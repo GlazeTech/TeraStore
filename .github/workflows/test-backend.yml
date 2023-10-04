@@ -1,16 +1,17 @@
-# Run this job on pushes to `main`, and for pull requests. If you don't specify
-# `branches: [main], then this actions runs _twice_ on pull requests, which is
-# annoying.
-
+# Heavily inspired by https://jacobian.org/til/github-actions-poetry/
+name: test-backend
+run-name: Test backend
+# on:
+#   - pull_request
 on:
-    push:
-      branches: [mads/scaffold-backend]
-    pull_request:
-      
-      branches: [main]
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
     mypy:
+        timeout-minutes: 15
         runs-on: ubuntu-latest
         defaults:
           run:
@@ -46,7 +47,8 @@ jobs:
               run: poetry install --no-interaction
             - name: mypy check
               run: poetry run mypy ./api
-    linting:
+    linting-formatting:
+        timeout-minutes: 15
         runs-on: ubuntu-latest
         steps:
             - name: Checkout
@@ -61,8 +63,8 @@ jobs:
               with:
                 src: "./backend/api"
                 version: 23.9.1
-
     test:
+      timeout-minutes: 15
       runs-on: ubuntu-latest
       defaults:
         run:
