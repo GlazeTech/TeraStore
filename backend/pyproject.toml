@@ -11,8 +11,8 @@ python = "^3.11"
 fastapi = {extras = ["all"], version = "^0.103.2"}
 
 [tool.poetry.group.dev.dependencies]
-mypy = "^1.5.1"
-black = "^23.9.1"
+mypy = "1.5.1"
+black = "23.9.1"
 ruff = "0.0.292"
 
 [tool.poetry.group.test.dependencies]
