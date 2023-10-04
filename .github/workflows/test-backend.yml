@@ -44,7 +44,7 @@ jobs:
             - name: Install project
               run: poetry install --no-interaction
             - name: mypy check
-              run: poetry run mypy ./backend/api
+              run: poetry run mypy ./api
     linting:
         runs-on: ubuntu-latest
         steps:
