@@ -4,7 +4,7 @@ run-name: Test backend
 
 on:
   push:
-    branches: [main]
+    branches: [main, mads/scaffold-backend]
   pull_request:
     branches: [main]
 
