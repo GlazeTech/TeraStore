@@ -6,6 +6,7 @@ on:
     push:
       branches: [mads/scaffold-backend]
     pull_request:
+      
       branches: [main]
 
 jobs:
