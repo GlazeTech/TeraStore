@@ -1,8 +1,7 @@
 # Heavily inspired by https://jacobian.org/til/github-actions-poetry/
 name: test-backend
 run-name: Test backend
-# on:
-#   - pull_request
+
 on:
   push:
     branches: [main]
