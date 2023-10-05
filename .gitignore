@@ -398,3 +398,9 @@ $RECYCLE.BIN/
 *.lnk
 
 # End of https://www.toptal.com/developers/gitignore/api/windows,macos,linux,python,node,react
+
+# direnv files
+.envrc
+
+# VS Code settings
+.vscode/
