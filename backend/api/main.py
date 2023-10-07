@@ -1,17 +1,12 @@
-import os
-
-import uvicorn
 from fastapi import FastAPI
 
-app = FastAPI()
+from api.public import api as public_api
 
 
-@app.get("/")
-async def root() -> dict[str, str]:
-    """Return a simple message."""
-    return {"message": "Hello World"}
+def create_app() -> FastAPI:
+    """Create a FastAPI application."""
+    app = FastAPI()
 
+    app.include_router(public_api)
 
-def start() -> None:
-    """Start server."""
-    uvicorn.run("api.main:app", port=8000, reload=os.getenv("ENV") == "dev")
+    return app
