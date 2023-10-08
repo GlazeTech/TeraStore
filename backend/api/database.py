@@ -1,13 +1,25 @@
 from collections.abc import Iterator
 
-from sqlmodel import Session, create_engine
+from sqlmodel import Session, SQLModel, create_engine
 
 from api.config import settings
 
-# Below is required for safe use;
-# see https://sqlmodel.tiangolo.com/tutorial/fastapi/simple-hero-api/
-connect_args = {"check_same_thread": False}
-engine = create_engine(settings.DATABASE_URI, echo=True, connect_args=connect_args)
+database_uri = (
+    f"postgresql://"
+    f"{settings.DATABASE_USERNAME}:{settings.DATABASE_PASSWORD}"
+    f"@{settings.DATABASE_URI}"
+)
+engine = create_engine(database_uri, echo=True)
+
+
+def create_db_and_tables() -> None:
+    """Create the database and tables for testing purposes."""
+    SQLModel.metadata.create_all(engine)
+
+
+def drop_tables() -> None:
+    """Drop the tables from the database."""
+    SQLModel.metadata.drop_all(engine)
 
 
 def get_session() -> Iterator[Session]:
