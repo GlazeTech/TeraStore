@@ -133,6 +133,7 @@ jobs:
       POSTGRES_USER: pg_user
       POSTGRES_PASSWORD: pg_user_pw
       POSTGRES_DB: terastore-db
+      ENV: dev
     steps:
       - name: Checkout
         uses: actions/checkout@v4
