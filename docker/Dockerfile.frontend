@@ -1,0 +1,8 @@
+FROM node:18-alpine as build-stage
+COPY ./frontend ./frontend
+
+RUN npm --prefix frontend/ clean-install
+RUN npm --prefix frontend/ run build
+
+FROM nginx:latest
+COPY --from=build-stage /frontend/dist/ /usr/share/nginx/html
