@@ -3,9 +3,9 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 
-from api.config import settings
+from api.config import get_settings
 from api.database import create_db_and_tables, drop_tables
-from api.public import api as public_api
+from api.public import make_api
 from api.utils.mock_data_generator import create_devices_and_pulses
 
 
@@ -20,8 +20,9 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
 def create_app() -> FastAPI:
     """Create a FastAPI application."""
+    settings = get_settings()
     app = FastAPI(lifespan=lifespan) if settings.ENV == "dev" else FastAPI()
 
-    app.include_router(public_api)
+    app.include_router(make_api())
 
     return app

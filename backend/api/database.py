@@ -2,14 +2,10 @@ from collections.abc import Iterator
 
 from sqlmodel import Session, SQLModel, create_engine
 
-from api.config import settings
+from api.config import get_settings
 
-database_uri = (
-    f"postgresql://"
-    f"{settings.DATABASE_USERNAME}:{settings.DATABASE_PASSWORD}"
-    f"@{settings.DATABASE_URI}"
-)
-engine = create_engine(database_uri, echo=True)
+settings = get_settings()
+engine = create_engine(settings.DATABASE_URL, echo=settings.ENV == "dev")
 
 
 def create_db_and_tables() -> None:
