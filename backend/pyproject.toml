@@ -1,30 +1,31 @@
-[tool.poetry]
+[project]
 name = "api"
-version = "0.1.0"
 description = "Python TeraStore API"
-authors = ["Mads Ehrhorn <mehkj@dtu.dk>", "Bjørn Mølvig <bhymo@dtu.dk>"]
-license = "MIT"
+authors = [
+  {name = "Mads Ehrhorn", email = "mehkj@dtu.dk"},
+  {name = "Bjørn Mølvig", email = "bhymo@dtu.dk"},
+]
+requires-python = ">=3.11,<3.12"
 readme = "README.md"
+dynamic = ["version"]
 
-[tool.poetry.dependencies]
-python = "^3.11"
-fastapi = {extras = ["all"], version = "^0.103.2"}
+dependencies = [
+  "fastapi[all]==0.103.2",
+]
 
-[tool.poetry.group.dev.dependencies]
-mypy = "1.5.1"
-black = "23.9.1"
-ruff = "0.0.292"
-
-[tool.poetry.group.test.dependencies]
-pytest = "^7.4.2"
-
-[tool.poetry.scripts]
-start = "api.main:start"
+[project.optional-dependencies]
+test = [
+  "mypy==1.5.1",
+  "black==23.9.1",
+  "ruff==0.0.292",
+  "pytest==7.4.2",
+]
 
 [tool.mypy]
 plugins = [
   "pydantic.mypy"
 ]
+exclude = ["build", "api.egg-info"]
 
 # from https://careers.wolt.com/en/blog/tech/professional-grade-mypy-configuration & https://docs.pydantic.dev/latest/integrations/mypy/
 disallow_any_unimported = true
@@ -48,6 +49,7 @@ line-length = 88
 target-version = "py311"
 select = ["ALL"]
 ignore = ["D100", "D104"]
+include = ["./backend/tests", "./backend/api"]
 
 [tool.ruff.per-file-ignores]
 # from https://github.com/astral-sh/ruff/issues/4368
@@ -62,7 +64,9 @@ ignore = ["D100", "D104"]
 [tool.black]
 line-length = 88
 target-version = ["py311"]
+# TODO: the below doesn't work...
+include = '(?:tests|api)\/.*\.pyi?$'
 
 [build-system]
-requires = ["poetry-core"]
-build-backend = "poetry.core.masonry.api"
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

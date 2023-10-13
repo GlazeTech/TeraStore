@@ -14,4 +14,9 @@ async def root() -> dict[str, str]:
 
 def start() -> None:
     """Start server."""
-    uvicorn.run("api.main:app", port=8000, reload=os.getenv("ENV") == "dev")
+    uvicorn.run(
+        "api.main:app",
+        host="localhost",
+        port=8000,
+        reload=os.getenv("ENV") == "dev",
+    )
