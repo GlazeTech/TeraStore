@@ -17,7 +17,7 @@ jobs:
           POSTGRES_USER: terastore-user
           POSTGRES_PASSWORD: terastore-password
           POSTGRES_DB: terastore-db
-          END: dev
+          ENV: dev
       - name: Run Black
         run: docker exec terastore-backend-dev black --check .
       - name: Run Mypy
