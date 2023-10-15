@@ -15,10 +15,11 @@ def get_env_var(var_name: str) -> str:
     -------
         The value of the environment variable.
     """
-    value = os.getenv(var_name)
-    if value is None:
+    try:
+        value = os.environ[var_name]
+    except KeyError as exc:
         msg = f"Environment variable {var_name} is not set"
-        raise ValueError(msg)
+        raise ValueError(msg) from exc
     return value
 
 
