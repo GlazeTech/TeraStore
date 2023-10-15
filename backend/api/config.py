@@ -3,15 +3,23 @@ from functools import lru_cache
 
 from pydantic import BaseSettings
 
-from api import __version__
-
 
 def get_env_var(var_name: str) -> str:
-    """Get the environment variable or return exception."""
-    value = os.getenv(var_name)
-    if value is None:
+    """Get the environment variable or return exception.
+
+    Args:
+    ----
+        var_name (str): The name of the environment variable.
+
+    Returns:
+    -------
+        The value of the environment variable.
+    """
+    try:
+        value = os.environ[var_name]
+    except KeyError as exc:
         msg = f"Environment variable {var_name} is not set"
-        raise ValueError(msg)
+        raise ValueError(msg) from exc
     return value
 
 
@@ -20,7 +28,6 @@ class Settings(BaseSettings):
 
     ENV = get_env_var("ENV")
     PROJECT_NAME = f"TeraStore API - {ENV}"
-    API_VERSION = __version__
     DATABASE_URL = get_env_var("DATABASE_URL")
     API_URL = "0.0.0.0" if ENV == "dev" else get_env_var("API_URL")  # noqa: S104
     API_PORT = 8000 if ENV == "dev" else int(get_env_var("API_PORT"))

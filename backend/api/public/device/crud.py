@@ -11,7 +11,17 @@ def create_device(
     device: DeviceCreate,
     db: Session = Depends(get_session),
 ) -> DeviceCreate:
-    """Create a new Device in the database."""
+    """Create a new Device in the database.
+
+    Args:
+    ----
+        device (DeviceCreate): The Device to create.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        The created Device including its DB ID.
+    """
     device_to_db = DeviceCreate.from_orm(device)
     db.add(device_to_db)
     db.commit()
@@ -24,12 +34,37 @@ def read_devices(
     limit: int = 20,
     db: Session = Depends(get_session),
 ) -> list[Device]:
-    """Read all Devices from the database."""
+    """Read all Devices from the database.
+
+    Args:
+    ----
+        offset (int, optional): The offset for the query. Defaults to 0.
+        limit (int, optional): The limit for the query. Defaults to 20.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of Devices.
+    """
     return db.exec(select(Device).offset(offset).limit(limit)).all()
 
 
 def read_device(device_id: UUID, db: Session = Depends(get_session)) -> Device:
-    """Read a single Pulse from the database."""
+    """Read a single Pulse from the database.
+
+    Args:
+    ----
+        device_id (UUID): The ID of the Device to read.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Raises:
+    ------
+        HTTPException: If no Device with the given ID is found.
+
+    Returns:
+    -------
+        The Device.
+    """
     device = db.get(Device, device_id)
     if not device:
         raise HTTPException(

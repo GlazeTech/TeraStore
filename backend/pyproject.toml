@@ -10,7 +10,9 @@ readme = "README.md"
 dynamic = ["version"]
 
 dependencies = [
-  "fastapi[all]==0.103.2",
+  "fastapi[all]==0.99.1",
+  "sqlmodel==0.0.8",
+  "psycopg2-binary==2.9.9"
 ]
 
 [project.optional-dependencies]

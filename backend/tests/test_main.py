@@ -1,0 +1,12 @@
+from fastapi.testclient import TestClient
+
+from api.main import create_app
+
+client = TestClient(create_app())
+
+
+def test_read_main() -> None:
+    """Test read main."""
+    response = client.get("/")
+    assert response.status_code == 200
+    assert response.json() == {"message": "Hello from FastAPI!"}
