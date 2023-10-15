@@ -13,4 +13,4 @@ RUN pip install .[test]
 COPY ./backend ./
 
 # Start FastAPI in development mode
-CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--reload"]
+CMD ["python", "asgi.py"]
