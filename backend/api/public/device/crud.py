@@ -10,7 +10,7 @@ from api.public.device.models import Device, DeviceCreate
 def create_device(
     device: DeviceCreate,
     db: Session = Depends(get_session),
-) -> DeviceCreate:
+) -> Device:
     """Create a new Device in the database.
 
     Args:
@@ -22,7 +22,7 @@ def create_device(
     -------
         The created Device including its DB ID.
     """
-    device_to_db = DeviceCreate.from_orm(device)
+    device_to_db = Device.from_orm(device)
     db.add(device_to_db)
     db.commit()
     db.refresh(device_to_db)

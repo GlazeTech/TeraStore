@@ -7,7 +7,7 @@ from api.database import get_session
 from api.public.pulse.models import Pulse, PulseCreate
 
 
-def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> PulseCreate:
+def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> Pulse:
     """Create a new Pulse in the database.
 
     Args:
@@ -19,7 +19,7 @@ def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> Puls
     -------
         The created Pulse including its DB ID.
     """
-    pulse_to_db = PulseCreate.from_orm(pulse)
+    pulse_to_db = Pulse.from_orm(pulse)
     db.add(pulse_to_db)
     db.commit()
     db.refresh(pulse_to_db)

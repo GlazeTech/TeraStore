@@ -14,7 +14,7 @@ router = APIRouter()
 def create_a_pulse(
     pulse: PulseCreate,
     db: Session = Depends(get_session),
-) -> PulseCreate:
+) -> Pulse:
     """Create a new Pulse in the database from the API.
 
     Args:

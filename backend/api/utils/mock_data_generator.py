@@ -1,48 +1,11 @@
-import secrets
-from datetime import datetime
 from uuid import UUID
-from zoneinfo import ZoneInfo
 
 from sqlmodel import Session
 
 from api.database import engine
 from api.public.device.models import Device
 from api.public.pulse.models import Pulse
-
-
-def generate_random_numbers(
-    n: int,
-    lower_bound: int,
-    upper_bound: int,
-) -> list[float]:
-    """Generate list of n random integers between lower_bound and upper_bound.
-
-    Args:
-    ----
-        n (int): The number of random integers to generate.
-        lower_bound (int): The lower bound (inclusive) for the random integers.
-        upper_bound (int): The upper bound (exclusive) for the random integers.
-
-    Returns:
-    -------
-        A list of random integers.
-    """
-    return [secrets.SystemRandom().uniform(lower_bound, upper_bound) for _ in range(n)]
-
-
-def generate_scaled_numbers(n: int, scale_factor: float) -> list[float]:
-    """Generate a list of numbers from 0 to < n and multiply each by scale_factor.
-
-    Args:
-    ----
-        n (int): The upper limit (exclusive) for the numbers.
-        scale_factor (float): The factor to multiply each number with.
-
-    Returns:
-    -------
-        A list of scaled numbers.
-    """
-    return [i * scale_factor for i in range(n)]
+from api.utils.helpers import generate_random_numbers, generate_scaled_numbers, get_now
 
 
 def create_mock_device(friendly_name: str) -> Device:
@@ -84,7 +47,7 @@ def create_mock_pulse(
         A mock pulse.
     """
     with Session(engine) as session:
-        now = datetime.now(tz=ZoneInfo("Europe/Copenhagen"))
+        now = get_now()
         pulse = Pulse(
             delays=delays,
             signal=signal,

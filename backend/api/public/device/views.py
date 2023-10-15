@@ -14,7 +14,7 @@ router = APIRouter()
 def create_a_device(
     device: DeviceCreate,
     db: Session = Depends(get_session),
-) -> DeviceCreate:
+) -> Device:
     """Create a new Device in the database from the API.
 
     Args:

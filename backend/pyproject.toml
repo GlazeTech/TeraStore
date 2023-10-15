@@ -25,7 +25,7 @@ test = [
 
 [tool.mypy]
 plugins = [
-  "pydantic.mypy"
+  "pydantic.mypy",
 ]
 exclude = ["build", "api.egg-info"]
 
