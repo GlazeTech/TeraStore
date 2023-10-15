@@ -5,7 +5,7 @@ import { useState } from "react";
 function App() {
 	const [backendMsg, setBackendMsg] = useState<string>("");
 	const [pulses, setPulses] = useState<number[]>([]);
-	
+
 
 	const handleButtonClick = () => {
 		pingBackend().then((msg) => setBackendMsg(msg));
