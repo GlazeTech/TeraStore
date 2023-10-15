@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile.backend.dev
     container_name: terastore-backend-dev
-    command: python asgi.py
+    command: uvicorn api.main:app --host 0.0.0.0 --reload
     environment:
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-dev/${POSTGRES_DB}"
       - ENV=${ENV}
