@@ -6,13 +6,12 @@ function App() {
 	const [backendMsg, setBackendMsg] = useState<string>("");
 	const [pulses, setPulses] = useState<number[]>([]);
 
-
 	const handleButtonClick = () => {
 		pingBackend().then((msg) => setBackendMsg(msg));
 	};
 
 	const handleButton2Click = () => {
-		getPulses().then((data) => setPulses(data))
+		getPulses().then((data) => setPulses(data));
 	};
 	return (
 		<div>
