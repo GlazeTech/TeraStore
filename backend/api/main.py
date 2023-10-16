@@ -2,14 +2,22 @@ import os
 
 import uvicorn
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 
 @app.get("/")
 async def root() -> dict[str, str]:
     """Return a simple message."""
-    return {"message": "Hello World"}
+    return {"message": "Hello from FastAPI!"}
 
 
 def start() -> None:
