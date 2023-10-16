@@ -12,7 +12,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build and run containers
-        run: docker-compose -f docker-compose.dev.yml up -d
+        run: docker-compose -f docker-compose.dev.yml up --build --detach
       - name: Run Black
         run: docker exec terastore-backend-dev black --check .
       - name: Run Mypy

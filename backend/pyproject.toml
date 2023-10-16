@@ -49,7 +49,7 @@ line-length = 88
 target-version = "py311"
 select = ["ALL"]
 ignore = ["D100", "D104"]
-include = ["./backend/tests", "./backend/api"]
+include = ["./tests", "./api"]
 
 [tool.ruff.per-file-ignores]
 # from https://github.com/astral-sh/ruff/issues/4368
