@@ -4,7 +4,6 @@ import { beforeAll, describe, expect, test, vi } from "vitest";
 
 describe("FilterMenu tests", () => {
 	beforeAll(async () => {
-		console.log("WHATUP");
 		vi.mock("api", async () => {
 			return {
 				getPulseKeys: vi.fn(async () => ["mocked_key1", "mocked_key2"]),
