@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-	baseURL: "http://0.0.0.0:8000",
+	baseURL: import.meta.env.PROD ? import.meta.env.VITE_BACKEND_URL : "http://localhost:8000" 
 });
 
 export async function pingBackend(): Promise<string> {

@@ -12,6 +12,14 @@ Beware that many API tools have a bad reputation around turning into money-makin
 
 To interact with the Postgres DB, you may use Jetbrains' [DataGrip](https://www.jetbrains.com/datagrip/), which is free if you're a student like us!
 
+## Deployment
+Before deploying the applications the environment variables
+* VITE_BACKEND_URL: The URL of the backend endpoint. A special environment variable (see [this](https://vitejs.dev/guide/env-and-mode.html)), which is loaded at build-time.
+
+For deployment of the app, run
+
+`docker-compose up`
+
 ## Develop
 
 To run the application, you must first set the following environment variables:
