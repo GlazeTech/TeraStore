@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
 from api.database import get_session
-from api.public.pulse.crud import create_pulse, read_pulse, read_pulses
+from api.public.pulse.crud import add_str_attr, create_pulse, read_pulse, read_pulses
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead
 
 router = APIRouter()
@@ -68,3 +68,14 @@ def get_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse:
         The Pulse with the given ID.
     """
     return read_pulse(pulse_id=pulse_id, db=db)
+
+
+@router.put("/{pulse_id}", response_model=PulseRead)
+def add_kv_str(
+    pulse_id: UUID,
+    key: str,
+    value: str,
+    db: Session = Depends(get_session),
+) -> Pulse:
+    """Add a key-value pair to a Pulse with pulse_id."""
+    return add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
