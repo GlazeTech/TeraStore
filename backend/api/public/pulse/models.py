@@ -61,18 +61,3 @@ class PulseReadWithDevice(PulseRead):
     """Model for reading a Pulse with its Device."""
 
     device: DeviceRead
-
-
-class PulseStrAttrs(SQLModel, table=True):
-    """Table model for Pulse EAV strings."""
-
-    index: int | None = Field(default=None, primary_key=True)
-    key: str
-    value: str
-    pulse_id: UUID = Field(foreign_key="pulse.pulse_id", index=True)
-
-
-class PulseKeyRegistry(SQLModel, table=True):
-    """Table model for Pulse EAV key registry."""
-
-    key: str = Field(primary_key=True)

@@ -3,6 +3,7 @@ from uuid import UUID
 from sqlmodel import Session
 
 from api.database import engine
+from api.public.attrs.models import PulseKeyRegistry, PulseStrAttrs
 from api.public.device.models import Device
 from api.public.pulse.models import Pulse
 from api.utils.helpers import generate_random_numbers, generate_scaled_numbers, get_now
@@ -61,27 +62,62 @@ def create_mock_pulse(
         return pulse
 
 
+def create_mock_attrs(pulse_id: UUID, key: str, value: str) -> None:
+    """Create mock attributes for testing purposes.
+
+    Args:
+    ----
+        pulse_id (UUID): The id of the pulse.
+        key (str): The key of the attribute.
+        value (str): The value of the attribute.
+
+    Returns:
+    -------
+        None
+    """
+    with Session(engine) as session:
+        existing_key = (
+            session.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
+        )
+        if not existing_key:
+            new_key = PulseKeyRegistry(key=key)
+            session.add(new_key)
+        attrs = PulseStrAttrs(pulse_id=pulse_id, key=key, value=value)
+        session.add(attrs)
+        session.commit()
+        session.refresh(attrs)
+
+
 def create_devices_and_pulses() -> None:
     """Create devices and pulses for testing purposes."""
     device_g_1 = create_mock_device("Glaze I")
     device_g_2 = create_mock_device("Glaze II")
     device_carmen = create_mock_device("Carmen")
 
-    create_mock_pulse(
+    pulse_1 = create_mock_pulse(
         delays=generate_scaled_numbers(600, 1e-10),
         signal=generate_random_numbers(600, 0, 100),
         integration_time=6000,
         device_id=device_g_1.device_id,
     )
-    create_mock_pulse(
+    pulse_2 = create_mock_pulse(
         delays=generate_scaled_numbers(600, 1e-10),
         signal=generate_random_numbers(600, 0, 100),
         integration_time=3000,
         device_id=device_g_2.device_id,
     )
-    create_mock_pulse(
+    pulse_3 = create_mock_pulse(
         delays=generate_scaled_numbers(600, 1e-10),
         signal=generate_random_numbers(600, 0, 100),
         integration_time=2000,
         device_id=device_carmen.device_id,
     )
+
+    create_mock_attrs(pulse_1.pulse_id, "angle", "29")
+    create_mock_attrs(pulse_1.pulse_id, "substrate", "sand-blasted steel")
+
+    create_mock_attrs(pulse_2.pulse_id, "angle", "23")
+    create_mock_attrs(pulse_2.pulse_id, "substrate", "plastic")
+
+    create_mock_attrs(pulse_3.pulse_id, "angle", "17")
+    create_mock_attrs(pulse_3.pulse_id, "substrate", "polymer")
