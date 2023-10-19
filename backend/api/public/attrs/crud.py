@@ -1,7 +1,7 @@
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
-from sqlalchemy import and_, or_
+from sqlalchemy import and_
 from sqlmodel import Session, select
 
 from api.database import get_session
@@ -126,28 +126,25 @@ def filter_on_key_value_pairs(
     key_value_pairs: list[dict[str, str]],
     db: Session = Depends(get_session),
 ) -> list[UUID]:
-    """Get all pulses that match the key-value pairs.
-
-    Args:
-    ----
-        key_value_pairs (list[dict[str, str]]): A list of dicts containing kv pairs.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        A list of pulse ids.
-
-    """
-    conditions = []
+    """Get all pulses that match the key-value pairs."""
+    # Initialize a list to hold pulse_ids for each condition
+    pulse_ids_list = []
 
     for kv in key_value_pairs:
         key = kv.get("key")
         value = kv.get("value")
-        conditions.append(and_(PulseStrAttrs.key == key, PulseStrAttrs.value == value))  # type: ignore[type-var]
 
-    combined_conditions = or_(*conditions)
+        # Perform query for this key-value pair
+        statement = select(PulseStrAttrs.pulse_id).where(
+            and_(PulseStrAttrs.key == key, PulseStrAttrs.value == value),
+        )
+        results = db.execute(statement).fetchall()
 
-    statement = select(PulseStrAttrs.pulse_id).where(combined_conditions)
-    results = db.execute(statement).fetchall()
+        # Convert results to set of pulse_ids and add to list
+        pulse_ids = {row[0] for row in results}
+        pulse_ids_list.append(pulse_ids)
 
-    return [row[0] for row in results]
+    # Find the intersection of all sets of pulse_ids
+    common_pulse_ids = set.intersection(*pulse_ids_list)
+
+    return list(common_pulse_ids)
