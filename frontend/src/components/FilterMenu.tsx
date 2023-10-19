@@ -1,5 +1,5 @@
 import * as M from "@mantine/core";
-import { getKeyValues, getPulseKeys } from "api";
+import { getFilteredPulses, getKeyValues, getPulseKeys } from "api";
 import { PulseFilter } from "interfaces";
 import { useEffect, useState } from "react";
 
@@ -59,6 +59,10 @@ function FilterMenu() {
 
 	return (
 		<>
+			<M.Button onClick={() => getFilteredPulses(pulseFilters)}>
+				Filter
+			</M.Button>
+
 			<M.Popover opened={newFilterIsOpen} position="right-start" offset={5}>
 				<M.Popover.Target>
 					<M.Button onClick={() => setNewFilterIsOpen((o: boolean) => !o)}>
