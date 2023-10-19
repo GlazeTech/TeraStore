@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 function FilterMenu() {
 	const [newFilterIsOpen, setNewFilterIsOpen] = useState(false);
+	const [nPulses, setNPulses] = useState<number | null>(null);
 	const [pulseKeys, setPulseKeys] = useState<string[]>([]);
 	const [selectedPulseKey, setSelectedPulseKey] = useState<string | null>(null);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
@@ -41,6 +42,10 @@ function FilterMenu() {
 		}
 	}, [selectedPulseKey, selectedKeyValue]);
 
+	useEffect(() => {
+		getFilteredPulses(pulseFilters).then((pulses) => setNPulses(pulses.length));
+	}, [pulseFilters]);
+
 	const removeFilter = (filterToDelete: string) => () => {
 		setPulseFilters(
 			pulseFilters.filter((filter) => filter.key !== filterToDelete),
@@ -59,10 +64,6 @@ function FilterMenu() {
 
 	return (
 		<>
-			<M.Button onClick={() => getFilteredPulses(pulseFilters)}>
-				Filter
-			</M.Button>
-
 			<M.Popover opened={newFilterIsOpen} position="right-start" offset={5}>
 				<M.Popover.Target>
 					<M.Button onClick={() => setNewFilterIsOpen((o: boolean) => !o)}>
@@ -91,6 +92,7 @@ function FilterMenu() {
 				</M.Popover.Dropdown>
 			</M.Popover>
 			{displayPulseFilters(pulseFilters)}
+			Number of pulses: {nPulses === null ? "Apply filter" : nPulses}
 		</>
 	);
 }

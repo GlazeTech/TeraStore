@@ -22,8 +22,10 @@ export async function getKeyValues(key: string): Promise<string[]> {
 	});
 }
 
-export async function getFilteredPulses(filters: PulseFilter[]) {
+export async function getFilteredPulses(
+	filters: PulseFilter[],
+): Promise<string[]> {
 	return api.post("/attrs/filter", filters).then((resp) => {
-		console.log(resp);
+		return resp.data;
 	});
 }

@@ -130,6 +130,10 @@ def filter_on_key_value_pairs(
     # Initialize a list to hold pulse_ids for each condition
     pulse_ids_list = []
 
+    # If no filters applied, select all pulses
+    if len(key_value_pairs) == 0:
+        return db.execute(select(Pulse.pulse_id)).scalars().all()
+
     for kv in key_value_pairs:
         key = kv.get("key")
         value = kv.get("value")
