@@ -1,5 +1,5 @@
 import axios from "axios";
-
+import { PulseFilter } from "interfaces";
 const api = axios.create({
 	baseURL: "http://0.0.0.0:8000",
 });
@@ -10,16 +10,20 @@ export async function pingBackend(): Promise<string> {
 	});
 }
 
-// TODO: Add true http get
 export async function getPulseKeys(): Promise<string[]> {
-	return api.get("/").then(() => {
-		return ["key1", "key2"];
+	return api.get("/attrs/keys").then((resp) => {
+		return resp.data;
 	});
 }
 
-// TODO: Add true http get
 export async function getKeyValues(key: string): Promise<string[]> {
-	return api.get("/").then(() => {
-		return [`${key}_val1`, `${key}_val2`, `${key}_val3`];
+	return api.get(`/attrs/${key}/values`).then((resp) => {
+		return resp.data;
+	});
+}
+
+export async function getFilteredPulses(filters: PulseFilter[]) {
+	return api.post("/attrs/filter", filters).then((resp) => {
+		console.log(resp);
 	});
 }
