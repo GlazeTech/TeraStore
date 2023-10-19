@@ -5,11 +5,11 @@ services:
     build:
       context: .
       dockerfile: docker/Dockerfile.frontend
+      args:
+        VITE_BACKEND_URL: ${VITE_BACKEND_URL}
     container_name: terastore-frontend
     ports:
       - 80:80
-    environment:
-      - VITE_BACKEND_URL=${VITE_BACKEND_URL}
     depends_on:
       - backend
 
