@@ -1,6 +1,7 @@
 from uuid import UUID
 
 from fastapi import Depends, HTTPException, status
+from sqlalchemy import and_, or_
 from sqlmodel import Session, select
 
 from api.database import get_session
@@ -14,14 +15,31 @@ def add_str_attr(
     value: str,
     db: Session = Depends(get_session),
 ) -> Pulse:
-    """Add a key-value pair to a pulse with id pulse_id."""
+    """Add a key-value pair to a pulse with id pulse_id.
+
+    If the key does not exist, it will be added to the PulseKeyRegistry.
+
+    Args:
+    ----
+        pulse_id (UUID): The id of the pulse.
+        key (str): The key to add.
+        value (str): The value to add.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Raises:
+    ------
+        HTTPException: If no Pulse is found with the given ID.
+
+    Returns:
+    -------
+        The updated Pulse.
+    """
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Pulse not found with id: {pulse_id}",
         )
-    # Check if the key exists in PulseKeyRegistry
     existing_key = (
         db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
     )
@@ -40,30 +58,48 @@ def add_str_attr(
     return pulse
 
 
-def read_pulse_attr_keys(
+def read_pulse_attrs(
     pulse_id: UUID,
     db: Session = Depends(get_session),
-) -> list[str]:
-    """Get all the keys for a pulse with id pulse_id."""
+) -> list[dict[str, str]]:
+    """Get all the keys for a pulse with id pulse_id.
+
+    Args:
+    ----
+        pulse_id (UUID): The id of the pulse.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of dicts containing the key-value pairs.
+    """
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail=f"Pulse not found with id: {pulse_id}",
         )
-    # Get all the keys for the pulse
-    return [
-        key[0]
-        for key in db.query(PulseStrAttrs.key)
-        .filter(PulseStrAttrs.pulse_id == pulse_id)
-        .all()
-    ]
+    statement = select([PulseStrAttrs.key, PulseStrAttrs.value]).where(
+        PulseStrAttrs.pulse_id == pulse_id,
+    )
+    results = db.execute(statement).fetchall()
+
+    return [{"key": row[0], "value": row[1]} for row in results]
 
 
 def read_all_keys(
     db: Session = Depends(get_session),
 ) -> list[str]:
-    """Get all unique keys."""
+    """Get all unique keys.
+
+    Args:
+    ----
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of keys.
+    """
     return [key[0] for key in db.query(PulseKeyRegistry.key).all()]
 
 
@@ -71,6 +107,47 @@ def read_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
 ) -> list[str]:
-    """Get all unique values associated with a key."""
+    """Get all unique values associated with a key.
+
+    Args:
+    ----
+        key (str): The key to search for.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of values associated with the key.
+    """
     statement = select(PulseStrAttrs.value).where(PulseStrAttrs.key == key).distinct()
     return db.execute(statement).scalars().all()
+
+
+def filter_on_key_value_pairs(
+    key_value_pairs: list[dict[str, str]],
+    db: Session = Depends(get_session),
+) -> list[UUID]:
+    """Get all pulses that match the key-value pairs.
+
+    Args:
+    ----
+        key_value_pairs (list[dict[str, str]]): A list of dicts containing kv pairs.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of pulse ids.
+
+    """
+    conditions = []
+
+    for kv in key_value_pairs:
+        key = kv.get("key")
+        value = kv.get("value")
+        conditions.append(and_(PulseStrAttrs.key == key, PulseStrAttrs.value == value))  # type: ignore[type-var]
+
+    combined_conditions = or_(*conditions)
+
+    statement = select(PulseStrAttrs.pulse_id).where(combined_conditions)
+    results = db.execute(statement).fetchall()
+
+    return [row[0] for row in results]

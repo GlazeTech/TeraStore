@@ -5,40 +5,70 @@ from sqlmodel import Session
 
 from api.database import get_session
 from api.public.attrs.crud import (
-    add_str_attr,
+    filter_on_key_value_pairs,
     read_all_keys,
     read_all_values_on_key,
-    read_pulse_attr_keys,
 )
-from api.public.pulse.models import Pulse, PulseRead
 
 router = APIRouter()
 
 
-@router.get("")
+@router.get("/keys")
 def get_all_keys(db: Session = Depends(get_session)) -> list[str]:
-    """Get all keys associated with a Pulse."""
+    """Get all keys associated with a Pulse.
+
+    Args:
+    ----
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of keys.
+    """
     return read_all_keys(db=db)
 
 
-@router.put("/{pulse_id}", response_model=PulseRead)
-def add_kv_str(
-    pulse_id: UUID,
-    key: str,
-    value: str,
-    db: Session = Depends(get_session),
-) -> Pulse:
-    """Add a key-value pair to a Pulse with pulse_id."""
-    return add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
-
-
-@router.get("/{pulse_id}")
-def get_pulse_keys(pulse_id: UUID, db: Session = Depends(get_session)) -> list[str]:
-    """Get all keys associated with a Pulse."""
-    return read_pulse_attr_keys(pulse_id=pulse_id, db=db)
-
-
-@router.get("/{key}")
+@router.get("/{key}/values")
 def get_all_values_on_key(key: str, db: Session = Depends(get_session)) -> list[str]:
-    """Get all values associated with a key."""
+    """Get all values associated with a key.
+
+    Args:
+    ----
+        key (str): The key to search for.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of values associated with the key.
+    """
     return read_all_values_on_key(key=key, db=db)
+
+
+@router.post("/filter")
+def filter_attrs(
+    key_value_pairs: list[dict[str, str]],
+    db: Session = Depends(get_session),
+) -> list[UUID]:
+    """Filter pulses based on key-value pairs.
+
+    Example usage:
+    --------------
+        curl -X 'POST' \
+        'http://localhost:8000/attrs/filter' \
+        -H 'accept: application/json' \
+        -H 'Content-Type: application/json' \
+        -d '[
+        {"key": "angle", "value": "17"},
+        {"key": "substrate", "value": "plastic"}
+        ]'
+
+    Args:
+    ----
+        key_value_pairs (list[dict[str, str]]): A list of dicts containing kv pairs.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of pulse ids.
+    """
+    return filter_on_key_value_pairs(key_value_pairs, db)
