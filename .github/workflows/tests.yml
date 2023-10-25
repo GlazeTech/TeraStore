@@ -5,7 +5,7 @@ on:
   - pull_request
 
 env:
-  IMAGE_NAME: ghcr.io/${{ github.repository }}/terastore-backend-test
+  IMAGE_NAME: ghcr.io/glazetech/terastore/terastore-backend-test
   POSTGRES_USER: pg_user
   POSTGRES_PASSWORD: pg_user_pw
   POSTGRES_DB: terastore-db
@@ -32,10 +32,9 @@ jobs:
       - name: Check if image exists
         id: check-image
         run: |
-          exists=$(docker manifest inspect ${{ env.IMAGE_NAME }}:latest > /dev/null && echo 'true' || echo 'false')
-          echo 'Image exists: $exists'
-          echo 'exists=$exists' >> $GITHUB_ENV
-          echo '::set-output name=exists::$exists'
+          docker manifest inspect ${{ env.IMAGE_NAME }} && echo "exists=true" || echo "exists=false"
+        env:
+          exists: false
       - name: Build and Push Docker Image
         run: |
           docker-compose -f docker-compose-test.yml build backend-test
