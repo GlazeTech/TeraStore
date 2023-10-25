@@ -49,7 +49,7 @@ jobs:
           file: 'docker/Dockerfile.backend.test'
           tags: |
             ${{ env.IMAGE_NAME }}:latest
-        if: steps.cache-deps.outputs.cache-hit != true || steps.check-image.outputs.exists == 'false'
+        if: steps.cache-deps.outputs.cache-hit != 'true' || steps.check-image.outputs.exists != 'true'
 
   backend-test:
     strategy:
