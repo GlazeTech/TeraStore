@@ -6,8 +6,8 @@ on:
 
 env:
   IMAGE_NAME: ghcr.io/glazetech/terastore/terastore-backend-test
-  POSTGRES_USER: pg_user
-  POSTGRES_PASSWORD: pg_user_pw
+  POSTGRES_USER: terastore-user
+  POSTGRES_PASSWORD: terastore-password
   POSTGRES_DB: terastore-db
   ENV: test
 
@@ -76,7 +76,7 @@ jobs:
         run: ./scripts/run_${{ matrix.test }}.sh
 
       - name: Display PostgreSQL logs for debugging
-        run: docker-compose logs terastore-postgres-test
+        run: docker-compose -f docker-compose-test.yml logs db-test
 
       - name: Close application
         run: docker-compose -f docker-compose-test.yml down

@@ -2,7 +2,9 @@ version: "3.8"
 
 services:
   backend-test:
-    image: ghcr.io/glazetech/terastore/terastore-backend-test:latest
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.backend.test
     container_name: terastore-backend-test
     environment:
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test/${POSTGRES_DB}"
