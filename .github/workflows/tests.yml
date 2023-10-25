@@ -40,7 +40,7 @@ jobs:
           docker-compose -f docker-compose-test.yml build backend-test
           docker tag terastore-backend-test:latest ${{ env.IMAGE_NAME }}:latest
           docker push ${{ env.IMAGE_NAME }}:latest
-        if: steps.cache-deps.outputs.cache-hit != true && steps.check-image.outputs.exists == 'false'
+        if: steps.cache-deps.outputs.cache-hit != true || steps.check-image.outputs.exists == 'false'
 
   backend_tests:
     strategy:
