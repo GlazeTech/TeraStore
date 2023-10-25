@@ -63,9 +63,6 @@ jobs:
           username: ${{github.actor}}
           password: ${{secrets.GITHUB_TOKEN}}
 
-      - name: Pull Docker Image
-        run: docker pull ${{ env.IMAGE_NAME }}:latest
-
       - name: Start application
         run: docker-compose -f docker-compose-test.yml up --detach
 
