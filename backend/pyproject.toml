@@ -22,6 +22,12 @@ test = [
   "ruff==0.0.292",
   "pytest==7.4.2",
 ]
+dev = [
+  "mypy==1.5.1",
+  "black==23.9.1",
+  "ruff==0.0.292",
+  "pytest==7.4.2",
+]
 
 [tool.mypy]
 plugins = [
@@ -50,8 +56,7 @@ warn_required_dynamic_aliases = true
 line-length = 88
 target-version = "py311"
 select = ["ALL"]
-ignore = ["D100", "D104"]
-include = ["./tests", "./api"]
+ignore = ["D100", "D104", "D203", "D213"]
 
 [tool.ruff.per-file-ignores]
 # from https://github.com/astral-sh/ruff/issues/4368

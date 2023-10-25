@@ -1,3 +1,6 @@
+from __future__ import annotations
+
+from typing import Self
 from uuid import UUID, uuid4
 
 from sqlmodel import Field, SQLModel
@@ -29,6 +32,25 @@ class DeviceCreate(DeviceBase):
     As it does not take any other arguments than DeviceBase,
     it is only here for FastAPI documentation purposes.
     """
+
+    @classmethod
+    def create_mock(cls: type[DeviceCreate], friendly_name: str) -> DeviceCreate:
+        """Create a mock Device for testing purposes.
+
+        Returns
+        -------
+            A mock Device.
+        """
+        return cls(friendly_name=friendly_name)
+
+    def as_dict(self: Self) -> dict[str, str]:
+        """Convert the DeviceCreate to a dictionary.
+
+        Returns
+        -------
+            A dictionary representation of the DeviceCreate.
+        """
+        return self.dict()
 
 
 class DeviceRead(DeviceBase):

@@ -1,0 +1,16 @@
+# Use the same base image as production Dockerfile to ensure consistency.
+FROM python:3.11
+
+WORKDIR /app
+
+# Copy over the pyproject.toml first to leverage Docker cache.
+COPY ./backend/pyproject.toml ./
+
+# Install dependencies.
+RUN pip install .[test]
+
+# Copy the rest of the backend code
+COPY ./backend ./
+
+# Start a shell by default, this can be overridden by docker-compose
+CMD ["tail", "-f", "/dev/null"]

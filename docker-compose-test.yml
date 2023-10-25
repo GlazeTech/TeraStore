@@ -1,0 +1,35 @@
+version: "3.8"
+
+services:
+  backend-test:
+    build:
+      context: .
+      dockerfile: ./docker/Dockerfile.backend.test
+    container_name: terastore-backend-test
+    environment:
+      - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test/${POSTGRES_DB}"
+      - ENV=test
+      - API_URL=0.0.0.0
+      - API_PORT=8000
+    volumes:
+      - ./backend:/app
+    ports:
+      - 8000:8000
+    depends_on:
+      - db-test
+
+  db-test:
+    image: postgres:16-alpine
+    environment:
+      - POSTGRES_DB=${POSTGRES_DB}
+      - POSTGRES_USER=${POSTGRES_USER}
+      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
+    restart: always
+    container_name: terastore-postgres-test
+    ports:
+      - 5432:5432
+    volumes:
+      - db:/var/lib/postgresql/data
+
+volumes:
+  db:

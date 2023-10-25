@@ -1,10 +1,21 @@
-from datetime import datetime
+from __future__ import annotations
+
+from datetime import datetime  # noqa: TCH003
+from typing import TYPE_CHECKING, Self
 from uuid import UUID, uuid4
 
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
 
-from api.public.device.models import DeviceRead
+from api.utils.helpers import (
+    generate_random_integration_time,
+    generate_random_numbers,
+    generate_scaled_numbers,
+    get_now,
+)
+
+if TYPE_CHECKING:
+    from api.public.device.models import DeviceRead
 
 
 class PulseBase(SQLModel):
@@ -45,6 +56,44 @@ class PulseCreate(PulseBase):
     As it does not take any other arguments than PulseBase,
     it is only here for FastAPI documentation purposes.
     """
+
+    @classmethod
+    def create_mock(
+        cls: type[PulseCreate],
+        device_id: UUID,
+        length: int = 600,
+        timescale: float = 1e-10,
+        amplitude: float = 100.0,
+    ) -> PulseCreate:
+        """Create a mock pulse for testing purposes.
+
+        Args:
+        ----
+            device_id (UUID): The id of the device that created the pulse.
+            length (int, optional): The length of the pulse. Defaults to 600.
+            timescale (float, optional): The timescale of the pulse. Defaults to 1e-10.
+            amplitude (float, optional): The amplitude of the pulse. Defaults to 100.0.
+
+        Returns:
+        -------
+            A mock pulse.
+        """
+        return cls(
+            delays=generate_scaled_numbers(length, timescale),
+            signal=generate_random_numbers(length, -amplitude, amplitude),
+            integration_time=generate_random_integration_time(),
+            creation_time=get_now(),
+            device_id=device_id,
+        )
+
+    def as_dict(self: Self) -> dict[str, list[float] | int | datetime | UUID]:
+        """Convert the PulseCreate to a dictionary.
+
+        Returns
+        -------
+            A dictionary representation of the PulseCreate.
+        """
+        return self.dict()
 
 
 class PulseRead(PulseBase):
