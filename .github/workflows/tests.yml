@@ -8,6 +8,11 @@ jobs:
   backend-ci:
     timeout-minutes: 15
     runs-on: ubuntu-latest
+    env:
+      POSTGRES_USER: pg_user
+      POSTGRES_PASSWORD: pg_user_pw
+      POSTGRES_DB: terastore-db
+      ENV: test
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -15,7 +20,7 @@ jobs:
         id: cache-deps
         uses: actions/cache@v3
         with:
-          path: ~/.cache/pip
+          path: ~/.local
           key: ${{ runner.os }}-pip-${{ hashFiles('**/pyproject.toml') }}
       - name: Build Docker Image
         run: docker-compose -f docker-compose-test.yml build
