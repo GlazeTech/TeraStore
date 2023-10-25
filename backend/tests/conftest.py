@@ -14,7 +14,7 @@ from api.utils.types import WithLifespan
 def session_fixture() -> Generator[Session, None, None]:
     """Yield a Session object for interacting with the db."""
     settings = get_settings()
-    engine = create_engine(settings.DATABASE_URL, echo=settings.ENV == "dev")
+    engine = create_engine(settings.DATABASE_URL, echo=settings.ENV in ("dev", "test"))
 
     SQLModel.metadata.create_all(engine)
 

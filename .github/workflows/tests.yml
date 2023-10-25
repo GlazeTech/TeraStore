@@ -75,6 +75,9 @@ jobs:
       - name: Run Test
         run: ./scripts/run_${{ matrix.test }}.sh
 
+      - name: Display PostgreSQL logs for debugging
+        run: docker-compose logs terastore-postgres-test
+
       - name: Close application
         run: docker-compose -f docker-compose-test.yml down
   frontend-linting-formatting:
