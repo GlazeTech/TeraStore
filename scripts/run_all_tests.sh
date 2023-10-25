@@ -49,10 +49,9 @@ if [ "$current_hash" != "$last_hash" ]; then
   echo -e "${YELLOW}Detected changes in pyproject.toml, rebuilding...${NC}"
   docker-compose -f ./docker-compose-test.yml up --build --detach
   echo $current_hash > $last_hash_file
-else
-  echo -e "${YELLOW}No changes in pyproject.toml detected, using existing build...${NC}"
-  docker-compose -f ./docker-compose-test.yml up --detach
 fi
+
+docker-compose -f ./docker-compose-test.yml up --detach
 
 run_test ./scripts/run_black.sh
 run_test ./scripts/run_ruff.sh

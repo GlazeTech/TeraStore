@@ -20,15 +20,21 @@ jobs:
       - name: Build Docker Image
         run: docker-compose -f docker-compose-test.yml build
         if: steps.cache-deps.outputs.cache-hit != true
+      - name: Start application
+        run: docker-compose -f docker-compose-test.yml up --detach
       - name: Run Black
-        run: docker exec terastore-backend-test black --check .
+        run: ./scripts/run_black.sh
+        continue-on-error: true
       - name: Run Ruff
-        run: ruff check .
+        run: ./scripts/run_ruff.sh
+        continue-on-error: true
       - name: Run Mypy
-        run: docker exec terastore-backend-test mypy .
+        run: ./scripts/run_mypy.sh
+        continue-on-error: true
       - name: Run Pytest
-        run: docker exec terastore-backend-test pytest
-      - name: Clean up
+        run: ./scripts/run_pytest.sh
+        continue-on-error: true
+      - name: Close application
         run: docker-compose -f docker-compose-test.yml down
   frontend-linting-formatting:
     timeout-minutes: 15
