@@ -15,7 +15,7 @@ router = APIRouter()
 
 @router.get("/keys")
 def get_all_keys(db: Session = Depends(get_session)) -> list[str]:
-    """Get all keys associated with a Pulse.
+    """Get all keys.
 
     Args:
     ----

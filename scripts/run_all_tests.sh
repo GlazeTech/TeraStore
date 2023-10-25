@@ -47,11 +47,13 @@ echo "Starting services..."
 # Build if the hashes don't match or if it's the first time
 if [ "$current_hash" != "$last_hash" ]; then
   echo -e "${YELLOW}Detected changes in pyproject.toml, rebuilding...${NC}"
-  docker-compose -f ./docker-compose-test.yml up --build --detach
+  docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml up --build --detach
   echo $current_hash > $last_hash_file
+else
+  echo -e "${YELLOW}No changes detected in pyproject.toml, using cached image...${NC}"
 fi
 
-docker-compose -f ./docker-compose-test.yml up --detach
+docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml up --detach
 
 run_test ./scripts/run_black.sh
 run_test ./scripts/run_ruff.sh
@@ -60,7 +62,7 @@ run_test ./scripts/run_pytest.sh
 
 # Stop services
 echo "Stopping services..."
-docker-compose -f ./docker-compose-test.yml down
+docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml down
 
 # Check for failed tests
 if [ -z "$failed_tests" ]; then

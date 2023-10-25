@@ -5,23 +5,25 @@ services:
     image: ghcr.io/glazetech/terastore/terastore-backend-test:latest
     container_name: terastore-backend-test
     environment:
-      - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test/${POSTGRES_DB}"
+      - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test:5432/${POSTGRES_DB}"
       - ENV=test
       - API_URL=0.0.0.0
-      - API_PORT=8000
+      - API_PORT=8001 # we wish to be able to use dev and test at the same time
     volumes:
       - ./backend:/app
+      - ./scripts:/scripts
     ports:
-      - 8000:8000
+      - 8001:8000 # we wish to be able to use dev and test at the same time
     depends_on:
-      - db-test
+      db-test:
+        condition: service_healthy
 
   db-test:
     image: postgres:16-alpine
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U pg_user"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 1s
       retries: 5
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
@@ -30,7 +32,7 @@ services:
     restart: always
     container_name: terastore-postgres-test
     ports:
-      - 5432:5432
+      - 5433:5432 # we wish to be able to use dev and test at the same time
     volumes:
       - db:/var/lib/postgresql/data
 

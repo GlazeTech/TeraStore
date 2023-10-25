@@ -33,6 +33,11 @@ class DeviceCreate(DeviceBase):
     it is only here for FastAPI documentation purposes.
     """
 
+    class Config:
+        """The model configuration."""
+
+        extra = "forbid"
+
     @classmethod
     def create_mock(cls: type[DeviceCreate], friendly_name: str) -> DeviceCreate:
         """Create a mock Device for testing purposes.

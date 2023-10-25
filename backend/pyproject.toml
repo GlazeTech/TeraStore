@@ -20,13 +20,13 @@ test = [
   "mypy==1.5.1",
   "black==23.9.1",
   "ruff==0.0.292",
-  "pytest==7.4.2",
+  "pytest==7.4.2"
 ]
 dev = [
   "mypy==1.5.1",
   "black==23.9.1",
   "ruff==0.0.292",
-  "pytest==7.4.2",
+  "pytest==7.4.2"
 ]
 
 [tool.mypy]

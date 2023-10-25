@@ -86,14 +86,20 @@ class PulseCreate(PulseBase):
             device_id=device_id,
         )
 
-    def as_dict(self: Self) -> dict[str, list[float] | int | datetime | UUID]:
+    def as_dict(self: Self) -> dict[str, list[float] | int | str | UUID]:
         """Convert the PulseCreate to a dictionary.
 
         Returns
         -------
             A dictionary representation of the PulseCreate.
         """
-        return self.dict()
+        return {
+            "delays": self.delays,
+            "signal": self.signal,
+            "integration_time": self.integration_time,
+            "creation_time": self.creation_time.isoformat(),
+            "device_id": str(self.device_id),
+        }
 
 
 class PulseRead(PulseBase):

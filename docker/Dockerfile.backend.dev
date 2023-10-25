@@ -9,8 +9,5 @@ COPY ./backend/pyproject.toml ./
 # Install dependencies.
 RUN pip install .[test]
 
-# Copy the rest of the backend code
-COPY ./backend ./
-
 # Start FastAPI in development mode
 CMD ["python", "asgi.py"]

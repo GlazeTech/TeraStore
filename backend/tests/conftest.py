@@ -16,6 +16,7 @@ def session_fixture() -> Generator[Session, None, None]:
     settings = get_settings()
     engine = create_engine(settings.DATABASE_URL, echo=settings.ENV in ("dev", "test"))
 
+    SQLModel.metadata.drop_all(engine)
     SQLModel.metadata.create_all(engine)
 
     with Session(engine) as session:

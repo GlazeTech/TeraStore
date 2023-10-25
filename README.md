@@ -18,7 +18,7 @@ Before deploying the applications the environment variables
 
 For deployment of the app, run
 
-`docker-compose up`
+`docker compose up`
 
 ## Develop
 
@@ -26,6 +26,7 @@ To run the application, you must first set the following environment variables:
 * `POSTGRES_USER`: The PostgreSQL username to be used by the backend
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
+* `ENV=dev` because you're a dev (and want some things to be set for you)
 
 We suggest you create a `.env` file in the root of the project.
 This will contain the above mentioned environment variables, and you can fill it out like so:
@@ -81,7 +82,7 @@ You may have a look at [pyenv](https://github.com/pyenv/pyenv) to administer sev
 Then, run
 ```bash
 python -m venv .venv prompt terastore-backend
-pip install ./backend[test]
+pip install ./backend[dev]
 ```
 
 This installs a virtual environment in the workspace root, and installs all dependencies required for development.
@@ -92,7 +93,7 @@ cd ./frontend
 npm install
 ```
 
-For your sake, we recommend also install [direnv](https://direnv.net).
+For your sake, we recommend you also install [direnv](https://direnv.net).
 Do this, and make a file called `.envrc` in the workspace root, and populate it with
 ```bash
 export VIRTUAL_ENV=.venv
@@ -112,8 +113,20 @@ You should now have access to all VS Code features when developing locally!
 
 Then, run
 ```bash
-docker-compose -f docker-compose.dev.yml up
+docker compose -f docker-compose.dev.yml up
 ```
-which starts the services.
+(this `docker compose` command, instead of the classic `docker-compose` is the right way to use [Docker Compose V2](https://docs.docker.com/compose/migrate/)) which starts the services.
 
-You can now talk to the API via `http://0.0.0.0:8000`, and see the frontend in a browser at the URL stated by Vite in the `docker-compose` log.
+You can now talk to the API via `http://0.0.0.0:8000`, and see the frontend in a browser at the URL stated by Vite in the `docker compose` log.
+
+## Testing
+
+You can also easily test the backend!
+In the `./scripts` folder, we have some useful stuff.
+If you run
+```bash
+./scripts/run_all_tests.sh
+```
+a Docker Compose instance will spin up, and do all the tests for you!
+
+Nifty!
