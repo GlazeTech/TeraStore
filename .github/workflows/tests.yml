@@ -12,7 +12,7 @@ env:
   ENV: test
 
 jobs:
-  backend_check_and_push:
+  backend-image-check-and-push:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -45,12 +45,12 @@ jobs:
             ${{ env.IMAGE_NAME }}:latest
         if: steps.cache-deps.outputs.cache-hit != true || steps.check-image.outputs.exists == 'false'
 
-  backend_tests:
+  backend-test:
     strategy:
       fail-fast: false
       matrix:
         test: [black, ruff, mypy, pytest]
-    needs: backend_check_and_push
+    needs: backend-image-check-and-push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -107,7 +107,7 @@ jobs:
   docker-test-build:
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    needs: [backend_tests, frontend-test]
+    needs: [backend-test, frontend-test]
     env:
       POSTGRES_USER: pg_user
       POSTGRES_PASSWORD: pg_user_pw
