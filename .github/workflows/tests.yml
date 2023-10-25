@@ -35,11 +35,14 @@ jobs:
           docker manifest inspect ${{ env.IMAGE_NAME }} && echo "exists=true" || echo "exists=false"
         env:
           exists: false
-      - name: Build and Push Docker Image
-        run: |
-          docker-compose -f docker-compose-test.yml build backend-test
-          docker tag terastore-backend-test:latest ${{ env.IMAGE_NAME }}:latest
-          docker push ${{ env.IMAGE_NAME }}:latest
+      - name: Build and push
+        uses: docker/build-push-action@v3
+        with:
+          context: .
+          push: true
+          file: 'docker/Dockerfile.backend.test'
+          tags: |
+            ${{ env.IMAGE_NAME }}:latest
         if: steps.cache-deps.outputs.cache-hit != true || steps.check-image.outputs.exists == 'false'
 
   backend_tests:
