@@ -58,7 +58,7 @@ def read_pulses(
     return db.exec(select(Pulse).offset(offset).limit(limit)).all()
 
 
-def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse:
+def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse | None:
     """Read a single Pulse from the database.
 
     Args:
@@ -74,10 +74,4 @@ def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse:
     -------
         The Pulse with the given ID.
     """
-    pulse = db.get(Pulse, pulse_id)
-    if not pulse:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
-        )
-    return pulse
+    return db.get(Pulse, pulse_id)
