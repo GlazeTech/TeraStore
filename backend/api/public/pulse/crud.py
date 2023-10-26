@@ -3,22 +3,11 @@ from uuid import UUID
 from fastapi import Depends
 from sqlmodel import Session, select
 
-from api.database import _get_session
+from api.database import get_session
 from api.public.pulse.models import Pulse, PulseCreate
 
 
-def create_pulse(pulse: PulseCreate, db: Session = Depends(_get_session)) -> Pulse:
-    """Create a new Pulse in the database.
-
-    Args:
-    ----
-        pulse (PulseCreate): The Pulse to create.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        The created Pulse including its DB ID.
-    """
+def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> Pulse:
     pulse_to_db = Pulse.from_orm(pulse)
 
     db.add(pulse_to_db)
@@ -30,33 +19,11 @@ def create_pulse(pulse: PulseCreate, db: Session = Depends(_get_session)) -> Pul
 def read_pulses(
     offset: int = 0,
     limit: int = 20,
-    db: Session = Depends(_get_session),
+    db: Session = Depends(get_session),
 ) -> list[Pulse]:
-    """Read all Pulses from the database.
-
-    Args:
-    ----
-        offset (int, optional): The offset for the query. Defaults to 0.
-        limit (int, optional): The limit for the query. Defaults to 20.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        A list of Pulses.
-    """
+    """Get all pulses in the database."""
     return db.exec(select(Pulse).offset(offset).limit(limit)).all()
 
 
-def read_pulse(pulse_id: UUID, db: Session = Depends(_get_session)) -> Pulse | None:
-    """Read a single Pulse from the database.
-
-    Args:
-    ----
-        pulse_id (UUID): The ID of the Pulse to read.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        The Pulse with the given ID.
-    """
+def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse | None:
     return db.get(Pulse, pulse_id)

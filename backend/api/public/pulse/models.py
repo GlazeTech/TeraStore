@@ -65,19 +65,6 @@ class PulseCreate(PulseBase):
         timescale: float = 1e-10,
         amplitude: float = 100.0,
     ) -> PulseCreate:
-        """Create a mock pulse for testing purposes.
-
-        Args:
-        ----
-            device_id (UUID): The id of the device that created the pulse.
-            length (int, optional): The length of the pulse. Defaults to 600.
-            timescale (float, optional): The timescale of the pulse. Defaults to 1e-10.
-            amplitude (float, optional): The amplitude of the pulse. Defaults to 100.0.
-
-        Returns:
-        -------
-            A mock pulse.
-        """
         return cls(
             delays=generate_scaled_numbers(length, timescale),
             signal=generate_random_numbers(length, -amplitude, amplitude),
@@ -87,12 +74,6 @@ class PulseCreate(PulseBase):
         )
 
     def as_dict(self: Self) -> dict[str, list[float] | int | str | UUID]:
-        """Convert the PulseCreate to a dictionary.
-
-        Returns
-        -------
-            A dictionary representation of the PulseCreate.
-        """
         return {
             "delays": self.delays,
             "signal": self.signal,

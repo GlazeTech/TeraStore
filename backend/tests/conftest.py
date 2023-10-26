@@ -4,20 +4,20 @@ import pytest
 from fastapi.testclient import TestClient
 from sqlmodel import Session, create_engine
 
-from api.config import _get_settings
-from api.database import _create_db_and_tables, _drop_tables, _get_session
-from api.main import _create_app
+from api.config import get_settings
+from api.database import create_db_and_tables, drop_tables, get_session
+from api.main import create_app
 from api.utils.types import WithLifespan
 
 
 @pytest.fixture(name="session")
 def session_fixture() -> Generator[Session, None, None]:
     """Yield a Session object for interacting with the db."""
-    settings = _get_settings()
+    settings = get_settings()
     engine = create_engine(settings.DATABASE_URL, echo=settings.ENV in ("dev", "test"))
 
-    _drop_tables(engine)
-    _create_db_and_tables(engine)
+    drop_tables(engine)
+    create_db_and_tables(engine)
 
     with Session(engine) as session:
         yield session
@@ -26,12 +26,12 @@ def session_fixture() -> Generator[Session, None, None]:
 @pytest.fixture(name="client")
 def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     """Create a TestClient instance for testing."""
-    app = _create_app(WithLifespan.FALSE)
+    app = create_app(WithLifespan.FALSE)
 
     def get_session_override() -> Session:
         return session
 
-    app.dependency_overrides[_get_session] = get_session_override
+    app.dependency_overrides[get_session] = get_session_override
 
     client = TestClient(app)
     yield client

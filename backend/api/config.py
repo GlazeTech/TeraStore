@@ -5,16 +5,6 @@ from pydantic import BaseSettings
 
 
 def get_env_var(var_name: str) -> str:
-    """Get the environment variable or return exception.
-
-    Args:
-    ----
-        var_name (str): The name of the environment variable.
-
-    Returns:
-    -------
-        The value of the environment variable.
-    """
     try:
         value = os.environ[var_name]
     except KeyError as exc:
@@ -23,7 +13,7 @@ def get_env_var(var_name: str) -> str:
     return value
 
 
-class _Settings(BaseSettings):
+class Settings(BaseSettings):
     ENV = get_env_var("ENV")
     PROJECT_NAME = f"TeraStore API - {ENV}"
     DATABASE_URL = get_env_var("DATABASE_URL")
@@ -32,5 +22,5 @@ class _Settings(BaseSettings):
 
 
 @lru_cache
-def _get_settings() -> _Settings:
-    return _Settings()
+def get_settings() -> Settings:
+    return Settings()

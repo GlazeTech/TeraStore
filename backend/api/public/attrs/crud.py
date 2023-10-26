@@ -4,7 +4,7 @@ from fastapi import Depends
 from sqlalchemy import and_
 from sqlmodel import Session, select
 
-from api.database import _get_session
+from api.database import get_session
 from api.public.attrs.models import PulseKeyRegistry, PulseStrAttrs
 from api.public.pulse.models import Pulse
 
@@ -13,23 +13,9 @@ def add_str_attr(
     pulse_id: UUID,
     key: str,
     value: str,
-    db: Session = Depends(_get_session),
+    db: Session = Depends(get_session),
 ) -> Pulse | None:
-    """Add a key-value pair to a pulse with id pulse_id.
-
-    If the key does not exist, it will be added to the PulseKeyRegistry.
-
-    Args:
-    ----
-        pulse_id (UUID): The id of the pulse.
-        key (str): The key to add.
-        value (str): The value to add.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        The updated Pulse.
-    """
+    """Add a key-value pair to a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         return None
@@ -54,19 +40,9 @@ def add_str_attr(
 
 def read_pulse_attrs(
     pulse_id: UUID,
-    db: Session = Depends(_get_session),
+    db: Session = Depends(get_session),
 ) -> list[dict[str, str]] | None:
-    """Get all the keys for a pulse with id pulse_id.
-
-    Args:
-    ----
-        pulse_id (UUID): The id of the pulse.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        A list of dicts containing the key-value pairs.
-    """
+    """Get all the keys for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         return None
@@ -80,55 +56,26 @@ def read_pulse_attrs(
 
 
 def read_all_keys(
-    db: Session = Depends(_get_session),
+    db: Session = Depends(get_session),
 ) -> list[str]:
-    """Get all unique keys.
-
-    Args:
-    ----
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        A list of keys.
-    """
+    """Get all unique keys."""
     return [key[0] for key in db.query(PulseKeyRegistry.key).all()]
 
 
 def read_all_values_on_key(
     key: str,
-    db: Session = Depends(_get_session),
+    db: Session = Depends(get_session),
 ) -> list[str]:
-    """Get all unique values associated with a key.
-
-    Args:
-    ----
-        key (str): The key to search for.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        A list of values associated with the key.
-    """
+    """Get all unique values associated with a key."""
     statement = select(PulseStrAttrs.value).where(PulseStrAttrs.key == key).distinct()
     return db.execute(statement).scalars().all()
 
 
 def filter_on_key_value_pairs(
     key_value_pairs: list[dict[str, str]],
-    db: Session = Depends(_get_session),
+    db: Session = Depends(get_session),
 ) -> list[UUID]:
-    """Get all pulses that match the key-value pairs.
-
-    Args:
-    ----
-        key_value_pairs (list[dict[str, str]]): The key-value pairs to filter on.
-        db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Returns:
-    -------
-        A list of pulse_ids that match the key-value pairs.
-    """
+    """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
     pulse_ids_list = []
 

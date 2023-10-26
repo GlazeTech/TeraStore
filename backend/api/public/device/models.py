@@ -34,27 +34,13 @@ class DeviceCreate(DeviceBase):
     """
 
     class Config:
-        """The model configuration."""
-
         extra = "forbid"
 
     @classmethod
     def create_mock(cls: type[DeviceCreate], friendly_name: str) -> DeviceCreate:
-        """Create a mock Device for testing purposes.
-
-        Returns
-        -------
-            A mock Device.
-        """
         return cls(friendly_name=friendly_name)
 
     def as_dict(self: Self) -> dict[str, str]:
-        """Convert the DeviceCreate to a dictionary.
-
-        Returns
-        -------
-            A dictionary representation of the DeviceCreate.
-        """
         return self.dict()
 
 
