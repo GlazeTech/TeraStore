@@ -18,7 +18,7 @@ Before deploying the applications the environment variables
 
 For deployment of the app, run
 
-`docker-compose up`
+`docker compose up`
 
 ## Develop
 
@@ -26,6 +26,7 @@ To run the application, you must first set the following environment variables:
 * `POSTGRES_USER`: The PostgreSQL username to be used by the backend
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
+* `ENV=dev` because you're a dev (and want some things to be set for you)
 
 We suggest you create a `.env` file in the root of the project.
 This will contain the above mentioned environment variables, and you can fill it out like so:
@@ -81,7 +82,7 @@ You may have a look at [pyenv](https://github.com/pyenv/pyenv) to administer sev
 Then, run
 ```bash
 python -m venv .venv prompt terastore-backend
-pip install ./backend[test]
+pip install ./backend[dev]
 ```
 
 This installs a virtual environment in the workspace root, and installs all dependencies required for development.
@@ -92,7 +93,7 @@ cd ./frontend
 npm install
 ```
 
-For your sake, we recommend also install [direnv](https://direnv.net).
+For your sake, we recommend you also install [direnv](https://direnv.net).
 Do this, and make a file called `.envrc` in the workspace root, and populate it with
 ```bash
 export VIRTUAL_ENV=.venv
@@ -106,14 +107,30 @@ direnv allow
 ```
 it picks up the configuration from `direnv`, and will activate your virtual environment and load the environment variables you set in the `.env` file.
 
-We have a list of recommended VS Code extensions in `.vscode/extensions.json`; VS Code will prompt you to install these, and you should agree.
-
-You should now have access to all VS Code features when developing locally!
-
 Then, run
 ```bash
-docker-compose -f docker-compose.dev.yml up
+./scripts/dev_up.sh
 ```
-which starts the services.
 
-You can now talk to the API via `http://0.0.0.0:8000`, and see the frontend in a browser at the URL stated by Vite in the `docker-compose` log.
+You can now talk to the API via `http://0.0.0.0:8000`, and see the frontend in a browser at the URL stated by Vite in the `docker compose` log.
+
+When you're done developing, run
+```bash
+./scripts/dev_down.sh
+```
+This closes the dev services again.
+
+Be aware: while it seems to work to have the dev and test services running simultaneously, I have seen some weird behaviour once in a while.
+Thus, I tend to take the dev services down before I run the test suite.
+
+## Testing
+
+You can also easily test the backend!
+In the `./scripts` folder, we have some useful stuff.
+If you run
+```bash
+./scripts/run_all_tests.sh
+```
+a Docker Compose instance will spin up, and do all the tests for you!
+
+Nifty!

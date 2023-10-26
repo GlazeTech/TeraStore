@@ -22,7 +22,7 @@ services:
       context: .
       dockerfile: ./docker/Dockerfile.backend.dev
     container_name: terastore-backend-dev
-    command: uvicorn api.main:app --host 0.0.0.0 --reload
+    command: python asgi.py --with-lifespan --with-reload
     environment:
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-dev/${POSTGRES_DB}"
       - ENV=${ENV}
@@ -31,10 +31,16 @@ services:
     ports:
       - 8000:8000
     depends_on:
-      - db-dev
+      db-dev:
+        condition: service_healthy
 
   db-dev:
     image: postgres:16-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}

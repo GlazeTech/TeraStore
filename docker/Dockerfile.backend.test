@@ -9,5 +9,7 @@ COPY ./backend/pyproject.toml ./
 # Install dependencies.
 RUN pip install .[test]
 
-# Start FastAPI in development mode
-CMD ["python", "asgi.py"]
+# The app shouldn't run, but the container shouldn't shut immediately down either.
+# We thus run a script that tails constantly, but listens for SIGTERM and SIGINT.
+# In this way the container shuts down quickly.
+ENTRYPOINT ["/scripts/entrypoint.sh"]

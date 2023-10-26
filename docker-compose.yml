@@ -18,19 +18,25 @@ services:
       context: ./backend
       dockerfile: ../docker/Dockerfile.backend
     container_name: terastore-backend
-    command: uvicorn api.main:app --host 0.0.0.0
+    command: python asgi.py
     environment:
-      - "DATABASE_URL=postgres://${POSTGRES_USER}:${POSTGRES_PASSWORD}@localhost/${POSTGRES_DB}"
-
-    volumes:
-      - ./backend:/app
+      - "DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}"
+      - ENV=${ENV}
     ports:
       - 8000:8000
+    volumes:
+      - ./backend:/app
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   db:
     image: postgres:16-alpine
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 2s
+      timeout: 1s
+      retries: 5
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
       - POSTGRES_USER=${POSTGRES_USER}

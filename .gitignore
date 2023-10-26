@@ -404,3 +404,6 @@ $RECYCLE.BIN/
 
 # VS Code settings
 .vscode/
+
+# pyproject.toml hash file
+last_pyproject.toml_hash.txt

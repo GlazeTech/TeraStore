@@ -1,10 +1,11 @@
 import * as M from "@mantine/core";
-import { getKeyValues, getPulseKeys } from "api";
+import { getFilteredPulses, getKeyValues, getPulseKeys } from "api";
 import { PulseFilter } from "interfaces";
 import { useEffect, useState } from "react";
 
 function FilterMenu() {
 	const [newFilterIsOpen, setNewFilterIsOpen] = useState(false);
+	const [nPulses, setNPulses] = useState<number | null>(null);
 	const [pulseKeys, setPulseKeys] = useState<string[]>([]);
 	const [selectedPulseKey, setSelectedPulseKey] = useState<string | null>(null);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
@@ -40,6 +41,10 @@ function FilterMenu() {
 			setSelectedKeyValue(null);
 		}
 	}, [selectedPulseKey, selectedKeyValue]);
+
+	useEffect(() => {
+		getFilteredPulses(pulseFilters).then((pulses) => setNPulses(pulses.length));
+	}, [pulseFilters]);
 
 	const removeFilter = (filterToDelete: string) => () => {
 		setPulseFilters(
@@ -87,6 +92,7 @@ function FilterMenu() {
 				</M.Popover.Dropdown>
 			</M.Popover>
 			{displayPulseFilters(pulseFilters)}
+			Number of pulses: {nPulses === null ? "Apply filter" : nPulses}
 		</>
 	);
 }
