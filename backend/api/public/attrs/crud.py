@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from sqlalchemy import and_
 from sqlmodel import Session, select
 
@@ -14,7 +14,7 @@ def add_str_attr(
     key: str,
     value: str,
     db: Session = Depends(_get_session),
-) -> Pulse:
+) -> Pulse | None:
     """Add a key-value pair to a pulse with id pulse_id.
 
     If the key does not exist, it will be added to the PulseKeyRegistry.
@@ -36,10 +36,8 @@ def add_str_attr(
     """
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
-        )
+        return None
+
     existing_key = (
         db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
     )
@@ -61,7 +59,7 @@ def add_str_attr(
 def read_pulse_attrs(
     pulse_id: UUID,
     db: Session = Depends(_get_session),
-) -> list[dict[str, str]]:
+) -> list[dict[str, str]] | None:
     """Get all the keys for a pulse with id pulse_id.
 
     Args:
@@ -75,10 +73,8 @@ def read_pulse_attrs(
     """
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
-        )
+        return None
+
     statement = select([PulseStrAttrs.key, PulseStrAttrs.value]).where(
         PulseStrAttrs.pulse_id == pulse_id,
     )

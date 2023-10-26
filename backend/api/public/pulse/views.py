@@ -99,7 +99,13 @@ def add_kv_str(
     db: Session = Depends(_get_session),
 ) -> Pulse:
     """Add a key-value pair to a Pulse with pulse_id."""
-    return add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
+    pulse = add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
+    if not pulse:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Pulse not found with id: {pulse_id}",
+        )
+    return pulse
 
 
 @router.get("/{pulse_id}/attrs")
@@ -108,4 +114,10 @@ def get_pulse_keys(
     db: Session = Depends(_get_session),
 ) -> list[dict[str, str]]:
     """Get all keys associated with a Pulse."""
-    return read_pulse_attrs(pulse_id=pulse_id, db=db)
+    pulse_attrs = read_pulse_attrs(pulse_id=pulse_id, db=db)
+    if not pulse_attrs:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Pulse not found with id: {pulse_id}",
+        )
+    return pulse_attrs
