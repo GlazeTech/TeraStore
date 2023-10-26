@@ -107,17 +107,21 @@ direnv allow
 ```
 it picks up the configuration from `direnv`, and will activate your virtual environment and load the environment variables you set in the `.env` file.
 
-We have a list of recommended VS Code extensions in `.vscode/extensions.json`; VS Code will prompt you to install these, and you should agree.
-
-You should now have access to all VS Code features when developing locally!
-
 Then, run
 ```bash
-docker compose -f docker-compose.dev.yml up
+./scripts/dev_up.sh
 ```
-(this `docker compose` command, instead of the classic `docker-compose` is the right way to use [Docker Compose V2](https://docs.docker.com/compose/migrate/)) which starts the services.
 
 You can now talk to the API via `http://0.0.0.0:8000`, and see the frontend in a browser at the URL stated by Vite in the `docker compose` log.
+
+When you're done developing, run
+```bash
+./scripts/dev_down.sh
+```
+This closes the dev services again.
+
+Be aware: while it seems to work to have the dev and test services running simultaneously, I have seen some weird behaviour once in a while.
+Thus, I tend to take the dev services down before I run the test suite.
 
 ## Testing
 
