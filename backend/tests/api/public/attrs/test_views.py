@@ -6,16 +6,6 @@ from api.utils.mock_data_generator import create_devices_and_pulses
 
 
 def test_get_all_keys(client: TestClient) -> None:
-    """Test getting all keys.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     create_devices_and_pulses()
 
     response = client.get("/attrs/keys/")
@@ -25,16 +15,6 @@ def test_get_all_keys(client: TestClient) -> None:
 
 
 def test_get_all_values_on_key(client: TestClient) -> None:
-    """Test getting all values on a key.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     create_devices_and_pulses()
 
     response = client.get("/attrs/angle/values/")
@@ -44,16 +24,6 @@ def test_get_all_values_on_key(client: TestClient) -> None:
 
 
 def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
-    """Test getting all values on a non-existing key.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     create_devices_and_pulses()
 
     response = client.get("/attrs/non-existing-key/values/")
@@ -63,17 +33,6 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
 
 
 def test_get_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
-    """Test adding pulse attributes.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
@@ -113,16 +72,6 @@ def test_get_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
 
 
 def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
-    """Test getting pulse attributes on a non-existing pulse.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     pulse_id = str(uuid4())
     response = client.get(f"/pulses/{pulse_id}/attrs/")
 
@@ -131,17 +80,6 @@ def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
 
 
 def test_add_pulse_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
-    """Test adding pulse attributes.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
@@ -171,16 +109,6 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
 
 
 def test_add_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
-    """Test adding pulse attributes on a non-existing pulse.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     pulse_id = str(uuid4())
     attrs_key = "angle"
     attrs_value = "29"

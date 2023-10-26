@@ -4,17 +4,6 @@ from fastapi.testclient import TestClient
 
 
 def test_create_pulse(client: TestClient, device_uuid: str) -> None:
-    """Test creating a pulse.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
@@ -38,17 +27,6 @@ def test_create_pulse(client: TestClient, device_uuid: str) -> None:
 
 
 def test_create_pulse_with_invalid_delays(client: TestClient, device_uuid: str) -> None:
-    """Test creating a pulse with invalid delays.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, "a"],
@@ -68,17 +46,6 @@ def test_create_pulse_with_invalid_delays(client: TestClient, device_uuid: str) 
 
 
 def test_create_pulse_with_invalid_signal(client: TestClient, device_uuid: str) -> None:
-    """Test creating a pulse with invalid signal.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
@@ -101,17 +68,6 @@ def test_create_pulse_with_invalid_integration_time(
     client: TestClient,
     device_uuid: str,
 ) -> None:
-    """Test creating a pulse with invalid integration time.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
@@ -134,16 +90,6 @@ def test_create_pulse_with_invalid_integration_time(
 def test_create_pulse_with_nonexistent_device_id(
     client: TestClient,
 ) -> None:
-    """Test creating a pulse with nonexistent device id.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": str(uuid4()),
         "delays": [1, 2, 3],
@@ -167,17 +113,6 @@ def test_create_pulse_with_invalid_device_id(
     client: TestClient,
     device_uuid: str,
 ) -> None:
-    """Test creating a pulse with invalid device id.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": "a",
         "delays": [1, 2, 3],
@@ -199,17 +134,6 @@ def test_create_pulse_with_invalid_creation_time(
     client: TestClient,
     device_uuid: str,
 ) -> None:
-    """Test creating a pulse with invalid creation time.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
@@ -228,17 +152,6 @@ def test_create_pulse_with_invalid_creation_time(
 
 
 def test_get_pulse(client: TestClient, device_uuid: str) -> None:
-    """Test getting a pulse.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
@@ -266,16 +179,6 @@ def test_get_pulse(client: TestClient, device_uuid: str) -> None:
 
 
 def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:
-    """Test getting a pulse with an invalid pulse id.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     response = client.get("/pulses/abc")
     data = response.json()
 
@@ -285,16 +188,6 @@ def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:
 
 
 def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
-    """Test getting a pulse with a nonexistent pulse id.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-
-    Returns:
-    -------
-        None
-    """
     pulse_id = uuid4()
     response = client.get(f"/pulses/{pulse_id}")
     data = response.json()
@@ -304,17 +197,6 @@ def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
 
 
 def test_get_all_pulses(client: TestClient, device_uuid: str) -> None:
-    """Test getting all pulses.
-
-    Args:
-    ----
-        client (TestClient): The test client.
-        device_uuid (str): The uuid of the device.
-
-    Returns:
-    -------
-        None
-    """
     pulse_1_payload = {
         "device_id": device_uuid,
         "delays": [1, 2, 3],
