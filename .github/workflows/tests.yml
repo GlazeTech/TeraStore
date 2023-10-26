@@ -13,6 +13,7 @@ env:
 
 jobs:
   backend-image-check-and-push:
+    timeout-minutes: 15
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -50,8 +51,8 @@ jobs:
           tags: |
             ${{ env.IMAGE_NAME }}:latest
         if: steps.cache-deps.outputs.cache-hit != 'true' || steps.check-image.outputs.exists != 'true'
-
   backend-test:
+    timeout-minutes: 15
     strategy:
       fail-fast: false
       matrix:
