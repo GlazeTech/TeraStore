@@ -26,10 +26,6 @@ def add_str_attr(
         value (str): The value to add.
         db (Session, optional): The database session. Defaults to Depends(get_session).
 
-    Raises:
-    ------
-        HTTPException: If no Pulse is found with the given ID.
-
     Returns:
     -------
         The updated Pulse.
@@ -122,7 +118,17 @@ def filter_on_key_value_pairs(
     key_value_pairs: list[dict[str, str]],
     db: Session = Depends(_get_session),
 ) -> list[UUID]:
-    """Get all pulses that match the key-value pairs."""
+    """Get all pulses that match the key-value pairs.
+
+    Args:
+    ----
+        key_value_pairs (list[dict[str, str]]): The key-value pairs to filter on.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Returns:
+    -------
+        A list of pulse_ids that match the key-value pairs.
+    """
     # Initialize a list to hold pulse_ids for each condition
     pulse_ids_list = []
 

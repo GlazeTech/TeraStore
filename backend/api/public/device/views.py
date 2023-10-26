@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, Query
+from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlmodel import Session
 
 from api.database import _get_session
@@ -67,4 +67,12 @@ def get_device(device_id: UUID, db: Session = Depends(_get_session)) -> Device:
     -------
         The Device with the given ID.
     """
-    return read_device(device_id=device_id, db=db)
+    device = read_device(device_id=device_id, db=db)
+
+    if not device:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Device not found with id: {device_id}",
+        )
+
+    return device

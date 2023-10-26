@@ -29,6 +29,10 @@ def create_a_pulse(
         pulse (PulseCreate): The Pulse to create.
         db (Session, optional): The database session. Defaults to Depends(get_session).
 
+    Raises:
+    ------
+        HTTPException: If no Device is found with the given ID.
+
     Returns:
     -------
         The created Pulse including its DB ID.
@@ -98,7 +102,23 @@ def add_kv_str(
     value: str,
     db: Session = Depends(_get_session),
 ) -> Pulse:
-    """Add a key-value pair to a Pulse with pulse_id."""
+    """Add a key-value pair to a Pulse with pulse_id.
+
+    Args:
+    ----
+        pulse_id (UUID): The ID of the Pulse to add the key-value pair to.
+        key (str): The key to add.
+        value (str): The value to add.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Raises:
+    ------
+        HTTPException: If no Pulse is found with the given ID.
+
+    Returns:
+    -------
+        The Pulse with the given ID.
+    """
     pulse = add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
     if not pulse:
         raise HTTPException(
@@ -113,7 +133,21 @@ def get_pulse_keys(
     pulse_id: UUID,
     db: Session = Depends(_get_session),
 ) -> list[dict[str, str]]:
-    """Get all keys associated with a Pulse."""
+    """Get all keys associated with a Pulse.
+
+    Args:
+    ----
+        pulse_id (UUID): The ID of the Pulse to get the keys from.
+        db (Session, optional): The database session. Defaults to Depends(get_session).
+
+    Raises:
+    ------
+        HTTPException: If no Pulse is found with the given ID.
+
+    Returns:
+    -------
+        A list of dicts containing the keys and values.
+    """
     pulse_attrs = read_pulse_attrs(pulse_id=pulse_id, db=db)
     if not pulse_attrs:
         raise HTTPException(

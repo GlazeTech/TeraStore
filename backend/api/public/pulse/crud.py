@@ -1,8 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
-from psycopg2.errors import ForeignKeyViolation
-from sqlalchemy.exc import DBAPIError
+from fastapi import Depends
 from sqlmodel import Session, select
 
 from api.database import _get_session
@@ -22,18 +20,9 @@ def create_pulse(pulse: PulseCreate, db: Session = Depends(_get_session)) -> Pul
         The created Pulse including its DB ID.
     """
     pulse_to_db = Pulse.from_orm(pulse)
-    try:
-        db.add(pulse_to_db)
-        db.commit()
-    except DBAPIError as e:
-        db.rollback()
-        if isinstance(e.orig, ForeignKeyViolation):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Device not found with id: {pulse.device_id}",
-            ) from e
-        raise
 
+    db.add(pulse_to_db)
+    db.commit()
     db.refresh(pulse_to_db)
     return pulse_to_db
 
@@ -65,10 +54,6 @@ def read_pulse(pulse_id: UUID, db: Session = Depends(_get_session)) -> Pulse | N
     ----
         pulse_id (UUID): The ID of the Pulse to read.
         db (Session, optional): The database session. Defaults to Depends(get_session).
-
-    Raises:
-    ------
-        HTTPException: If no Pulse is found with the given ID.
 
     Returns:
     -------

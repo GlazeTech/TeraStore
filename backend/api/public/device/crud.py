@@ -1,6 +1,6 @@
 from uuid import UUID
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from sqlmodel import Session, select
 
 from api.database import _get_session
@@ -49,7 +49,7 @@ def read_devices(
     return db.exec(select(Device).offset(offset).limit(limit)).all()
 
 
-def read_device(device_id: UUID, db: Session = Depends(_get_session)) -> Device:
+def read_device(device_id: UUID, db: Session = Depends(_get_session)) -> Device | None:
     """Read a single Pulse from the database.
 
     Args:
@@ -57,18 +57,8 @@ def read_device(device_id: UUID, db: Session = Depends(_get_session)) -> Device:
         device_id (UUID): The ID of the Device to read.
         db (Session, optional): The database session. Defaults to Depends(get_session).
 
-    Raises:
-    ------
-        HTTPException: If no Device with the given ID is found.
-
     Returns:
     -------
         The Device.
     """
-    device = db.get(Device, device_id)
-    if not device:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Device not found with id: {device_id}",
-        )
-    return device
+    return db.get(Device, device_id)
