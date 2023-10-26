@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
-from api.database import get_session
+from api.database import _get_session
 from api.public.device.crud import create_device, read_device, read_devices
 from api.public.device.models import Device, DeviceCreate, DeviceRead
 
@@ -13,7 +13,7 @@ router = APIRouter()
 @router.post("", response_model=DeviceRead)
 def create_a_device(
     device: DeviceCreate,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> Device:
     """Create a new Device in the database from the API.
 
@@ -33,7 +33,7 @@ def create_a_device(
 def get_devices(
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[Device]:
     """Read all Devices from the database via the API.
 
@@ -51,7 +51,7 @@ def get_devices(
 
 
 @router.get("/{device_id}", response_model=DeviceRead)
-def get_device(device_id: UUID, db: Session = Depends(get_session)) -> Device:
+def get_device(device_id: UUID, db: Session = Depends(_get_session)) -> Device:
     """Read a single Device from the database via the API.
 
     Args:

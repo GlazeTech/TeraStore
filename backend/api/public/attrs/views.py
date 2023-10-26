@@ -3,7 +3,7 @@ from uuid import UUID
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
-from api.database import get_session
+from api.database import _get_session
 from api.public.attrs.crud import (
     filter_on_key_value_pairs,
     read_all_keys,
@@ -14,7 +14,7 @@ router = APIRouter()
 
 
 @router.get("/keys")
-def get_all_keys(db: Session = Depends(get_session)) -> list[str]:
+def get_all_keys(db: Session = Depends(_get_session)) -> list[str]:
     """Get all keys.
 
     Args:
@@ -29,7 +29,7 @@ def get_all_keys(db: Session = Depends(get_session)) -> list[str]:
 
 
 @router.get("/{key}/values")
-def get_all_values_on_key(key: str, db: Session = Depends(get_session)) -> list[str]:
+def get_all_values_on_key(key: str, db: Session = Depends(_get_session)) -> list[str]:
     """Get all values associated with a key.
 
     Args:
@@ -47,7 +47,7 @@ def get_all_values_on_key(key: str, db: Session = Depends(get_session)) -> list[
 @router.post("/filter")
 def filter_attrs(
     key_value_pairs: list[dict[str, str]],
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[UUID]:
     """Filter pulses based on key-value pairs.
 

@@ -2,8 +2,8 @@ import argparse
 
 import uvicorn
 
-from api.config import get_settings
-from api.main import create_app
+from api.config import _get_settings
+from api.main import _create_app
 from api.utils.types import WithLifespan
 
 parser = argparse.ArgumentParser(description="Start the FastAPI application.")
@@ -20,13 +20,13 @@ parser.add_argument(
 args = parser.parse_args()
 
 if args.with_lifespan:
-    api = create_app(WithLifespan.TRUE)
+    api = _create_app(WithLifespan.TRUE)
 else:
-    api = create_app(WithLifespan.FALSE)
+    api = _create_app(WithLifespan.FALSE)
 
 
 if __name__ == "__main__":
-    settings = get_settings()
+    settings = _get_settings()
 
     uvicorn.run(
         "asgi:api",

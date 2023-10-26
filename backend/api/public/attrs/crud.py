@@ -4,7 +4,7 @@ from fastapi import Depends, HTTPException, status
 from sqlalchemy import and_
 from sqlmodel import Session, select
 
-from api.database import get_session
+from api.database import _get_session
 from api.public.attrs.models import PulseKeyRegistry, PulseStrAttrs
 from api.public.pulse.models import Pulse
 
@@ -13,7 +13,7 @@ def add_str_attr(
     pulse_id: UUID,
     key: str,
     value: str,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> Pulse:
     """Add a key-value pair to a pulse with id pulse_id.
 
@@ -60,7 +60,7 @@ def add_str_attr(
 
 def read_pulse_attrs(
     pulse_id: UUID,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[dict[str, str]]:
     """Get all the keys for a pulse with id pulse_id.
 
@@ -88,7 +88,7 @@ def read_pulse_attrs(
 
 
 def read_all_keys(
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[str]:
     """Get all unique keys.
 
@@ -105,7 +105,7 @@ def read_all_keys(
 
 def read_all_values_on_key(
     key: str,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[str]:
     """Get all unique values associated with a key.
 
@@ -124,7 +124,7 @@ def read_all_values_on_key(
 
 def filter_on_key_value_pairs(
     key_value_pairs: list[dict[str, str]],
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[UUID]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition

@@ -3,13 +3,13 @@ from uuid import UUID
 from fastapi import Depends, HTTPException, status
 from sqlmodel import Session, select
 
-from api.database import get_session
+from api.database import _get_session
 from api.public.device.models import Device, DeviceCreate
 
 
 def create_device(
     device: DeviceCreate,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> Device:
     """Create a new Device in the database.
 
@@ -32,7 +32,7 @@ def create_device(
 def read_devices(
     offset: int = 0,
     limit: int = 20,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[Device]:
     """Read all Devices from the database.
 
@@ -49,7 +49,7 @@ def read_devices(
     return db.exec(select(Device).offset(offset).limit(limit)).all()
 
 
-def read_device(device_id: UUID, db: Session = Depends(get_session)) -> Device:
+def read_device(device_id: UUID, db: Session = Depends(_get_session)) -> Device:
     """Read a single Pulse from the database.
 
     Args:

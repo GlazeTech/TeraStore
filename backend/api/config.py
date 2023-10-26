@@ -23,9 +23,7 @@ def get_env_var(var_name: str) -> str:
     return value
 
 
-class Settings(BaseSettings):
-    """Application settings."""
-
+class _Settings(BaseSettings):
     ENV = get_env_var("ENV")
     PROJECT_NAME = f"TeraStore API - {ENV}"
     DATABASE_URL = get_env_var("DATABASE_URL")
@@ -34,6 +32,5 @@ class Settings(BaseSettings):
 
 
 @lru_cache
-def get_settings() -> Settings:
-    """Get the application settings."""
-    return Settings()
+def _get_settings() -> _Settings:
+    return _Settings()

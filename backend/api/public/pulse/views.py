@@ -5,7 +5,7 @@ from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session
 
-from api.database import get_session
+from api.database import _get_session
 from api.public.attrs.crud import add_str_attr, read_pulse_attrs
 from api.public.pulse.crud import (
     create_pulse,
@@ -20,7 +20,7 @@ router = APIRouter()
 @router.post("", response_model=PulseRead)
 def create_a_pulse(
     pulse: PulseCreate,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> Pulse:
     """Create a new Pulse in the database from the API.
 
@@ -48,7 +48,7 @@ def create_a_pulse(
 def get_pulses(
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[Pulse]:
     """Read all Pulses from the database via the API.
 
@@ -66,7 +66,7 @@ def get_pulses(
 
 
 @router.get("/{pulse_id}", response_model=PulseRead)
-def get_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse:
+def get_pulse(pulse_id: UUID, db: Session = Depends(_get_session)) -> Pulse:
     """Read a single Pulse from the database via the API.
 
     Args:
@@ -96,7 +96,7 @@ def add_kv_str(
     pulse_id: UUID,
     key: str,
     value: str,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> Pulse:
     """Add a key-value pair to a Pulse with pulse_id."""
     return add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
@@ -105,7 +105,7 @@ def add_kv_str(
 @router.get("/{pulse_id}/attrs")
 def get_pulse_keys(
     pulse_id: UUID,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[dict[str, str]]:
     """Get all keys associated with a Pulse."""
     return read_pulse_attrs(pulse_id=pulse_id, db=db)

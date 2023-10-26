@@ -5,11 +5,11 @@ from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session, select
 
-from api.database import get_session
+from api.database import _get_session
 from api.public.pulse.models import Pulse, PulseCreate
 
 
-def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> Pulse:
+def create_pulse(pulse: PulseCreate, db: Session = Depends(_get_session)) -> Pulse:
     """Create a new Pulse in the database.
 
     Args:
@@ -41,7 +41,7 @@ def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> Puls
 def read_pulses(
     offset: int = 0,
     limit: int = 20,
-    db: Session = Depends(get_session),
+    db: Session = Depends(_get_session),
 ) -> list[Pulse]:
     """Read all Pulses from the database.
 
@@ -58,7 +58,7 @@ def read_pulses(
     return db.exec(select(Pulse).offset(offset).limit(limit)).all()
 
 
-def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse | None:
+def read_pulse(pulse_id: UUID, db: Session = Depends(_get_session)) -> Pulse | None:
     """Read a single Pulse from the database.
 
     Args:
