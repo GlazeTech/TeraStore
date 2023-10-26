@@ -47,7 +47,7 @@ echo -e "${YELLOW}Starting services...${NC}"
 # Build if the hashes don't match or if it's the first time
 if [ "$current_hash" != "$last_hash" ]; then
   echo -e "${YELLOW}Detected changes in pyproject.toml, rebuilding...${NC}"
-  docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml up --build --detach
+  docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml build
   echo $current_hash > $last_hash_file
 else
   echo -e "${YELLOW}No changes detected in pyproject.toml, using cached image...${NC}"
