@@ -14,10 +14,10 @@ def test_create_device(client: TestClient) -> None:
     -------
         None
     """
-    device = DeviceCreate.create_mock(friendly_name="Glaze I")
+    device_payload = {"friendly_name": "Glaze I"}
     response = client.post(
         "/devices/",
-        json=device.as_dict(),
+        json=device_payload,
     )
     data = response.json()
 
@@ -37,9 +37,10 @@ def test_create_device_with_invalid_friendly_name(client: TestClient) -> None:
     -------
         None
     """
+    device_payload = {"friendly_name": [1]}
     response = client.post(
         "/devices/",
-        json={"friendly_name": [1]},
+        json=device_payload,
     )
     data = response.json()
 
@@ -59,9 +60,10 @@ def test_create_device_with_extra_params(client: TestClient) -> None:
     -------
         None
     """
+    device_payload = {"friendly_name": "Glaze I", "device_id": "abc"}
     response = client.post(
         "/devices/",
-        json={"friendly_name": "Glaze I", "device_id": "abc"},
+        json=device_payload,
     )
     data = response.json()
 
@@ -81,15 +83,42 @@ def test_create_device_with_empty_body(client: TestClient) -> None:
     -------
         None
     """
+    device_payload: dict[None, None] = {}
     response = client.post(
         "/devices/",
-        json={},
+        json=device_payload,
     )
     data = response.json()
 
     assert response.status_code == 422
     assert data["detail"][0]["msg"] == "field required"
     assert data["detail"][0]["type"] == "value_error.missing"
+
+
+def test_create_device_with_invalid_device_id(client: TestClient) -> None:
+    """Test creating a device with an invalid device id.
+
+    Args:
+    ----
+        client (TestClient): The test client.
+
+    Returns:
+    -------
+        None
+    """
+    device_payload = {
+        "friendly_name": "Glaze I",
+        "device_id": "00000000-0000-0000-0000-000000000000",
+    }
+    response = client.post(
+        "/devices/",
+        json=device_payload,
+    )
+    data = response.json()
+
+    assert response.status_code == 422
+    assert data["detail"][0]["msg"] == "extra fields not permitted"
+    assert data["detail"][0]["type"] == "value_error.extra"
 
 
 def test_get_device(client: TestClient) -> None:
@@ -103,10 +132,10 @@ def test_get_device(client: TestClient) -> None:
     -------
         None
     """
-    device = DeviceCreate.create_mock(friendly_name="Glaze I")
+    device_payload = {"friendly_name": "Glaze I"}
     response = client.post(
         "/devices/",
-        json=device.as_dict(),
+        json=device_payload,
     )
     data = response.json()
 

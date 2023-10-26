@@ -2,7 +2,7 @@ from uuid import UUID
 
 from sqlmodel import Session
 
-from api.database import engine
+from api.database import app_engine
 from api.public.attrs.models import PulseKeyRegistry, PulseStrAttrs
 from api.public.device.models import Device, DeviceCreate
 from api.public.pulse.models import Pulse, PulseCreate
@@ -20,7 +20,7 @@ def write_mock_device(device: DeviceCreate) -> Device:
         The written mock device.
     """
     device_to_db = Device.from_orm(device)
-    with Session(engine) as session:
+    with Session(app_engine) as session:
         session.add(device_to_db)
         session.commit()
         session.refresh(device_to_db)
@@ -39,7 +39,7 @@ def write_mock_pulse(pulse: PulseCreate) -> Pulse:
         The written pulse.
     """
     pulse_to_db = Pulse.from_orm(pulse)
-    with Session(engine) as session:
+    with Session(app_engine) as session:
         session.add(pulse_to_db)
         session.commit()
         session.refresh(pulse_to_db)
@@ -59,7 +59,7 @@ def create_mock_attrs(pulse_id: UUID, key: str, value: str) -> None:
     -------
         None
     """
-    with Session(engine) as session:
+    with Session(app_engine) as session:
         existing_key = (
             session.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
         )
