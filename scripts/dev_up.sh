@@ -38,7 +38,7 @@ if [ "$current_hash" != "$last_hash" ]; then
   docker compose -f ./docker-compose-dev.yml build
   echo $current_hash > $last_hash_file
 else
-  echo -e "${YELLOW}No changes detected in pyproject.toml, using cached image...${NC}"
+  echo -e "${YELLOW}No changes detected in pyproject.toml, using cached image if available...${NC}"
 fi
 
 docker compose -f ./docker-compose-dev.yml up --detach
