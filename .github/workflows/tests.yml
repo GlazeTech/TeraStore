@@ -118,10 +118,6 @@ jobs:
       - name: Build containers
         run: docker compose -f docker-compose-prod.yml build
       - name: Start application
-        continue-on-error: true
         run: docker compose -f docker-compose-prod.yml up --detach
-      - name: Print log to debug
-        if: ${{ job.status }} != 'success'
-        run: docker logs terastore-backend-prod
       - name: Close application
         run: docker compose -f docker-compose-prod.yml down
