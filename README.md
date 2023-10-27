@@ -26,22 +26,18 @@ To run the application, you must first set the following environment variables:
 * `POSTGRES_USER`: The PostgreSQL username to be used by the backend
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
-* `ENV=dev` because you're a dev (and want some things to be set for you)
 
 We suggest you create a `.env` file in the root of the project.
 This will contain the above mentioned environment variables, and you can fill it out like so:
 
 ```bash
-ENV=dev
 POSTGRES_USER=terastore-user
 POSTGRES_PASSWORD=terastore-password
 POSTGRES_DB=terastore-db
 ```
 
-The environment variable `ENV` will ensure that when you start the app a fresh database with mock data will be created,
-and the API will reload upon save (when [PR SQLModel & FastAPI implementation](https://github.com/GlazeTech/TeraStore/pull/15) has been merged).
-
-Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
+**NOTE: WE DO NOT RECOMMEND THE FOLLOWING FOR NOW. TOO PROBLEMATIC.**
+~~Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
 you may create a file `.vscode/settings.json`, and populate it like so:
 
 ```json
@@ -72,7 +68,7 @@ you may create a file `.vscode/settings.json`, and populate it like so:
 
 This _should_ ensure that the relevant services pick up binaries and configurations when you've installed all dependencies.
 
-NB: the `biome.lspBin` is unfortunate, as it depends on version and platform. Not yet sure how to fix this.
+NB: the `biome.lspBin` is unfortunate, as it depends on version and platform. Not yet sure how to fix this.~~
 
 Then, install the environments and dependencies.
 
@@ -81,7 +77,7 @@ You may have a look at [pyenv](https://github.com/pyenv/pyenv) to administer sev
 
 Then, run
 ```bash
-python -m venv .venv --prompt terastore-backend
+python3.11 -m venv .venv --prompt terastore-backend
 pip install ./backend[dev]
 ```
 
@@ -112,7 +108,7 @@ Then, run
 ./scripts/dev_up.sh
 ```
 
-You can now talk to the API via `http://0.0.0.0:8000`, and see the frontend in a browser at the URL stated by Vite in the `docker compose` log.
+You can now talk to the API via `http://0.0.0.0:8000`, and see the frontend in a browser at `http://0.0.0.0:5173/`.
 
 When you're done developing, run
 ```bash
@@ -120,8 +116,9 @@ When you're done developing, run
 ```
 This closes the dev services again.
 
-Be aware: while it seems to work to have the dev and test services running simultaneously, I have seen some weird behaviour once in a while.
-Thus, I tend to take the dev services down before I run the test suite.
+~~Be aware: while it seems to work to have the dev and test services running simultaneously, I have seen some weird behaviour once in a while.
+Thus, I tend to take the dev services down before I run the test suite.~~
+Running all the services (PROD, DEV, TEST) concurrently should be fixed now.
 
 ## Testing
 

@@ -9,7 +9,6 @@ env:
   POSTGRES_USER: terastore-user
   POSTGRES_PASSWORD: terastore-password
   POSTGRES_DB: terastore-db
-  ENV: test
 
 jobs:
   backend-image-check-and-push:
