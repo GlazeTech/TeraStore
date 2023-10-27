@@ -10,7 +10,7 @@ class PulseStrAttrs(SQLModel, table=True):
 
     key: str
     value: str
-    pulse_id: UUID = Field(foreign_key="pulse.pulse_id", index=True)
+    pulse_id: UUID = Field(foreign_key="pulses.pulse_id", index=True)
 
     index: int | None = Field(default=None, primary_key=True)
 
