@@ -1,25 +1,10 @@
+import { mockApi } from "@tests/apiMocks";
 import { fireEvent, render, waitFor } from "@tests/testing-utils";
 import FilterMenu from "components/FilterMenu";
-import { PulseFilter } from "interfaces";
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 describe("FilterMenu tests", () => {
-	beforeAll(async () => {
-		vi.mock("api", async () => {
-			return {
-				getPulseKeys: vi.fn(async () => ["mocked_key1", "mocked_key2"]),
-				getKeyValues: vi.fn(async (key: string) => [
-					`${key}_val1`,
-					`${key}_val2`,
-					`${key}_val3`,
-				]),
-				getFilteredPulses: vi.fn(async (_: PulseFilter[]) => [
-					"pulseId1",
-					"pulseId2",
-				]),
-			};
-		});
-	});
+	beforeAll(mockApi);
 	test("Component can render", () => {
 		const screen = render(<FilterMenu />);
 		expect(
