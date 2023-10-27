@@ -13,7 +13,7 @@ describe("FilterMenu tests", () => {
 					`${key}_val2`,
 					`${key}_val3`,
 				]),
-				getFilteredPulses: vi.fn(async (filter: PulseFilter[]) => [
+				getFilteredPulses: vi.fn(async (_: PulseFilter[]) => [
 					"pulseId1",
 					"pulseId2",
 				]),
