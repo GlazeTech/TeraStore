@@ -7,7 +7,7 @@ from sqlmodel import Session, create_engine
 from api.config import get_settings
 from api.database import create_db_and_tables, drop_tables, get_session
 from api.main import create_app
-from api.utils.types import WithLifespan
+from api.utils.types import Lifespan
 
 
 @pytest.fixture(name="session")
@@ -26,7 +26,7 @@ def session_fixture() -> Generator[Session, None, None]:
 @pytest.fixture(name="client")
 def client_fixture(session: Session) -> Generator[TestClient, None, None]:
     """Create a TestClient instance for testing."""
-    app = create_app(WithLifespan.FALSE)
+    app = create_app(Lifespan.TEST)
 
     def get_session_override() -> Session:
         return session
