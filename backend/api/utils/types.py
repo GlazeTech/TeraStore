@@ -1,8 +1,9 @@
-from enum import Enum
+from enum import Enum, auto
 
 
-class WithLifespan(Enum):
+class Lifespan(Enum):
     """Enum for the lifespan argument of create_app."""
 
-    TRUE = True
-    FALSE = False
+    PROD = auto()
+    DEV = auto()
+    TEST = auto()

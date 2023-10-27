@@ -4,13 +4,15 @@ import uvicorn
 
 from api.config import get_settings
 from api.main import create_app
-from api.utils.types import WithLifespan
+from api.utils.types import Lifespan
 
 parser = argparse.ArgumentParser(description="Start the FastAPI application.")
+
 parser.add_argument(
-    "--with-lifespan",
-    action="store_true",
-    help="Run the lifespan function on startup.",
+    "--lifespan",
+    choices=[lifespan.name for lifespan in Lifespan],
+    help="Run the application with the lifespan PROD, DEV or TEST.",
+    required=True,
 )
 parser.add_argument(
     "--with-reload",
@@ -19,10 +21,7 @@ parser.add_argument(
 )
 args = parser.parse_args()
 
-if args.with_lifespan:
-    api = create_app(WithLifespan.TRUE)
-else:
-    api = create_app(WithLifespan.FALSE)
+api = create_app(Lifespan[args.lifespan])
 
 
 if __name__ == "__main__":
