@@ -1,5 +1,7 @@
 version: "3.8"
 
+name: terastore-test
+
 services:
   backend-test:
     image: ghcr.io/glazetech/terastore/terastore-backend-test:latest
@@ -21,7 +23,7 @@ services:
   db-test:
     image: postgres:16-alpine
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
       interval: 2s
       timeout: 1s
       retries: 5
@@ -38,3 +40,7 @@ services:
 
 volumes:
   db:
+
+networks:
+  default:
+    name: terastore-test-network

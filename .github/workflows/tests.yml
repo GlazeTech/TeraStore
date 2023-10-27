@@ -116,8 +116,8 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
       - name: Build containers
-        run: docker compose build
+        run: docker compose -f docker-compose-prod.yml build
       - name: Start application
-        run: docker compose up --detach
+        run: docker compose -f docker-compose-prod.yml up --detach
       - name: Close application
-        run: docker compose down
+        run: docker compose -f docker-compose-prod.yml down
