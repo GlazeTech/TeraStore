@@ -8,14 +8,11 @@ services:
     container_name: terastore-backend-test
     environment:
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test:5432/${POSTGRES_DB}"
-      - ENV=test
-      - API_URL=0.0.0.0
-      - API_PORT=8001 # we wish to be able to use dev and test at the same time
     volumes:
       - ./backend:/app
       - ./scripts:/scripts
     ports:
-      - 8001:8000 # we wish to be able to use dev and test at the same time
+      - 8000:8000
     depends_on:
       db-test:
         condition: service_healthy
@@ -34,7 +31,7 @@ services:
     restart: always
     container_name: terastore-postgres-test
     ports:
-      - 5433:5432 # we wish to be able to use dev and test at the same time
+      - 5432:5432
     volumes:
       - db:/var/lib/postgresql/data
 

@@ -28,7 +28,6 @@ services:
     command: python asgi.py --lifespan DEV --with-reload
     environment:
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-dev/${POSTGRES_DB}"
-      - ENV=${ENV}
     healthcheck:
       test: curl -s http://localhost:8000/health | grep healthy
       timeout: 1s

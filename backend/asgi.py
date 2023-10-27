@@ -29,7 +29,7 @@ if __name__ == "__main__":
 
     uvicorn.run(
         "asgi:api",
-        host=settings.API_URL,
-        port=settings.API_PORT,
+        host="0.0.0.0",  # noqa: S104
+        port=8000,
         reload=args.with_reload,
     )

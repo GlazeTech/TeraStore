@@ -24,7 +24,6 @@ services:
     command: python asgi.py --lifespan PROD
     environment:
       - "DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-prod:5432/${POSTGRES_DB}"
-      - ENV=${ENV}
     healthcheck:
       test: curl -s http://localhost:8000/health | grep healthy
       timeout: 1s
