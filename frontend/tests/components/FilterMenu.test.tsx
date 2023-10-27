@@ -1,20 +1,10 @@
+import { mockApi } from "@tests/apiMocks";
 import { fireEvent, render, waitFor } from "@tests/testing-utils";
 import FilterMenu from "components/FilterMenu";
-import { beforeAll, describe, expect, test, vi } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 describe("FilterMenu tests", () => {
-	beforeAll(async () => {
-		vi.mock("api", async () => {
-			return {
-				getPulseKeys: vi.fn(async () => ["mocked_key1", "mocked_key2"]),
-				getKeyValues: vi.fn(async (key: string) => [
-					`${key}_val1`,
-					`${key}_val2`,
-					`${key}_val3`,
-				]),
-			};
-		});
-	});
+	beforeAll(mockApi);
 	test("Component can render", () => {
 		const screen = render(<FilterMenu />);
 		expect(
@@ -38,16 +28,16 @@ describe("FilterMenu tests", () => {
 			fireEvent.click(screen.getByText("mocked_key1"));
 		});
 
-		// Open "Value" selection dropdown
+		// // Open "Value" selection dropdown
 		fireEvent.click(screen.getByPlaceholderText("Value"));
 
 		// Select a value
 		await waitFor(() => {
-			screen.getByText("mocked_key1_val1");
+			screen.getByText("mocked_key1_val1 (2)");
 		});
-		fireEvent.click(screen.getByText("mocked_key1_val1"));
+		fireEvent.click(screen.getByText("mocked_key1_val1 (2)"));
 
-		// Ensure a filter appears
+		// // Ensure a filter appears
 		expect(screen.getByText("mocked_key1: mocked_key1_val1"));
 	});
 });

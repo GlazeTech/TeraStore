@@ -81,7 +81,7 @@ You may have a look at [pyenv](https://github.com/pyenv/pyenv) to administer sev
 
 Then, run
 ```bash
-python -m venv .venv prompt terastore-backend
+python -m venv .venv --prompt terastore-backend
 pip install ./backend[dev]
 ```
 

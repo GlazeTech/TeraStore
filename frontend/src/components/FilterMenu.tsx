@@ -3,6 +3,11 @@ import { getFilteredPulses, getKeyValues, getPulseKeys } from "api";
 import { PulseFilter } from "interfaces";
 import { useEffect, useState } from "react";
 
+interface Option {
+	value: string;
+	label: string;
+}
+
 function FilterMenu() {
 	const [newFilterIsOpen, setNewFilterIsOpen] = useState(false);
 	const [nPulses, setNPulses] = useState<number | null>(null);
@@ -10,6 +15,7 @@ function FilterMenu() {
 	const [selectedPulseKey, setSelectedPulseKey] = useState<string | null>(null);
 	const [keyValues, setKeyValues] = useState<string[]>([]);
 	const [selectedKeyValue, setSelectedKeyValue] = useState<string | null>(null);
+	const [selectValueOptions, setSelectValueOptions] = useState<Option[]>([]);
 	const [pulseFilters, setPulseFilters] = useState<PulseFilter[]>([]);
 
 	// When "New filter" is clicked, get and set available keys to filter on
@@ -28,6 +34,25 @@ function FilterMenu() {
 			getKeyValues(selectedPulseKey).then((values) => setKeyValues(values));
 		}
 	}, [selectedPulseKey]);
+
+	// When the values of a selected key are fetched, set the available value options with a formatted display value
+	useEffect(() => {
+		if (selectedPulseKey) {
+			const pulsesForEachValue = keyValues.map(async (value) => {
+				return getFilteredPulses([
+					...pulseFilters,
+					{ key: selectedPulseKey, value: value },
+				]);
+			});
+			Promise.all(pulsesForEachValue).then((results) => {
+				setSelectValueOptions(
+					keyValues.map((value, idx) => {
+						return { value: value, label: `${value} (${results[idx].length})` };
+					}),
+				);
+			});
+		}
+	}, [keyValues]);
 
 	// When the value of a key is selected, add the filter and close the "add filter" menu
 	useEffect(() => {
@@ -82,7 +107,7 @@ function FilterMenu() {
 						<M.Select
 							label="Value"
 							placeholder="Value"
-							data={keyValues}
+							data={selectValueOptions}
 							onChange={setSelectedKeyValue}
 							disabled={!selectedPulseKey}
 						/>

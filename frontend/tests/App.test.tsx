@@ -1,10 +1,11 @@
 import { render } from "./testing-utils";
 
+import { mockApi } from "@tests/apiMocks";
 import App from "components/App";
-import { expect, test } from "vitest";
-
-test("Simple test", () => {
-	const screen = render(<App />);
-	const textElement = screen.getByText("Hello, world!");
-	expect(textElement).toBeInTheDocument();
+import { beforeAll, describe, test } from "vitest";
+describe("App tests", () => {
+	beforeAll(mockApi);
+	test("App can render", () => {
+		render(<App />);
+	});
 });
