@@ -1,5 +1,7 @@
 version: "3.8"
 
+name: terastore-dev
+
 services:
   frontend-dev:
     build:
@@ -15,7 +17,8 @@ services:
     ports:
       - 5173:5173
     depends_on:
-      - backend-dev
+      backend-dev:
+        condition: service_healthy
 
   backend-dev:
     build:
@@ -25,7 +28,11 @@ services:
     command: python asgi.py --lifespan DEV --with-reload
     environment:
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-dev/${POSTGRES_DB}"
-      - ENV=${ENV}
+    healthcheck:
+      test: curl -s http://localhost:8000/health | grep healthy
+      timeout: 1s
+      interval: 2s
+      retries: 5
     volumes:
       - ./backend:/app
     ports:
@@ -37,9 +44,9 @@ services:
   db-dev:
     image: postgres:16-alpine
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
-      interval: 2s
+      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
       timeout: 1s
+      interval: 2s
       retries: 5
     environment:
       - POSTGRES_DB=${POSTGRES_DB}
@@ -55,3 +62,7 @@ services:
 volumes:
   db:
   node_modules:
+
+networks:
+  default:
+    name: terastore-dev-network
