@@ -38,7 +38,7 @@ class PulseBase(SQLModel):
     signal: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
     integration_time: int
     creation_time: datetime
-    device_id: UUID = Field(foreign_key="device.device_id")
+    device_id: UUID = Field(foreign_key="devices.device_id")
 
 
 class Pulse(PulseBase, table=True):
@@ -46,6 +46,8 @@ class Pulse(PulseBase, table=True):
 
     The purpose of this class is to interact with the database.
     """
+
+    __tablename__ = "pulses"
 
     pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)
 

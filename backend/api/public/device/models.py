@@ -23,6 +23,8 @@ class Device(DeviceBase, table=True):
     The purpose of this class is to interact with the database.
     """
 
+    __tablename__ = "devices"
+
     device_id: UUID = Field(default_factory=uuid4, primary_key=True)
 
 
