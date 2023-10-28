@@ -1,6 +1,5 @@
 import { AppShell, MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
-import "assets/App.css";
 import { useEffect } from "react";
 import { useFiltersStore } from "store";
 import FilterMenu from "./FilterMenu";
@@ -14,7 +13,7 @@ function App() {
 
 	return (
 		<MantineProvider>
-			<AppShell>
+			<AppShell navbar={{ width: 200, breakpoint: "xs" }}>
 				<AppShell.Header> </AppShell.Header>
 				<AppShell.Navbar>
 					<FilterMenu />

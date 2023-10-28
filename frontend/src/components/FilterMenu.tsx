@@ -1,11 +1,22 @@
 import * as M from "@mantine/core";
-import { getFilteredPulses, getKeyValues } from "api";
+import { FilterResult } from "classes";
+import { getFilterResultsForEachKeyValue } from "helpers";
 import { PulseFilter } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
+
 interface Option {
 	value: string;
 	label: string;
+}
+
+function filterResultsToOptions(filterResults: FilterResult[]): Option[] {
+	return filterResults.map((filter) => {
+		return {
+			value: filter.lastFilter.value,
+			label: `${filter.lastFilter.value} (${filter.nPulses})`,
+		};
+	});
 }
 
 function FilterMenu() {
@@ -21,27 +32,14 @@ function FilterMenu() {
 			state.removePulseFilter,
 		]);
 
-	// When a filter key is set, get available values and number of pulses each value hits
+	// When a filter key is set, get available values and format a display value
 	useEffect(() => {
 		if (selectedPulseKey) {
-			getKeyValues(selectedPulseKey).then((values) => {
-				const pulsesForEachValue = values.map(async (value) => {
-					return getFilteredPulses([
-						...pulseFilters,
-						{ key: selectedPulseKey, value: value },
-					]);
-				});
-				Promise.all(pulsesForEachValue).then((results) => {
-					setSelectValueOptions(
-						values.map((value, idx) => {
-							return {
-								value: value,
-								label: `${value} (${results[idx].length})`,
-							};
-						}),
-					);
-				});
-			});
+			getFilterResultsForEachKeyValue(selectedPulseKey, pulseFilters).then(
+				(filterResults) => {
+					setSelectValueOptions(filterResultsToOptions(filterResults));
+				},
+			);
 		}
 	}, [selectedPulseKey]);
 
@@ -94,7 +92,9 @@ function FilterMenu() {
 					)}
 				</M.Popover.Dropdown>
 			</M.Popover>
-			{displayPulseFilters(pulseFilters)}
+			<div style={{ display: "flex", flexWrap: "wrap" }}>
+				{displayPulseFilters(pulseFilters)}
+			</div>
 		</>
 	);
 }
