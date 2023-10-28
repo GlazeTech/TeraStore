@@ -1,10 +1,12 @@
 import { mockApi } from "@tests/apiMocks";
+import { setupFilterStore } from "@tests/store-utils";
 import { fireEvent, render, waitFor } from "@tests/testing-utils";
 import FilterMenu from "components/FilterMenu";
-import { beforeAll, describe, expect, test } from "vitest";
+import { beforeAll, beforeEach, describe, expect, test } from "vitest";
 
 describe("FilterMenu tests", () => {
 	beforeAll(mockApi);
+	beforeEach(setupFilterStore);
 	test("Component can render", () => {
 		const screen = render(<FilterMenu />);
 		expect(
