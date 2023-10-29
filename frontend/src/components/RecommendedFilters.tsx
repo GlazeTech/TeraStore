@@ -3,35 +3,27 @@ import { FilterResult } from "classes";
 import { getFilterResultsForEachKeyValue } from "helpers";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
-interface RecommendedFilterCardProps {
-	pulseKey: string;
+
+interface KeyFilterResult {
+	key: string;
+	filterResults: FilterResult[];
 }
+interface RecommendedFilterCardProps {
+	keyFilterResult: KeyFilterResult;
+}
+const totalPulses = (filterResultArr: FilterResult[]) =>
+	filterResultArr.map((filter) => filter.nPulses).reduce((a, b) => a + b, 0);
 
-function RecommendedFilterCard({ pulseKey }: RecommendedFilterCardProps) {
-	const [filterResults, setFilterResults] = useState<FilterResult[] | null>(
-		null,
-	);
-	const [pulseFilters, addPulseFilter] = useFiltersStore((state) => [
-		state.pulseFilters,
-		state.addPulseFilter,
-	]);
-
-	useEffect(() => {
-		getFilterResultsForEachKeyValue(pulseKey, pulseFilters).then((results) => {
-			setFilterResults(results);
-		});
-	}, [pulseFilters]);
-
-	const totalPulses = () =>
-		filterResults?.map((filter) => filter.nPulses).reduce((a, b) => a + b, 0);
+function RecommendedFilterCard({
+	keyFilterResult,
+}: RecommendedFilterCardProps) {
+	const [addPulseFilter] = useFiltersStore((state) => [state.addPulseFilter]);
 
 	const addFilter = (idx: number) => {
-		if (filterResults) {
-			addPulseFilter({
-				key: pulseKey,
-				value: filterResults[idx].lastFilter.value,
-			});
-		}
+		addPulseFilter({
+			key: keyFilterResult.key,
+			value: keyFilterResult.filterResults[idx].lastFilter.value,
+		});
 	};
 	return (
 		<M.Card
@@ -43,24 +35,21 @@ function RecommendedFilterCard({ pulseKey }: RecommendedFilterCardProps) {
 		>
 			<M.Card.Section withBorder inheritPadding>
 				<M.Group justify="space-between" mt="md" mb="xs">
-					<M.Text fw={600}>{pulseKey}</M.Text>
-					<M.Text>(total: {totalPulses()})</M.Text>
+					<M.Text fw={600}>{keyFilterResult.key}</M.Text>
+					<M.Text>(total: {totalPulses(keyFilterResult.filterResults)})</M.Text>
 				</M.Group>
 			</M.Card.Section>
 			<M.Card.Section withBorder inheritPadding>
-				{filterResults?.map((filterResult, idx) => (
+				{keyFilterResult.filterResults.map((filterResult, idx) => (
 					<M.Group
 						mt="5"
 						mb="5"
 						justify="space-between"
 						key={`filterResults-${idx}`}
 					>
-						{/* <M.Text fw={400}> */}
 						<M.Badge variant="light" onClick={() => addFilter(idx)}>
 							{filterResult.lastFilter.value}
 						</M.Badge>
-						{/* </M.Text> */}
-
 						<M.Text fw={400}>({filterResult.nPulses})</M.Text>
 					</M.Group>
 				))}
@@ -70,20 +59,48 @@ function RecommendedFilterCard({ pulseKey }: RecommendedFilterCardProps) {
 }
 
 function RecommendedFilters() {
-	const [notAppliedPulseKeys] = useFiltersStore((state) => [
+	const [notAppliedPulseKeys, pulseFilters] = useFiltersStore((state) => [
 		state.notAppliedPulseKeys,
+		state.pulseFilters,
 	]);
+	const [sortedFilterResults, setSortedFilterResults] = useState<
+		KeyFilterResult[] | null
+	>(null);
 
-	const cards = notAppliedPulseKeys?.map((key, idx) => {
-		return (
-			<RecommendedFilterCard
-				pulseKey={key}
-				key={`recommendedFilterCard-${idx}`}
-			/>
-		);
-	});
+	useEffect(() => {
+		if (notAppliedPulseKeys) {
+			Promise.all(
+				notAppliedPulseKeys?.map((key) =>
+					getFilterResultsForEachKeyValue(key, pulseFilters),
+				),
+			).then((results) =>
+				setSortedFilterResults(
+					notAppliedPulseKeys
+						.map((key, idx) => ({
+							key: key,
+							filterResults: results[idx],
+						}))
+						.sort(
+							(a, b) =>
+								totalPulses(b.filterResults) - totalPulses(a.filterResults),
+						),
+				),
+			);
+		}
+	}, [notAppliedPulseKeys]);
 
-	return <div style={{ display: "flex", flexWrap: "wrap" }}>{cards}</div>;
+	return (
+		<div style={{ display: "flex", flexWrap: "wrap" }}>
+			{sortedFilterResults?.map((kfResult, idx) => {
+				return (
+					<RecommendedFilterCard
+						key={`recommendedFilterCard-${idx}`}
+						keyFilterResult={kfResult}
+					/>
+				);
+			})}
+		</div>
+	);
 }
 
 export default RecommendedFilters;
