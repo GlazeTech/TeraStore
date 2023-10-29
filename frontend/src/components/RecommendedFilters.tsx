@@ -70,7 +70,7 @@ function RecommendedFilters() {
 	useEffect(() => {
 		if (notAppliedPulseKeys) {
 			Promise.all(
-				notAppliedPulseKeys?.map((key) =>
+				notAppliedPulseKeys.map((key) =>
 					getFilterResultsForEachKeyValue(key, pulseFilters),
 				),
 			).then((results) =>
