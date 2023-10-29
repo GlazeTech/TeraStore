@@ -56,6 +56,7 @@ function FilterMenu() {
 	const displayPulseFilters = (filters: PulseFilter[]) => {
 		return filters.map((filter) => (
 			<M.Pill
+				m={5}
 				key={filter.key}
 				withRemoveButton
 				onRemove={() => removePulseFilter(filter)}
@@ -67,7 +68,10 @@ function FilterMenu() {
 		<>
 			<M.Popover opened={newFilterIsOpen} position="right-start" offset={5}>
 				<M.Popover.Target>
-					<M.Button onClick={() => setNewFilterIsOpen((o: boolean) => !o)}>
+					<M.Button
+						m={5}
+						onClick={() => setNewFilterIsOpen((o: boolean) => !o)}
+					>
 						New filter
 					</M.Button>
 				</M.Popover.Target>
