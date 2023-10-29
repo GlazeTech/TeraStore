@@ -6,6 +6,6 @@ import { beforeAll, describe, test } from "vitest";
 describe("RecommendedFilter tests", () => {
 	beforeAll(mockApi);
 	test("Component can render", () => {
-		const screen = render(<RecommendedFilters />);
+		render(<RecommendedFilters />);
 	});
 });
