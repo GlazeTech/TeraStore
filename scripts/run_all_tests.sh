@@ -53,7 +53,12 @@ else
   echo -e "${YELLOW}No changes detected in pyproject.toml, using cached image if available...${NC}"
 fi
 
-docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml up --detach
+if ! docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml start; then
+  echo -e "${YELLOW}Docker start failed. Probably cached images do not exist. Building...${NC}"
+  docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml up --detach
+else
+  echo -e "${YELLOW}Docker start succeeded. Using cached images...${NC}"
+fi
 
 run_test ./scripts/run_black.sh
 run_test ./scripts/run_ruff.sh

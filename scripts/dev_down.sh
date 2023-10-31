@@ -9,4 +9,4 @@ echo -e "${YELLOW}Stopping dev containers...${NC}"
 
 docker compose -f ./docker-compose-dev.yml stop
 
-echo -e "${GREEN}Dev containers stopped.${NC}"
+echo -e "${GREEN}Dev services stopped.${NC}"

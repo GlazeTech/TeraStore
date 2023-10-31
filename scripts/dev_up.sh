@@ -50,4 +50,9 @@ else
   echo -e "${YELLOW}No changes detected in pyproject.toml or package.json. Using cached images if available...${NC}"
 fi
 
-docker compose -f ./docker-compose-dev.yml up --detach --remove-orphans
+if ! docker compose -f ./docker-compose-dev.yml start; then
+  echo -e "${YELLOW}Docker start failed. Probably cached images do not exist. Building...${NC}"
+  docker compose -f ./docker-compose-dev.yml up --detach
+fi
+
+echo -e "${GREEN}Dev services started.${NC}"
