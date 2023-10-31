@@ -20,7 +20,7 @@ else
 fi
 
 # File to store the last hash
-last_hash_file="./last_pyproject.toml_hash.txt"
+last_hash_file="./.last_pyproject.toml_hash.txt"
 
 # Hash the pyproject.toml file
 current_hash=$($HASH_CMD ./backend/pyproject.toml | awk '{print $1}')

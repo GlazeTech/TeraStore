@@ -6,7 +6,10 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.database import create_db_and_tables, drop_tables
 from api.public import make_api
-from api.utils.mock_data_generator import create_devices_and_pulses
+from api.utils.mock_data_generator import (
+    create_devices_and_pulses,
+    create_frontend_dev_data,
+)
 from api.utils.types import Lifespan
 
 
@@ -14,6 +17,7 @@ from api.utils.types import Lifespan
 async def lifespan_dev(app: FastAPI) -> AsyncGenerator[None, None]:
     create_db_and_tables()
     create_devices_and_pulses()
+    create_frontend_dev_data()
     yield
     drop_tables()
 
