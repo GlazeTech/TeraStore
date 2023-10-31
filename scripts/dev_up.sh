@@ -47,7 +47,7 @@ if [ "$current_hash_backend" != "$last_hash_backend" ] || [ "$current_hash_front
   echo $current_hash_frontend > $last_hash_file_frontend
   echo $current_hash_backend > $last_hash_file_backend
 else
-  echo -e "${YELLOW}No changes detected in pyproject.toml, using cached image if available...${NC}"
+  echo -e "${YELLOW}No changes detected in pyproject.toml or package.json. Using cached images if available...${NC}"
 fi
 
 docker compose -f ./docker-compose-dev.yml up --detach --remove-orphans
