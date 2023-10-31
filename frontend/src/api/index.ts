@@ -1,4 +1,5 @@
 import axios from "axios";
+import { Pulse } from "classes";
 import { PulseFilter } from "interfaces";
 const api = axios.create({
 	baseURL: import.meta.env.PROD
@@ -29,5 +30,17 @@ export async function getFilteredPulses(
 ): Promise<string[]> {
 	return api.post("/attrs/filter", filters).then((resp) => {
 		return resp.data;
+	});
+}
+
+export async function getPulse(pulseID: string): Promise<Pulse> {
+	return api.get(`/pulses/${pulseID}`).then((resp) => {
+		return new Pulse(
+			resp.data.delays,
+			resp.data.signal,
+			resp.data.integration_time,
+			new Date(resp.data.creation_time),
+			resp.data.pulse_id,
+		);
 	});
 }
