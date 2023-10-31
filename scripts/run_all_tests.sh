@@ -62,7 +62,7 @@ run_test ./scripts/run_pytest.sh
 
 # Stop services
 echo "Stopping services..."
-docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml down
+docker compose -f ./docker-compose-test.yml -f ./docker-compose-test-local.yml stop
 
 # Check for failed tests
 if [ -z "$failed_tests" ]; then
