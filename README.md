@@ -36,12 +36,12 @@ POSTGRES_PASSWORD=terastore-password
 POSTGRES_DB=terastore-db
 ```
 
-**NOTE: WE DO NOT RECOMMEND THE FOLLOWING FOR NOW. TOO PROBLEMATIC.**
-~~Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
+Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
 you may create a file `.vscode/settings.json`, and populate it like so:
 
 ```json
 {
+    "python.analysis.extraPaths": ["./backend"],
     "black-formatter.args": [
         "--config",
         "./backend/pyproject.toml"
@@ -60,15 +60,22 @@ you may create a file `.vscode/settings.json`, and populate it like so:
     "python.testing.pytestEnabled": true,
     "biome.lspBin": "./frontend/node_modules/@biomejs/cli-darwin-arm64/biome",
     "[typescriptreact]": {
-        "editor.defaultFormatter": "biomejs.biome",
+        "editor.defaultFormatter": "vscode.typescript-language-features",
         "editor.formatOnSave": true
-    }
+    },
+    "[typescript]": {
+        "editor.defaultFormatter": "vscode.typescript-language-features",
+        "editor.formatOnSave": true
+    },
+    "[github-actions-workflow]": {
+        "editor.defaultFormatter": "redhat.vscode-yaml"
+    },
 }
 ```
 
-This _should_ ensure that the relevant services pick up binaries and configurations when you've installed all dependencies.
+This ensures that the relevant services pick up binaries and configurations when you've installed all dependencies.
 
-NB: the `biome.lspBin` is unfortunate, as it depends on version and platform. Not yet sure how to fix this.~~
+NB: the `biome.lspBin` is unfortunate, as it depends on version and platform. Not yet sure how to fix this.
 
 Then, install the environments and dependencies.
 
@@ -119,6 +126,15 @@ This closes the dev services again.
 ~~Be aware: while it seems to work to have the dev and test services running simultaneously, I have seen some weird behaviour once in a while.
 Thus, I tend to take the dev services down before I run the test suite.~~
 Running all the services (PROD, DEV, TEST) concurrently should be fixed now.
+
+Do note: the VS Code Python test extension will not work.
+It does not integrate with Docker, other than if you run VS Code in a dev container.
+It would be nice to get it to work... I am currently looking at options.
+[This](https://github.com/kondratyev-nv/vscode-python-test-adapter) extension might prove useful.
+
+Do _also_ note: the VS Code Python debugger extension will not work.
+Again, Docker.
+However, I think there are actual solutions for this, which I at some point will look into.
 
 ## Testing
 
