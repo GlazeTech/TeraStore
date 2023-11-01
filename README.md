@@ -36,12 +36,12 @@ POSTGRES_PASSWORD=terastore-password
 POSTGRES_DB=terastore-db
 ```
 
-**NOTE: WE DO NOT RECOMMEND THE FOLLOWING FOR NOW. TOO PROBLEMATIC.**
-~~Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
+Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
 you may create a file `.vscode/settings.json`, and populate it like so:
 
 ```json
 {
+    "python.analysis.extraPaths": ["./backend"],
     "black-formatter.args": [
         "--config",
         "./backend/pyproject.toml"
@@ -52,23 +52,26 @@ you may create a file `.vscode/settings.json`, and populate it like so:
         "./backend/pyproject.toml"
     ],
     "mypy.configFile": "./backend/pyproject.toml",
-    "mypy.runUsingActiveInterpreter": true,
-    "python.testing.pytestArgs": [
-        "backend"
-    ],
-    "python.testing.unittestEnabled": false,
-    "python.testing.pytestEnabled": true,
-    "biome.lspBin": "./frontend/node_modules/@biomejs/cli-darwin-arm64/biome",
-    "[typescriptreact]": {
-        "editor.defaultFormatter": "biomejs.biome",
-        "editor.formatOnSave": true
-    }
+    "mypy.runUsingActiveInterpreter": true
 }
 ```
 
-This _should_ ensure that the relevant services pick up binaries and configurations when you've installed all dependencies.
+This ensures that the relevant services pick up binaries and configurations when you've installed all dependencies.
+It also ensures that VS Code knows where the functions and classes of this module are located: in the `./backend` folder, not in the virtual environment.
 
-NB: the `biome.lspBin` is unfortunate, as it depends on version and platform. Not yet sure how to fix this.~~
+>NB: Biome format does not work in this configuration.
+>The extension output _says_ it picks up the configuration file in `./frontend`, but formatting does not work (Biome is said by VS Code to not be able to format e.g. Typescript files; which is a blatant lie).
+>If one moves the `biome.json` file to the root of the workspace, it works fine.
+>I have tried with a symlinked file, but that breaks other stuff.
+>
+>Do note: the VS Code Python test extension will not work.
+>It does not integrate with Docker, other than if you run VS Code in a dev container.
+>It would be nice to get it to work... I am currently looking at options.
+>[This](https://github.com/kondratyev-nv/vscode-python-test-adapter) extension might prove useful.
+>
+>Do _also_ note: the VS Code Python debugger extension will not work.
+>Again, Docker.
+>However, I think there are actual solutions for this, which I at some point will look into.
 
 Then, install the environments and dependencies.
 
