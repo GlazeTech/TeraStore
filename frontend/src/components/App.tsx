@@ -14,15 +14,20 @@ function App() {
 
 	return (
 		<MantineProvider defaultColorScheme="auto">
-			<AppShell navbar={{ width: 200, breakpoint: "xs" }}>
+			<AppShell
+				navbar={{ width: 250, breakpoint: "xs" }}
+				aside={{ width: 250, breakpoint: "xs" }}
+			>
 				<AppShell.Header> </AppShell.Header>
 				<AppShell.Navbar>
 					<FilterMenu />
 				</AppShell.Navbar>
 				<AppShell.Main>
-					<MatchingPulses />
 					<RecommendedFilters />
 				</AppShell.Main>
+				<AppShell.Aside>
+					<MatchingPulses />
+				</AppShell.Aside>
 			</AppShell>
 		</MantineProvider>
 	);
