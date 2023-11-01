@@ -3,6 +3,7 @@ import { getFilteredPulses, getPulse } from "api";
 import { Pulse } from "classes";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
+
 interface PulseCardProps {
 	pulseID: string;
 	isSelected: boolean;
