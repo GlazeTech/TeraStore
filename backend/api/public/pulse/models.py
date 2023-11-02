@@ -99,3 +99,11 @@ class PulseReadWithDevice(PulseRead):
     """Model for reading a Pulse with its Device."""
 
     device: DeviceRead
+
+
+class TemporaryIdTable(SQLModel, table=True):
+    """Temporary table for performing joins on pulse IDs."""
+
+    __tablename__ = "temporary_table"
+
+    pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)

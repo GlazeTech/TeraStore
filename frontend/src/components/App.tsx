@@ -1,10 +1,14 @@
-import { AppShell, MantineProvider } from "@mantine/core";
 import "@mantine/core/styles.css";
+import "@mantine/notifications/styles.css";
+
+import { AppShell, MantineProvider } from "@mantine/core";
+import { Notifications } from "@mantine/notifications";
 import { useEffect } from "react";
 import { useFiltersStore } from "store";
 import FilterMenu from "./FilterMenu";
 import MatchingPulses from "./MatchingPulses";
 import RecommendedFilters from "./RecommendedFilters";
+
 function App() {
 	const fetchInitialState = useFiltersStore((store) => store.fetchInitialState);
 
@@ -14,6 +18,7 @@ function App() {
 
 	return (
 		<MantineProvider defaultColorScheme="auto">
+			<Notifications position="top-right" />
 			<AppShell
 				navbar={{ width: 250, breakpoint: "xs" }}
 				aside={{ width: 250, breakpoint: "xs" }}

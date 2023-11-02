@@ -1,6 +1,6 @@
 import axios from "axios";
 import { Pulse } from "classes";
-import { PulseFilter } from "interfaces";
+import { PulseFilter, PulseFromBackend } from "interfaces";
 const api = axios.create({
 	baseURL: import.meta.env.PROD
 		? import.meta.env.VITE_BACKEND_URL
@@ -41,6 +41,21 @@ export async function getPulse(pulseID: string): Promise<Pulse> {
 			resp.data.integration_time,
 			new Date(resp.data.creation_time),
 			resp.data.pulse_id,
+		);
+	});
+}
+
+export async function getPulses(pulseIDs: string[]): Promise<Pulse[]> {
+	return api.post("/pulses/get", pulseIDs).then((resp) => {
+		return resp.data.map(
+			(el: PulseFromBackend) =>
+				new Pulse(
+					el.delays,
+					el.signal,
+					el.integration_time,
+					new Date(el.creation_time),
+					el.pulse_id,
+				),
 		);
 	});
 }

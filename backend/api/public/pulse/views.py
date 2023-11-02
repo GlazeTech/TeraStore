@@ -11,13 +11,14 @@ from api.public.pulse.crud import (
     create_pulse,
     read_pulse,
     read_pulses,
+    read_pulses_with_ids,
 )
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead
 
 router = APIRouter()
 
 
-@router.post("", response_model=PulseRead)
+@router.post("/create", response_model=PulseRead)
 def create_a_pulse(
     pulse: PulseCreate,
     db: Session = Depends(get_session),
@@ -40,6 +41,14 @@ def get_pulses(
     db: Session = Depends(get_session),
 ) -> list[Pulse]:
     return read_pulses(offset=offset, limit=limit, db=db)
+
+
+@router.post("/get", response_model=list[PulseRead])
+def get_pulses_from_ids(
+    ids: list[UUID],
+    db: Session = Depends(get_session),
+) -> list[Pulse]:
+    return read_pulses_with_ids(ids, db=db)
 
 
 @router.get("/{pulse_id}", response_model=PulseRead)
