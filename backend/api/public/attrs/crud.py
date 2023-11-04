@@ -5,41 +5,56 @@ from sqlalchemy import and_
 from sqlmodel import Session, select
 
 from api.database import get_session
-from api.public.attrs.models import PulseKeyRegistry, PulseStrAttrs
-from api.public.pulse.models import Pulse
+from api.public.attrs.models import (
+    KeyValuePair,
+    PulseKeyRegistry,
+    PulseStrAttrs,
+)
+from api.public.pulse.models import Pulse, PulseRead
+from api.utils.exceptions import AttrDataTypeExistsError
 
 
-def add_str_attr(
-    pulse_id: UUID,
-    key: str,
-    value: str,
+def create_attr(
+    pulse_id: int,
+    kv_pair: KeyValuePair,
     db: Session = Depends(get_session),
 ) -> Pulse | None:
-    """Add a key-value pair to a pulse with id pulse_id."""
+    """Check if given pulse exists."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         return None
 
+    pulse_read = PulseRead.from_orm(pulse)
+
+    # Check if given key exists.
     existing_key = (
-        db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
+        db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == kv_pair.key).first()
     )
+
+    # Check if key already exists and if so, check if data type matches
+    if existing_key and existing_key.data_type != kv_pair.data_type:
+        raise AttrDataTypeExistsError(key=kv_pair.key, data_type=kv_pair.data_type)
 
     # If key doesn't exist, add it to PulseKeyRegistry
     if not existing_key:
-        new_key = PulseKeyRegistry(key=key)
+        new_key = PulseKeyRegistry.from_orm(
+            PulseKeyRegistry(key=kv_pair.key, data_type=kv_pair.data_type),
+        )
         db.add(new_key)
+        db.commit()
 
-    # Now, add the new EAV string attribute
-    pulse_str_attr = PulseStrAttrs(key=key, value=value, pulse_id=pulse_id)
-    db.add(pulse_str_attr)
+    # Add the new EAV attribute
+    pulse_attr = kv_pair.data_model_class(pulse_read.pulse_id)
+
+    db.add(pulse_attr)
 
     db.commit()
     db.refresh(pulse)
-    return pulse
+    return Pulse.from_orm(pulse)
 
 
 def read_pulse_attrs(
-    pulse_id: UUID,
+    pulse_id: int,
     db: Session = Depends(get_session),
 ) -> list[dict[str, str]] | None:
     """Get all the keys for a pulse with id pulse_id."""

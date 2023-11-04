@@ -1,7 +1,8 @@
 from sqlmodel import Session
 
 from api.database import app_engine
-from api.public.attrs.crud import add_str_attr
+from api.public.attrs.crud import create_attr
+from api.public.attrs.models import KeyValuePair
 from api.public.device.crud import create_device
 from api.public.device.models import DeviceCreate
 from api.public.pulse.crud import create_pulse
@@ -28,14 +29,42 @@ def create_devices_and_pulses() -> None:
             sess,
         )
 
-        add_str_attr(pulse_1.pulse_id, "angle", "29", sess)
-        add_str_attr(pulse_1.pulse_id, "substrate", "sand-blasted steel", sess)
+        create_attr(
+            pulse_1.pulse_id,
+            KeyValuePair(key="angle", value="29", data_type="string"),
+            sess,
+        )
+        create_attr(
+            pulse_1.pulse_id,
+            KeyValuePair(
+                key="substrate",
+                value="sand-blasted steel",
+                data_type="string",
+            ),
+            sess,
+        )
 
-        add_str_attr(pulse_2.pulse_id, "angle", "23", sess)
-        add_str_attr(pulse_2.pulse_id, "substrate", "plastic", sess)
+        create_attr(
+            pulse_2.pulse_id,
+            KeyValuePair(key="angle", value="23", data_type="string"),
+            sess,
+        )
+        create_attr(
+            pulse_2.pulse_id,
+            KeyValuePair(key="substrate", value="plastic", data_type="string"),
+            sess,
+        )
 
-        add_str_attr(pulse_3.pulse_id, "angle", "17", sess)
-        add_str_attr(pulse_3.pulse_id, "substrate", "polymer", sess)
+        create_attr(
+            pulse_3.pulse_id,
+            KeyValuePair(key="angle", value="17", data_type="string"),
+            sess,
+        )
+        create_attr(
+            pulse_3.pulse_id,
+            KeyValuePair(key="substrate", value="polymer", data_type="string"),
+            sess,
+        )
 
 
 def create_frontend_dev_data() -> None:
@@ -64,52 +93,73 @@ def create_frontend_dev_data() -> None:
                 for _ in range(n_pulses)
             ]
             for pulse in pulses:
-                add_str_attr(
+                create_attr(
                     pulse_id=pulse.pulse_id,
-                    key="project",
-                    value=project,
+                    kv_pair=KeyValuePair(
+                        key="project",
+                        value=project,
+                        data_type="string",
+                    ),
                     db=sess,
                 )
                 if count % 2 == 0:
-                    add_str_attr(
+                    create_attr(
                         pulse_id=pulse.pulse_id,
-                        key="substrate",
-                        value="PMMA",
+                        kv_pair=KeyValuePair(
+                            key="substrate",
+                            value="PMMA",
+                            data_type="string",
+                        ),
                         db=sess,
                     )
                 if count % 2 == 1:
-                    add_str_attr(
+                    create_attr(
                         pulse_id=pulse.pulse_id,
-                        key="spotsize (mm)",
-                        value="5.6",
+                        kv_pair=KeyValuePair(
+                            key="spotsize (mm)",
+                            value="5.6",
+                            data_type="string",
+                        ),
                         db=sess,
                     )
                 if count % 3 == 0:
-                    add_str_attr(
+                    create_attr(
                         pulse_id=pulse.pulse_id,
-                        key="mode",
-                        value="reflection",
+                        kv_pair=KeyValuePair(
+                            key="mode",
+                            value="reflection",
+                            data_type="string",
+                        ),
                         db=sess,
                     )
                 else:
-                    add_str_attr(
+                    create_attr(
                         pulse_id=pulse.pulse_id,
-                        key="mode",
-                        value="transmission",
+                        kv_pair=KeyValuePair(
+                            key="mode",
+                            value="transmission",
+                            data_type="string",
+                        ),
                         db=sess,
                     )
                 if count % 5 == 0:
-                    add_str_attr(
+                    create_attr(
                         pulse_id=pulse.pulse_id,
-                        key="antennas",
-                        value="HHI",
+                        kv_pair=KeyValuePair(
+                            key="antennas",
+                            value="HHI",
+                            data_type="string",
+                        ),
                         db=sess,
                     )
                 else:
-                    add_str_attr(
+                    create_attr(
                         pulse_id=pulse.pulse_id,
-                        key="antennas",
-                        value="Toptica",
+                        kv_pair=KeyValuePair(
+                            key="antennas",
+                            value="Toptica",
+                            data_type="string",
+                        ),
                         db=sess,
                     )
                 count += 1
@@ -127,11 +177,39 @@ def create_frontend_dev_data() -> None:
             sess,
         )
 
-        add_str_attr(pulse_1.pulse_id, "angle", "29", sess)
-        add_str_attr(pulse_1.pulse_id, "substrate", "sand-blasted steel", sess)
+        create_attr(
+            pulse_1.pulse_id,
+            KeyValuePair(key="angle", value="29", data_type="string"),
+            sess,
+        )
+        create_attr(
+            pulse_1.pulse_id,
+            KeyValuePair(
+                key="substrate",
+                value="sand-blasted steel",
+                data_type="string",
+            ),
+            sess,
+        )
 
-        add_str_attr(pulse_2.pulse_id, "angle", "23", sess)
-        add_str_attr(pulse_2.pulse_id, "substrate", "plastic", sess)
+        create_attr(
+            pulse_2.pulse_id,
+            KeyValuePair(key="angle", value="23", data_type="string"),
+            sess,
+        )
+        create_attr(
+            pulse_2.pulse_id,
+            KeyValuePair(key="substrate", value="plastic", data_type="string"),
+            sess,
+        )
 
-        add_str_attr(pulse_3.pulse_id, "angle", "17", sess)
-        add_str_attr(pulse_3.pulse_id, "substrate", "polymer", sess)
+        create_attr(
+            pulse_3.pulse_id,
+            KeyValuePair(key="angle", value="17", data_type="string"),
+            sess,
+        )
+        create_attr(
+            pulse_3.pulse_id,
+            KeyValuePair(key="substrate", value="polymer", data_type="string"),
+            sess,
+        )

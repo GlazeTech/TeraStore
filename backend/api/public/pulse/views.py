@@ -1,18 +1,21 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session
 
 from api.database import get_session
-from api.public.attrs.crud import add_str_attr, read_pulse_attrs
+from api.public.attrs.crud import create_attr, read_pulse_attrs
+from api.public.attrs.models import KeyValuePair
 from api.public.pulse.crud import (
     create_pulse,
     read_pulse,
     read_pulses,
 )
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead
+from api.utils.exceptions import (
+    AttrDataConversionError,
+    AttrDataTypeUnsupportedError,
+)
 
 router = APIRouter()
 
@@ -21,7 +24,7 @@ router = APIRouter()
 def create_a_pulse(
     pulse: PulseCreate,
     db: Session = Depends(get_session),
-) -> Pulse:
+) -> PulseRead:
     try:
         return create_pulse(pulse=pulse, db=db)
     except DBAPIError as e:
@@ -43,7 +46,7 @@ def get_pulses(
 
 
 @router.get("/{pulse_id}", response_model=PulseRead)
-def get_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse:
+def get_pulse(pulse_id: int, db: Session = Depends(get_session)) -> Pulse:
     pulse = read_pulse(pulse_id=pulse_id, db=db)
     if not pulse:
         raise HTTPException(
@@ -54,24 +57,38 @@ def get_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> Pulse:
 
 
 @router.put("/{pulse_id}/attrs", response_model=PulseRead)
-def add_kv_str(
-    pulse_id: UUID,
-    key: str,
-    value: str,
+def add_attr(
+    pulse_id: int,
+    kv_pair: KeyValuePair,
     db: Session = Depends(get_session),
 ) -> Pulse:
-    pulse = add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
-    if not pulse:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
+    try:
+        pulse = create_attr(
+            pulse_id=pulse_id,
+            kv_pair=kv_pair,
+            db=db,
         )
+        if not pulse:
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND,
+                detail=f"Pulse not found with id: {pulse_id}",
+            )
+    except (AttrDataTypeUnsupportedError, AttrDataConversionError) as e:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=str(e),
+        ) from e
+    except ValueError as e:
+        raise HTTPException(
+            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+            detail=str(e),
+        ) from e
     return pulse
 
 
 @router.get("/{pulse_id}/attrs")
 def get_pulse_keys(
-    pulse_id: UUID,
+    pulse_id: int,
     db: Session = Depends(get_session),
 ) -> list[dict[str, str]]:
     pulse_attrs = read_pulse_attrs(pulse_id=pulse_id, db=db)
