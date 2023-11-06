@@ -2,6 +2,8 @@ from uuid import uuid4
 
 from fastapi.testclient import TestClient
 
+from api.utils.mock_data_generator import create_devices_and_pulses
+
 
 def test_create_pulse(client: TestClient, device_uuid: str) -> None:
     pulse_payload = {
@@ -12,7 +14,7 @@ def test_create_pulse(client: TestClient, device_uuid: str) -> None:
         "creation_time": "2021-01-01T00:00:00",
     }
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
     data = response.json()
@@ -35,7 +37,7 @@ def test_create_pulse_with_invalid_delays(client: TestClient, device_uuid: str) 
         "creation_time": "2021-01-01T00:00:00",
     }
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
     data = response.json()
@@ -54,7 +56,7 @@ def test_create_pulse_with_invalid_signal(client: TestClient, device_uuid: str) 
         "creation_time": "2021-01-01T00:00:00",
     }
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
     data = response.json()
@@ -77,7 +79,7 @@ def test_create_pulse_with_invalid_integration_time(
     }
 
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
     data = response.json()
@@ -98,7 +100,7 @@ def test_create_pulse_with_nonexistent_device_id(
         "creation_time": "2021-01-01T00:00:00",
     }
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
 
@@ -121,7 +123,7 @@ def test_create_pulse_with_invalid_device_id(
         "creation_time": "2021-01-01T00:00:00",
     }
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
 
@@ -142,7 +144,7 @@ def test_create_pulse_with_invalid_creation_time(
         "creation_time": "a",
     }
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
 
@@ -160,7 +162,7 @@ def test_get_pulse(client: TestClient, device_uuid: str) -> None:
         "creation_time": "2021-01-01T00:00:00",
     }
     response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
 
@@ -205,7 +207,7 @@ def test_get_all_pulses(client: TestClient, device_uuid: str) -> None:
         "creation_time": "2021-01-01T00:00:00",
     }
     pulse_1_response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_1_payload,
     )
     pulse_1_data = pulse_1_response.json()
@@ -218,7 +220,7 @@ def test_get_all_pulses(client: TestClient, device_uuid: str) -> None:
         "creation_time": "2021-02-01T00:00:00",
     }
     pulse_2_response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_2_payload,
     )
     pulse_2_data = pulse_2_response.json()
@@ -240,3 +242,12 @@ def test_get_all_pulses(client: TestClient, device_uuid: str) -> None:
     assert data[1]["integration_time"] == 200
     assert data[1]["creation_time"] == "2021-02-01T00:00:00"
     assert data[1]["pulse_id"] == pulse_2_data["pulse_id"]
+
+
+def test_read_pulses_with_ids(client: TestClient) -> None:
+    create_devices_and_pulses()
+    all_pulses = client.get("/pulses/").json()
+    wanted_pulse_ids = [pulse["pulse_id"] for pulse in all_pulses][:-1]
+    selected_pulses = client.post("/pulses/get", json=wanted_pulse_ids).json()
+    selected_pulse_ids = [pulse["pulse_id"] for pulse in selected_pulses]
+    assert wanted_pulse_ids == selected_pulse_ids
