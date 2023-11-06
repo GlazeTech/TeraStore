@@ -1,7 +1,7 @@
 import * as M from "@mantine/core";
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { cachedGetFilteredPulses, cachedGetPulse, getPulses } from "api";
+import { cachedGetFilteredPulses, cachedGetPulse, cachedGetPulses } from "api";
 import { Pulse } from "classes";
 import { downloadJson } from "helpers";
 import { useEffect, useState } from "react";
@@ -85,7 +85,7 @@ function DownloadModalContent({ pulseIds }: { pulseIds: string[] }) {
 			});
 			return;
 		}
-		getPulses(selectedPulses.map((pulse) => pulse.id)).then((result) => {
+		cachedGetPulses(selectedPulses.map((pulse) => pulse.id)).then((result) => {
 			console.log(result);
 			downloadJson(result, "TeraStore - pulses");
 		});

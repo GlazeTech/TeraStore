@@ -61,6 +61,7 @@ export async function getPulses(pulseIDs: string[]): Promise<Pulse[]> {
 		);
 	});
 }
+
 export const cachedGetKeyValues = cacheFunction(
 	getKeyValues,
 	100,
@@ -78,3 +79,5 @@ export const cachedGetFilteredPulses = cacheFunction(
 );
 
 export const cachedGetPulse = cacheFunction(getPulse, 100, (arg) => arg);
+
+export const cachedGetPulses = cacheFunction(getPulses, 15, (arg)=>[...arg].sort((a, b) => a.localeCompare(b)).join(","))
