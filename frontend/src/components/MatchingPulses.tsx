@@ -1,12 +1,15 @@
 import * as M from "@mantine/core";
+<<<<<<< Updated upstream
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
 import { getFilteredPulses, getPulse, getPulses } from "api";
+=======
+import { cachedGetFilteredPulses, cachedGetPulse } from "api";
+>>>>>>> Stashed changes
 import { Pulse } from "classes";
 import { downloadJson } from "helpers";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
-
 interface PulseCardProps {
 	pulseID: string;
 	isSelected: boolean;
@@ -18,7 +21,7 @@ function PulseCard({ pulseID, isSelected, setSelected }: PulseCardProps) {
 
 	useEffect(() => {
 		if (isSelected) {
-			getPulse(pulseID).then((p) => setPulse(p));
+			cachedGetPulse(pulseID).then((p) => setPulse(p));
 		}
 	}, [isSelected]);
 
@@ -139,7 +142,7 @@ function MatchingPulses() {
 	const [modalIsOpen, modalHandler] = useDisclosure(false);
 
 	useEffect(() => {
-		getFilteredPulses(pulseFilters).then((res) => setFilteredPulses(res));
+		cachedGetFilteredPulses(pulseFilters).then((res) => setFilteredPulses(res));
 	}, [pulseFilters]);
 
 	return (
