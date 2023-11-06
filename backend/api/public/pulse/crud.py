@@ -4,7 +4,7 @@ from fastapi import Depends
 from sqlmodel import Session, select
 
 from api.database import get_session
-from api.public.pulse.models import Pulse, PulseCreate, TemporaryIdTable
+from api.public.pulse.models import Pulse, PulseCreate, TemporaryPulseIdTable
 
 
 def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> Pulse:
@@ -30,20 +30,20 @@ def read_pulses_with_ids(
     db: Session = Depends(get_session),
 ) -> list[Pulse]:
     # Save wanted ID's in a temporary table
-    db.bulk_save_objects([TemporaryIdTable(pulse_id=idx) for idx in ids])
+    db.bulk_save_objects([TemporaryPulseIdTable(pulse_id=idx) for idx in ids])
     db.commit()
 
     # Select all pulses whose ID is in the temporary table
     pulses = db.exec(
         select(Pulse).join(
-            TemporaryIdTable,
-            TemporaryIdTable.pulse_id == Pulse.pulse_id,
+            TemporaryPulseIdTable,
+            TemporaryPulseIdTable.pulse_id == Pulse.pulse_id,
             isouter=False,
         ),
     ).all()
 
     # Delete the entries from the temporary table again
-    db.query(TemporaryIdTable).delete()
+    db.query(TemporaryPulseIdTable).delete()
     db.commit()
     return pulses
 

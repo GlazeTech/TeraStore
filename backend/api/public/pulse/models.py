@@ -101,9 +101,12 @@ class PulseReadWithDevice(PulseRead):
     device: DeviceRead
 
 
-class TemporaryIdTable(SQLModel, table=True):
-    """Temporary table for performing joins on pulse IDs."""
+class TemporaryPulseIdTable(SQLModel, table=True):
+    """Temporary table for performing joins on pulse IDs.
 
-    __tablename__ = "temporary_table"
+    Instead of using "SELECT .. WHERE id IN (...)"-style queries, adding the ID's to a temporary table first can drastically improve performance. See this: https://stackoverflow.com/questions/5803472/sql-where-id-in-id1-id2-idn
+    """
+
+    __tablename__ = "temporary_pulse_id_table"
 
     pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)
