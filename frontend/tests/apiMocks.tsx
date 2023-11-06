@@ -23,7 +23,6 @@ export const mockApi = async () => {
 				"pulseId1",
 				"pulseId2",
 			]),
-
 		};
 	});
 };
