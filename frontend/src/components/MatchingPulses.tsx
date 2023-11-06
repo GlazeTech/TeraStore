@@ -1,11 +1,7 @@
 import * as M from "@mantine/core";
-<<<<<<< Updated upstream
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { getFilteredPulses, getPulse, getPulses } from "api";
-=======
-import { cachedGetFilteredPulses, cachedGetPulse } from "api";
->>>>>>> Stashed changes
+import { cachedGetFilteredPulses, cachedGetPulse, getPulses } from "api";
 import { Pulse } from "classes";
 import { downloadJson } from "helpers";
 import { useEffect, useState } from "react";
