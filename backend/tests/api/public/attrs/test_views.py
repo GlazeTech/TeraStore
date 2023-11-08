@@ -41,7 +41,7 @@ def test_get_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
         "creation_time": "2021-01-01T00:00:00",
     }
     pulse_response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
     pulse_data = pulse_response.json()
@@ -88,7 +88,7 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
         "creation_time": "2021-01-01T00:00:00",
     }
     pulse_response = client.post(
-        "/pulses/",
+        "/pulses/create/",
         json=pulse_payload,
     )
     pulse_data = pulse_response.json()

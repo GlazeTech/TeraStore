@@ -14,6 +14,15 @@ export const mockApi = async () => {
 				"pulseId1",
 				"pulseId2",
 			]),
+			cachedGetKeyValues: vi.fn(async (key: string) => [
+				`${key}_val1`,
+				`${key}_val2`,
+				`${key}_val3`,
+			]),
+			cachedGetFilteredPulses: vi.fn(async (_: PulseFilter[]) => [
+				"pulseId1",
+				"pulseId2",
+			]),
 		};
 	});
 };
