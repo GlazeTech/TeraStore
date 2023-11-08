@@ -1,3 +1,4 @@
+import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 
@@ -6,6 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.database import create_db_and_tables, drop_tables
 from api.public import make_api
+from api.utils.logging import EndpointFilter
 from api.utils.mock_data_generator import (
     create_devices_and_pulses,
     create_frontend_dev_data,
@@ -43,6 +45,9 @@ def create_app(lifespan: Lifespan) -> FastAPI:
         allow_methods=["*"],
         allow_headers=["*"],
     )
+
+    uvicorn_logger = logging.getLogger("uvicorn.access")
+    uvicorn_logger.addFilter(EndpointFilter(path="/health"))
 
     @app.get("/")
     async def root() -> dict[str, str]:
