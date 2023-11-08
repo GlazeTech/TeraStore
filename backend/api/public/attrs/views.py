@@ -21,8 +21,15 @@ def get_all_keys(db: Session = Depends(get_session)) -> dict[str, str]:
 def get_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> list[str] | list[int]:
-    return read_all_values_on_key(key=key, db=db)
+) -> list[str] | list[int] | None:
+    try:
+        return read_all_values_on_key(key=key, db=db)
+    except ValueError:
+        # It seems we cannot type annotate an empty list. Guido says no:
+        # https://github.com/python/typing/issues/157
+        # Or, they suggest you use list[object], but that doesn't satisfy Mypy.
+        # We'll have to return a None instead.
+        return None
 
 
 @router.post("/filter")

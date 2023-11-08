@@ -79,7 +79,7 @@ def add_attr(
         )
     except (PulseNotFoundError, AttrDataTypeExistsError) as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_404_NOT_FOUND,
             detail=str(e),
         ) from e
     return pulse

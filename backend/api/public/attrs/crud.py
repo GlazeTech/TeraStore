@@ -42,12 +42,12 @@ def read_key_values(
     # However, the interface is fine, so I'll leave it for now for quick PR draft.
     if key.data_type == "string":
         statement_str = (
-            select(PulseStrAttrs.value).where(PulseStrAttrs.key == key).distinct()
+            select(PulseStrAttrs.value).where(PulseStrAttrs.key == key.key).distinct()
         )
         return db.exec(statement_str).all()
     if key.data_type == "integer":
         statement_int = (
-            select(PulseIntAttrs.value).where(PulseIntAttrs.key == key).distinct()
+            select(PulseIntAttrs.value).where(PulseIntAttrs.key == key.key).distinct()
         )
         return db.exec(statement_int).all()
     raise AttrDataTypeUnsupportedError(key.data_type)

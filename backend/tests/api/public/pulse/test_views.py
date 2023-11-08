@@ -126,8 +126,8 @@ def test_create_pulse_with_invalid_device_id(
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"][0]["msg"] == "value is not a valid uuid"
-    assert response.json()["detail"][0]["type"] == "type_error.uuid"
+    assert response.json()["detail"][0]["msg"] == "value is not a valid integer"
+    assert response.json()["detail"][0]["type"] == "type_error.integer"
 
 
 def test_create_pulse_with_invalid_creation_time(
@@ -183,8 +183,8 @@ def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid uuid"
-    assert data["detail"][0]["type"] == "type_error.uuid"
+    assert data["detail"][0]["msg"] == "value is not a valid integer"
+    assert data["detail"][0]["type"] == "type_error.integer"
 
 
 def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
