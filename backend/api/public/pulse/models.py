@@ -111,4 +111,4 @@ class TemporaryPulseIdTable(SQLModel, table=True):
 
     __tablename__ = "temporary_pulse_id_table"
 
-    pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)
+    pulse_id: int | None = Field(default_factory=None, primary_key=True)

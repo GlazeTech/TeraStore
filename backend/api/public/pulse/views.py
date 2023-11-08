@@ -48,7 +48,7 @@ def get_pulses(
 
 @router.post("/get", response_model=list[PulseRead])
 def get_pulses_from_ids(
-    ids: list[UUID],
+    ids: list[int],
     db: Session = Depends(get_session),
 ) -> list[Pulse]:
     return read_pulses_with_ids(ids, db=db)
