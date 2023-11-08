@@ -1,6 +1,5 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from psycopg2.errors import ForeignKeyViolation
-from pydantic import ValidationError
 from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session
 
@@ -15,8 +14,7 @@ from api.public.pulse.crud import (
 )
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead
 from api.utils.exceptions import (
-    AttrDataConversionError,
-    AttrDataTypeUnsupportedError,
+    AttrDataTypeExistsError,
     PulseNotFoundError,
 )
 
@@ -79,18 +77,9 @@ def add_attr(
             kv_pair=kv_pair,
             db=db,
         )
-    except (
-        AttrDataTypeUnsupportedError,
-        AttrDataConversionError,
-        PulseNotFoundError,
-    ) as e:
+    except (PulseNotFoundError, AttrDataTypeExistsError) as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
-        ) from e
-    except (ValueError, ValidationError) as e:
-        raise HTTPException(
-            status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
         ) from e
     return pulse
@@ -101,10 +90,11 @@ def get_pulse_keys(
     pulse_id: int,
     db: Session = Depends(get_session),
 ) -> list[dict[str, str]]:
-    pulse_attrs = read_pulse_attrs(pulse_id=pulse_id, db=db)
-    if not pulse_attrs:
+    try:
+        pulse_attrs = read_pulse_attrs(pulse_id=pulse_id, db=db)
+    except PulseNotFoundError as e:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
-        )
+            detail=str(e),
+        ) from e
     return pulse_attrs

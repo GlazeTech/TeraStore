@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from fastapi.testclient import TestClient
 
 from api.utils.mock_data_generator import create_devices_and_pulses
@@ -32,9 +30,9 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
     assert response.json() == []
 
 
-def test_get_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
+def test_get_attrs_on_pulse(client: TestClient, device_id: int) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -72,16 +70,16 @@ def test_get_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
 
 
 def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
-    pulse_id = str(uuid4())
+    pulse_id = 1000
     response = client.get(f"/pulses/{pulse_id}/attrs/")
 
     assert response.status_code == 404
     assert response.json()["detail"] == f"Pulse not found with id: {pulse_id}"
 
 
-def test_add_pulse_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
+def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: int) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -109,7 +107,7 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
 
 
 def test_add_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
-    pulse_id = str(uuid4())
+    pulse_id = 1000
     attrs_key = "angle"
     attrs_value = "29"
 

@@ -39,7 +39,7 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture()
-def device_uuid(client: TestClient) -> Generator[str, None, None]:
+def device_id(client: TestClient) -> Generator[str, None, None]:
     """Create a Device for testing purposes."""
     device_payload = {"friendly_name": "Glaze I"}
     response = client.post(
@@ -49,6 +49,6 @@ def device_uuid(client: TestClient) -> Generator[str, None, None]:
 
     if response.status_code == 200:
         data = response.json()
-        yield data["device_id"]  # This will be used in your test functions
+        yield data["device_id"]
     else:
         pytest.fail(f"Failed to create device: {response.status_code}")

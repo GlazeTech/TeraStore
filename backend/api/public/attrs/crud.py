@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import Depends
 from sqlalchemy import and_
 from sqlmodel import Session, select
@@ -7,11 +5,16 @@ from sqlmodel import Session, select
 from api.database import get_session
 from api.public.attrs.models import (
     KeyValuePair,
+    PulseIntAttrs,
     PulseKeyRegistry,
     PulseStrAttrs,
 )
 from api.public.pulse.models import Pulse, PulseRead
-from api.utils.exceptions import AttrDataTypeExistsError, PulseNotFoundError
+from api.utils.exceptions import (
+    AttrDataTypeExistsError,
+    AttrDataTypeUnsupportedError,
+    PulseNotFoundError,
+)
 
 
 def create_attr(
@@ -56,11 +59,11 @@ def create_attr(
 def read_pulse_attrs(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[dict[str, str]] | None:
+) -> list[dict[str, str]]:
     """Get all the keys for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
-        return None
+        raise PulseNotFoundError(pulse_id=pulse_id)
 
     statement = select([PulseStrAttrs.key, PulseStrAttrs.value]).where(
         PulseStrAttrs.pulse_id == pulse_id,
@@ -72,24 +75,48 @@ def read_pulse_attrs(
 
 def read_all_keys(
     db: Session = Depends(get_session),
-) -> list[str]:
-    """Get all unique keys."""
-    return [key[0] for key in db.query(PulseKeyRegistry.key).all()]
+) -> dict[str, str]:
+    """Get all unique keys and their corresponding data type."""
+    return {
+        key[0]: key[1]
+        for key in db.query(PulseKeyRegistry.key, PulseKeyRegistry.data_type).all()
+    }
 
 
 def read_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> list[str]:
+) -> list[str] | list[int]:
     """Get all unique values associated with a key."""
-    statement = select(PulseStrAttrs.value).where(PulseStrAttrs.key == key).distinct()
-    return db.execute(statement).scalars().all()
+    # Determine data type of key
+    data_type = (
+        db.query(PulseKeyRegistry.data_type)
+        .filter(
+            PulseKeyRegistry.key == key,
+        )
+        .scalar()
+    )
+
+    # I wish to change this, so all logic regarding data types is in one place.
+    # This is to ensure that if I add a new data type, I don't have to change this here.
+    # However, the interface is fine, so I'll leave it for now for quick PR draft.
+    if data_type == "string":
+        statement_str = (
+            select(PulseStrAttrs.value).where(PulseStrAttrs.key == key).distinct()
+        )
+        return db.execute(statement_str).scalars().all()
+    if data_type == "integer":
+        statement_int = (
+            select(PulseIntAttrs.value).where(PulseIntAttrs.key == key).distinct()
+        )
+        return db.execute(statement_int).scalars().all()
+    raise AttrDataTypeUnsupportedError(data_type)
 
 
 def filter_on_key_value_pairs(
     key_value_pairs: list[dict[str, str]],
     db: Session = Depends(get_session),
-) -> list[UUID]:
+) -> list[int]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
     pulse_ids_list = []
@@ -116,3 +143,37 @@ def filter_on_key_value_pairs(
     common_pulse_ids = set.intersection(*pulse_ids_list)
 
     return list(common_pulse_ids)
+
+
+def filter_on_kv_string(
+    key_value_pair: dict[str, str],
+    db: Session = Depends(get_session),
+) -> list[int]:
+    """Get all pulses that match this kv-pair, where value is string."""
+    key = key_value_pair.get("key")
+    value = key_value_pair.get("value")
+
+    # Perform query for this key-value pair
+    statement = select(PulseStrAttrs.pulse_id).where(
+        and_(PulseStrAttrs.key == key, PulseStrAttrs.value == value),
+    )
+    results = db.execute(statement).fetchall()
+
+    return [row[0] for row in results]
+
+
+def filter_on_kv_int(
+    key_value_pair: dict[str, int],
+    db: Session = Depends(get_session),
+) -> list[int]:
+    """Get all pulses that match this kv-pair, where value is integer."""
+    key = key_value_pair.get("key")
+    value = key_value_pair.get("value")
+
+    # Perform query for this key-value pair
+    statement = select(PulseIntAttrs.pulse_id).where(
+        and_(PulseIntAttrs.key == key, PulseIntAttrs.value == value),
+    )
+    results = db.execute(statement).fetchall()
+
+    return [row[0] for row in results]

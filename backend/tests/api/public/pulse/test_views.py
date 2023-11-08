@@ -1,13 +1,11 @@
-from uuid import uuid4
-
 from fastapi.testclient import TestClient
 
 from api.utils.mock_data_generator import create_devices_and_pulses
 
 
-def test_create_pulse(client: TestClient, device_uuid: str) -> None:
+def test_create_pulse(client: TestClient, device_id: int) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -20,7 +18,7 @@ def test_create_pulse(client: TestClient, device_uuid: str) -> None:
     data = response.json()
 
     assert response.status_code == 200
-    assert data["device_id"] == device_uuid
+    assert data["device_id"] == device_id
     assert data["delays"] == [1, 2, 3]
     assert data["signal"] == [1, 2, 3]
     assert data["integration_time"] == 100
@@ -28,9 +26,9 @@ def test_create_pulse(client: TestClient, device_uuid: str) -> None:
     assert data["pulse_id"] is not None
 
 
-def test_create_pulse_with_invalid_delays(client: TestClient, device_uuid: str) -> None:
+def test_create_pulse_with_invalid_delays(client: TestClient, device_id: int) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, "a"],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -47,9 +45,9 @@ def test_create_pulse_with_invalid_delays(client: TestClient, device_uuid: str) 
     assert data["detail"][0]["type"] == "type_error.float"
 
 
-def test_create_pulse_with_invalid_signal(client: TestClient, device_uuid: str) -> None:
+def test_create_pulse_with_invalid_signal(client: TestClient, device_id: int) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, "a"],
         "integration_time": 100,
@@ -68,10 +66,10 @@ def test_create_pulse_with_invalid_signal(client: TestClient, device_uuid: str) 
 
 def test_create_pulse_with_invalid_integration_time(
     client: TestClient,
-    device_uuid: str,
+    device_id: int,
 ) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": "a",
@@ -93,7 +91,7 @@ def test_create_pulse_with_nonexistent_device_id(
     client: TestClient,
 ) -> None:
     pulse_payload = {
-        "device_id": str(uuid4()),
+        "device_id": 1000,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -113,7 +111,7 @@ def test_create_pulse_with_nonexistent_device_id(
 
 def test_create_pulse_with_invalid_device_id(
     client: TestClient,
-    device_uuid: str,
+    device_id: int,
 ) -> None:
     pulse_payload = {
         "device_id": "a",
@@ -134,10 +132,10 @@ def test_create_pulse_with_invalid_device_id(
 
 def test_create_pulse_with_invalid_creation_time(
     client: TestClient,
-    device_uuid: str,
+    device_id: int,
 ) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -153,9 +151,9 @@ def test_create_pulse_with_invalid_creation_time(
     assert response.json()["detail"][0]["type"] == "value_error.datetime"
 
 
-def test_get_pulse(client: TestClient, device_uuid: str) -> None:
+def test_get_pulse(client: TestClient, device_id: int) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -172,7 +170,7 @@ def test_get_pulse(client: TestClient, device_uuid: str) -> None:
     data = response.json()
 
     assert response.status_code == 200
-    assert data["device_id"] == device_uuid
+    assert data["device_id"] == device_id
     assert data["delays"] == [1, 2, 3]
     assert data["signal"] == [1, 2, 3]
     assert data["integration_time"] == 100
@@ -190,7 +188,7 @@ def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:
 
 
 def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
-    pulse_id = uuid4()
+    pulse_id = 1000
     response = client.get(f"/pulses/{pulse_id}")
     data = response.json()
 
@@ -198,9 +196,9 @@ def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
     assert data["detail"] == f"Pulse not found with id: {pulse_id}"
 
 
-def test_get_all_pulses(client: TestClient, device_uuid: str) -> None:
+def test_get_all_pulses(client: TestClient, device_id: int) -> None:
     pulse_1_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -213,7 +211,7 @@ def test_get_all_pulses(client: TestClient, device_uuid: str) -> None:
     pulse_1_data = pulse_1_response.json()
 
     pulse_2_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [4, 5, 6],
         "signal": [4, 5, 6],
         "integration_time": 200,
@@ -230,13 +228,13 @@ def test_get_all_pulses(client: TestClient, device_uuid: str) -> None:
 
     assert response.status_code == 200
     assert len(data) == 2
-    assert data[0]["device_id"] == device_uuid
+    assert data[0]["device_id"] == device_id
     assert data[0]["delays"] == [1, 2, 3]
     assert data[0]["signal"] == [1, 2, 3]
     assert data[0]["integration_time"] == 100
     assert data[0]["creation_time"] == "2021-01-01T00:00:00"
     assert data[0]["pulse_id"] == pulse_1_data["pulse_id"]
-    assert data[1]["device_id"] == device_uuid
+    assert data[1]["device_id"] == device_id
     assert data[1]["delays"] == [4, 5, 6]
     assert data[1]["signal"] == [4, 5, 6]
     assert data[1]["integration_time"] == 200

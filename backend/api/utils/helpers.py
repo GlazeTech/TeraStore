@@ -1,6 +1,5 @@
 import secrets
 from datetime import datetime
-from uuid import UUID
 from zoneinfo import ZoneInfo
 
 
@@ -27,11 +26,11 @@ def get_now(timezone: str = "Europe/Copenhagen") -> datetime:
 
 
 def create_mock_pulse(
-    device_id: UUID,
+    device_id: int,
     length: int = 600,
     timescale: float = 1e-10,
     amplitude: float = 100.0,
-) -> dict[str, list[float] | int | datetime | UUID]:
+) -> dict[str, list[float] | int | datetime]:
     return {
         "delays": generate_scaled_numbers(length, timescale),
         "signal": generate_random_numbers(length, -amplitude, amplitude),
