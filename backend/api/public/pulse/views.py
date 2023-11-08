@@ -5,7 +5,7 @@ from sqlmodel import Session
 
 from api.database import get_session
 from api.public.attrs.crud import create_attr, read_pulse_attrs
-from api.public.attrs.models import KeyValuePair
+from api.public.attrs.models import KeyValuePair, PulseIntAttrsRead, PulseStrAttrsRead
 from api.public.pulse.crud import (
     create_pulse,
     read_pulse,
@@ -89,7 +89,7 @@ def add_attr(
 def get_pulse_keys(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[dict[str, str]]:
+) -> list[PulseStrAttrsRead | PulseIntAttrsRead]:
     try:
         pulse_attrs = read_pulse_attrs(pulse_id=pulse_id, db=db)
     except PulseNotFoundError as e:

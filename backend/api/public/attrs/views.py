@@ -7,6 +7,7 @@ from api.public.attrs.crud import (
     read_all_keys,
     read_all_values_on_key,
 )
+from api.public.attrs.models import PulseIntAttrsFilter, PulseStrAttrsFilter
 
 router = APIRouter()
 
@@ -26,7 +27,7 @@ def get_all_values_on_key(
 
 @router.post("/filter")
 def filter_attrs(
-    key_value_pairs: list[dict[str, str]],
+    key_value_pairs: list[PulseIntAttrsFilter | PulseStrAttrsFilter],
     db: Session = Depends(get_session),
 ) -> list[int]:
     """Filter pulses based on key-value pairs.
@@ -38,8 +39,8 @@ def filter_attrs(
         -H 'accept: application/json' \
         -H 'Content-Type: application/json' \
         -d '[
-        {"key": "angle", "value": "17"},
-        {"key": "substrate", "value": "plastic"}
+        {"key": "project", "value": "hempel", "data_type": "string"},
+        {"key": "an_int", "min_value": "1", "max_value": "5", "data_type": "integer"}
         ]'
     """
     return filter_on_key_value_pairs(key_value_pairs, db)
