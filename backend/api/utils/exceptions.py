@@ -26,3 +26,11 @@ class AttrDataConversionError(Exception):
     def __init__(self: Self, data_type: str) -> None:
         self.data_type = data_type
         super().__init__(f"Value cannot be cast to {data_type}.")
+
+
+class PulseNotFoundError(Exception):
+    """Exception raised when the data type of an attribute is not supported."""
+
+    def __init__(self: Self, pulse_id: int) -> None:
+        self.pulse_id = pulse_id
+        super().__init__(f"Pulse not found with id: {pulse_id}.")

@@ -11,18 +11,18 @@ from api.public.attrs.models import (
     PulseStrAttrs,
 )
 from api.public.pulse.models import Pulse, PulseRead
-from api.utils.exceptions import AttrDataTypeExistsError
+from api.utils.exceptions import AttrDataTypeExistsError, PulseNotFoundError
 
 
 def create_attr(
     pulse_id: int,
     kv_pair: KeyValuePair,
     db: Session = Depends(get_session),
-) -> Pulse | None:
-    """Check if given pulse exists."""
+) -> Pulse:
+    """Create a new EAV attribute for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
-        return None
+        raise PulseNotFoundError(pulse_id=pulse_id)
 
     pulse_read = PulseRead.from_orm(pulse)
 

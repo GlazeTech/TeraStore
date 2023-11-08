@@ -65,6 +65,7 @@ ignore = [
   "D103", # allow undocumented public function
   "D104", # allow undocumented public package
   "D106", # allow undocumented public nested class
+  "D107", # allow undocumented public __init__
   "D203", # allow 0 black lines before class docstring
   "D213", # allow multiline docstring to start on first line
 ]

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from psycopg2.errors import ForeignKeyViolation
+from pydantic import ValidationError
 from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session
 
@@ -16,6 +17,7 @@ from api.public.pulse.models import Pulse, PulseCreate, PulseRead
 from api.utils.exceptions import (
     AttrDataConversionError,
     AttrDataTypeUnsupportedError,
+    PulseNotFoundError,
 )
 
 router = APIRouter()
@@ -77,17 +79,16 @@ def add_attr(
             kv_pair=kv_pair,
             db=db,
         )
-        if not pulse:
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Pulse not found with id: {pulse_id}",
-            )
-    except (AttrDataTypeUnsupportedError, AttrDataConversionError) as e:
+    except (
+        AttrDataTypeUnsupportedError,
+        AttrDataConversionError,
+        PulseNotFoundError,
+    ) as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         ) from e
-    except ValueError as e:
+    except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=str(e),
