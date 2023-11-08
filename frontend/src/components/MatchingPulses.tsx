@@ -1,12 +1,11 @@
 import * as M from "@mantine/core";
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { getFilteredPulses, getPulse, getPulses } from "api";
+import { cachedGetFilteredPulses, cachedGetPulse, cachedGetPulses } from "api";
 import { Pulse } from "classes";
 import { downloadJson } from "helpers";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
-
 interface PulseCardProps {
 	pulseID: string;
 	isSelected: boolean;
@@ -18,7 +17,7 @@ function PulseCard({ pulseID, isSelected, setSelected }: PulseCardProps) {
 
 	useEffect(() => {
 		if (isSelected) {
-			getPulse(pulseID).then((p) => setPulse(p));
+			cachedGetPulse(pulseID).then((p) => setPulse(p));
 		}
 	}, [isSelected]);
 
@@ -86,7 +85,7 @@ function DownloadModalContent({ pulseIds }: { pulseIds: string[] }) {
 			});
 			return;
 		}
-		getPulses(selectedPulses.map((pulse) => pulse.id)).then((result) => {
+		cachedGetPulses(selectedPulses.map((pulse) => pulse.id)).then((result) => {
 			console.log(result);
 			downloadJson(result, "TeraStore - pulses");
 		});
@@ -139,7 +138,7 @@ function MatchingPulses() {
 	const [modalIsOpen, modalHandler] = useDisclosure(false);
 
 	useEffect(() => {
-		getFilteredPulses(pulseFilters).then((res) => setFilteredPulses(res));
+		cachedGetFilteredPulses(pulseFilters).then((res) => setFilteredPulses(res));
 	}, [pulseFilters]);
 
 	return (
