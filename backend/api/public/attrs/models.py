@@ -68,7 +68,7 @@ class KeyValuePair(BaseModel):
             error_message = "data_type must be set"
             raise ValueError(error_message)
         if data_type not in [member.value for member in AllowedAttrDataType]:
-            AttrDataTypeUnsupportedError(data_type)
+            raise AttrDataTypeUnsupportedError(data_type)
         if data_type == AllowedAttrDataType.STRING.value:
             try:
                 str(value)
