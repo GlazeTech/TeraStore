@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Any, Self, TypeVar
+from typing import Any, Literal, Self, TypeVar
 
 from pydantic import BaseModel, root_validator
 from sqlmodel import Field, SQLModel
@@ -35,12 +35,12 @@ class PulseStrAttrs(PulseAttrsBase, table=True):
 
 class PulseStrAttrsRead(PulseAttrsBase):
     value: str
-    data_type: str = "string"
+    data_type: Literal["string"] = Field(default="string")
 
 
 class PulseStrAttrsFilter(PulseAttrsBase):
     value: str
-    data_type: str = "string"
+    data_type: Literal["string"] = Field(default="string")
 
     class Config:
         @classmethod
@@ -68,13 +68,13 @@ class PulseIntAttrs(PulseAttrsBase, table=True):
 
 class PulseIntAttrsRead(PulseAttrsBase):
     value: int
-    data_type: str = "integer"
+    data_type: Literal["integer"] = Field(default="integer")
 
 
 class PulseIntAttrsFilter(PulseAttrsBase):
     min_value: int
     max_value: int
-    data_type: str = "integer"
+    data_type: Literal["integer"] = Field(default="integer")
 
     class Config:
         @classmethod
