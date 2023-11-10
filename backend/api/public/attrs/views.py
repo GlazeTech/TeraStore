@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException, status
 from sqlmodel import Session
 
 from api.database import get_session
@@ -7,7 +7,11 @@ from api.public.attrs.crud import (
     read_all_keys,
     read_all_values_on_key,
 )
-from api.public.attrs.models import PulseIntAttrsFilter, PulseStrAttrsFilter
+from api.public.attrs.models import (
+    PulseIntAttrsFilter,
+    PulseStrAttrsFilter,
+)
+from api.utils.exceptions import AttrKeyNotFoundError
 
 router = APIRouter()
 
@@ -21,15 +25,14 @@ def get_all_keys(db: Session = Depends(get_session)) -> list[dict[str, str]]:
 def get_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> list[str] | list[int] | None:
+) -> list[int] | list[str]:
     try:
         return read_all_values_on_key(key=key, db=db)
-    except ValueError:
-        # It seems we cannot type annotate an empty list. Guido says no:
-        # https://github.com/python/typing/issues/157
-        # Or, they suggest you use list[object], but that doesn't satisfy Mypy.
-        # We'll have to return a None instead.
-        return None
+    except AttrKeyNotFoundError as e:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=str(e),
+        ) from e
 
 
 @router.post("/filter")

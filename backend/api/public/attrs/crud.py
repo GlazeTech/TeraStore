@@ -16,6 +16,7 @@ from api.public.pulse.models import Pulse, PulseRead
 from api.utils.exceptions import (
     AttrDataTypeExistsError,
     AttrDataTypeUnsupportedError,
+    AttrKeyNotFoundError,
     PulseNotFoundError,
 )
 
@@ -36,7 +37,7 @@ def check_attr_data_type(
 def read_key_values(
     key: PulseKeyRegistry,
     db: Session = Depends(get_session),
-) -> list[str] | list[int]:
+) -> list[int] | list[str]:
     # I wish to change this, so all logic regarding data types is in one place.
     # This is to ensure that if I add a new data type, I don't have to change this here.
     # However, the interface is fine, so I'll leave it for now for quick PR draft.
@@ -131,13 +132,12 @@ def read_all_keys(
 def read_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> list[str] | list[int]:
+) -> list[int] | list[str]:
     """Get all unique values associated with a key."""
     # Determine data type of key
     existing_key = check_attr_data_type(key=key, db=db)
     if not existing_key:
-        error_str = f"Key {key} does not exist in PulseKeyRegistry."
-        raise ValueError(error_str)
+        raise AttrKeyNotFoundError(key=key)
 
     return read_key_values(key=existing_key, db=db)
 

@@ -19,6 +19,14 @@ PulseIntAttrsFilterConfig_T = TypeVar(
 )
 
 
+class PulseStrAttrsValue(BaseModel):
+    value: str
+
+
+class PulseIntAttrsValue(BaseModel):
+    value: int
+
+
 class PulseAttrsBase(SQLModel):
     key: str
 

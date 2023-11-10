@@ -28,6 +28,14 @@ class AttrDataConversionError(Exception):
         super().__init__(f"Value cannot be cast to {data_type}.")
 
 
+class AttrKeyNotFoundError(Exception):
+    """Exception raised when the data type of an attribute is not found."""
+
+    def __init__(self: Self, key: str) -> None:
+        self.key = key
+        super().__init__(f"Key {key} not found.")
+
+
 class PulseNotFoundError(Exception):
     """Exception raised when the data type of an attribute is not supported."""
 
