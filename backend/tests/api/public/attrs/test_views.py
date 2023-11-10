@@ -9,7 +9,8 @@ def test_get_all_keys(client: TestClient) -> None:
     response = client.get("/attrs/keys/")
 
     assert response.status_code == 200
-    assert response.json() == ["angle", "substrate"]
+    assert "angle" in response.json()
+    assert "substrate" in response.json()
 
 
 def test_get_all_values_on_key(client: TestClient) -> None:

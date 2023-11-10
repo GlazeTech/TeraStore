@@ -3,12 +3,12 @@ from sqlmodel import Session
 
 from api.database import get_session
 from api.public.device.crud import create_device, read_device, read_devices
-from api.public.device.models import Device, DeviceCreate, DeviceRead
+from api.public.device.models import DeviceCreate, DeviceRead
 
 router = APIRouter()
 
 
-@router.post("", response_model=DeviceRead)
+@router.post("")
 def create_a_device(
     device: DeviceCreate,
     db: Session = Depends(get_session),
@@ -16,15 +16,15 @@ def create_a_device(
     return create_device(device=device, db=db)
 
 
-@router.get("", response_model=list[DeviceRead])
+@router.get("")
 def get_devices(
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
     db: Session = Depends(get_session),
-) -> list[Device]:
+) -> list[DeviceRead]:
     return read_devices(offset=offset, limit=limit, db=db)
 
 
-@router.get("/{device_id}", response_model=DeviceRead)
-def get_device(device_id: int, db: Session = Depends(get_session)) -> Device:
+@router.get("/{device_id}")
+def get_device(device_id: int, db: Session = Depends(get_session)) -> DeviceRead:
     return read_device(device_id=device_id, db=db)

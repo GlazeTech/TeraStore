@@ -21,12 +21,14 @@ def read_devices(
     offset: int = 0,
     limit: int = 20,
     db: Session = Depends(get_session),
-) -> list[Device]:
-    return db.exec(select(Device).offset(offset).limit(limit)).all()
+) -> list[DeviceRead]:
+    statement = select(Device).offset(offset).limit(limit)
+    devices = db.exec(statement).all()
+    return [DeviceRead.from_orm(device) for device in devices]
 
 
-def read_device(device_id: int, db: Session = Depends(get_session)) -> Device:
+def read_device(device_id: int, db: Session = Depends(get_session)) -> DeviceRead:
     device = db.get(Device, device_id)
     if not device:
         raise DeviceNotFoundError(device_id=device_id)
-    return device
+    return DeviceRead.from_orm(device)

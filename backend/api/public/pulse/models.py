@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime  # noqa: TCH003
-from typing import TYPE_CHECKING, Self
+from typing import Self
 
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
@@ -12,9 +12,6 @@ from api.utils.helpers import (
     generate_scaled_numbers,
     get_now,
 )
-
-if TYPE_CHECKING:
-    from api.public.device.models import DeviceRead
 
 
 class PulseBase(SQLModel):
@@ -94,12 +91,6 @@ class PulseRead(PulseBase):
     pulse_id: int
 
 
-class PulseReadWithDevice(PulseRead):
-    """Model for reading a Pulse with its Device."""
-
-    device: DeviceRead
-
-
 class TemporaryPulseIdTable(SQLModel, table=True):
     """Temporary table for performing joins on pulse IDs.
 
@@ -111,4 +102,4 @@ class TemporaryPulseIdTable(SQLModel, table=True):
 
     __tablename__ = "temporary_pulse_id_table"
 
-    pulse_id: int = Field(default=None, primary_key=True)
+    pulse_id: int | None = Field(default=None, primary_key=True)
