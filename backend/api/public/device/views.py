@@ -1,9 +1,9 @@
-from fastapi import APIRouter, Depends, HTTPException, Query, status
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
 from api.database import get_session
 from api.public.device.crud import create_device, read_device, read_devices
-from api.public.device.models import Device, DeviceCreate, DeviceRead
+from api.public.device.models import DeviceCreate, DeviceRead
 
 router = APIRouter()
 
@@ -21,18 +21,10 @@ def get_devices(
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
     db: Session = Depends(get_session),
-) -> list[Device]:
+) -> list[DeviceRead]:
     return read_devices(offset=offset, limit=limit, db=db)
 
 
 @router.get("/{device_id}", response_model=DeviceRead)
-def get_device(device_id: int, db: Session = Depends(get_session)) -> Device:
-    device = read_device(device_id=device_id, db=db)
-
-    if not device:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Device not found with id: {device_id}",
-        )
-
-    return device
+def get_device(device_id: int, db: Session = Depends(get_session)) -> DeviceRead:
+    return read_device(device_id=device_id, db=db)

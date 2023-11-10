@@ -2,7 +2,7 @@ from sqlmodel import Session
 
 from api.database import app_engine
 from api.public.attrs.crud import create_attr
-from api.public.attrs.models import KeyValuePair
+from api.public.attrs.models import PulseStrAttrsRead
 from api.public.device.crud import create_device
 from api.public.device.models import DeviceCreate
 from api.public.pulse.crud import create_pulse
@@ -31,12 +31,12 @@ def create_devices_and_pulses() -> None:
 
         create_attr(
             pulse_1.pulse_id,
-            KeyValuePair(key="angle", value="29", data_type="string"),
+            PulseStrAttrsRead(key="angle", value="29", data_type="string"),
             sess,
         )
         create_attr(
             pulse_1.pulse_id,
-            KeyValuePair(
+            PulseStrAttrsRead(
                 key="substrate",
                 value="sand-blasted steel",
                 data_type="string",
@@ -46,23 +46,23 @@ def create_devices_and_pulses() -> None:
 
         create_attr(
             pulse_2.pulse_id,
-            KeyValuePair(key="angle", value="23", data_type="string"),
+            PulseStrAttrsRead(key="angle", value="23", data_type="string"),
             sess,
         )
         create_attr(
             pulse_2.pulse_id,
-            KeyValuePair(key="substrate", value="plastic", data_type="string"),
+            PulseStrAttrsRead(key="substrate", value="plastic", data_type="string"),
             sess,
         )
 
         create_attr(
             pulse_3.pulse_id,
-            KeyValuePair(key="angle", value="17", data_type="string"),
+            PulseStrAttrsRead(key="angle", value="17", data_type="string"),
             sess,
         )
         create_attr(
             pulse_3.pulse_id,
-            KeyValuePair(key="substrate", value="polymer", data_type="string"),
+            PulseStrAttrsRead(key="substrate", value="polymer", data_type="string"),
             sess,
         )
 
@@ -95,7 +95,7 @@ def create_frontend_dev_data() -> None:
             for pulse in pulses:
                 create_attr(
                     pulse_id=pulse.pulse_id,
-                    kv_pair=KeyValuePair(
+                    kv_pair=PulseStrAttrsRead(
                         key="project",
                         value=project,
                         data_type="string",
@@ -105,7 +105,7 @@ def create_frontend_dev_data() -> None:
                 if count % 2 == 0:
                     create_attr(
                         pulse_id=pulse.pulse_id,
-                        kv_pair=KeyValuePair(
+                        kv_pair=PulseStrAttrsRead(
                             key="substrate",
                             value="PMMA",
                             data_type="string",
@@ -115,7 +115,7 @@ def create_frontend_dev_data() -> None:
                 if count % 2 == 1:
                     create_attr(
                         pulse_id=pulse.pulse_id,
-                        kv_pair=KeyValuePair(
+                        kv_pair=PulseStrAttrsRead(
                             key="spotsize (mm)",
                             value="5.6",
                             data_type="string",
@@ -125,7 +125,7 @@ def create_frontend_dev_data() -> None:
                 if count % 3 == 0:
                     create_attr(
                         pulse_id=pulse.pulse_id,
-                        kv_pair=KeyValuePair(
+                        kv_pair=PulseStrAttrsRead(
                             key="mode",
                             value="reflection",
                             data_type="string",
@@ -135,7 +135,7 @@ def create_frontend_dev_data() -> None:
                 else:
                     create_attr(
                         pulse_id=pulse.pulse_id,
-                        kv_pair=KeyValuePair(
+                        kv_pair=PulseStrAttrsRead(
                             key="mode",
                             value="transmission",
                             data_type="string",
@@ -145,7 +145,7 @@ def create_frontend_dev_data() -> None:
                 if count % 5 == 0:
                     create_attr(
                         pulse_id=pulse.pulse_id,
-                        kv_pair=KeyValuePair(
+                        kv_pair=PulseStrAttrsRead(
                             key="antennas",
                             value="HHI",
                             data_type="string",
@@ -155,7 +155,7 @@ def create_frontend_dev_data() -> None:
                 else:
                     create_attr(
                         pulse_id=pulse.pulse_id,
-                        kv_pair=KeyValuePair(
+                        kv_pair=PulseStrAttrsRead(
                             key="antennas",
                             value="Toptica",
                             data_type="string",
@@ -179,12 +179,12 @@ def create_frontend_dev_data() -> None:
 
         create_attr(
             pulse_1.pulse_id,
-            KeyValuePair(key="angle", value="29", data_type="string"),
+            PulseStrAttrsRead(key="angle", value="29", data_type="string"),
             sess,
         )
         create_attr(
             pulse_1.pulse_id,
-            KeyValuePair(
+            PulseStrAttrsRead(
                 key="substrate",
                 value="sand-blasted steel",
                 data_type="string",
@@ -194,22 +194,22 @@ def create_frontend_dev_data() -> None:
 
         create_attr(
             pulse_2.pulse_id,
-            KeyValuePair(key="angle", value="23", data_type="string"),
+            PulseStrAttrsRead(key="angle", value="23", data_type="string"),
             sess,
         )
         create_attr(
             pulse_2.pulse_id,
-            KeyValuePair(key="substrate", value="plastic", data_type="string"),
+            PulseStrAttrsRead(key="substrate", value="plastic", data_type="string"),
             sess,
         )
 
         create_attr(
             pulse_3.pulse_id,
-            KeyValuePair(key="angle", value="17", data_type="string"),
+            PulseStrAttrsRead(key="angle", value="17", data_type="string"),
             sess,
         )
         create_attr(
             pulse_3.pulse_id,
-            KeyValuePair(key="substrate", value="polymer", data_type="string"),
+            PulseStrAttrsRead(key="substrate", value="polymer", data_type="string"),
             sess,
         )

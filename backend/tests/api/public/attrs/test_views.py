@@ -9,10 +9,16 @@ def test_get_all_keys(client: TestClient) -> None:
     response = client.get("/attrs/keys/")
 
     assert response.status_code == 200
-    assert response.json() == {
-        "angle": "string",
-        "substrate": "string",
-    }
+    assert response.json() == [
+        {
+            "name": "angle",
+            "data_type": "string",
+        },
+        {
+            "name": "substrate",
+            "data_type": "string",
+        },
+    ]
 
 
 def test_get_all_values_on_key(client: TestClient) -> None:
@@ -29,8 +35,8 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
 
     response = client.get("/attrs/non-existing-key/values/")
 
-    assert response.status_code == 200
-    assert response.json() is None
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Key non-existing-key not found."
 
 
 def test_get_attrs_on_pulse(client: TestClient, device_id: str) -> None:

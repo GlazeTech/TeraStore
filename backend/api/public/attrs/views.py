@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
 from api.database import get_session
@@ -9,15 +9,15 @@ from api.public.attrs.crud import (
 )
 from api.public.attrs.models import (
     PulseIntAttrsFilter,
+    PulseKeyRegistryRead,
     PulseStrAttrsFilter,
 )
-from api.utils.exceptions import AttrKeyNotFoundError
 
 router = APIRouter()
 
 
 @router.get("/keys")
-def get_all_keys(db: Session = Depends(get_session)) -> list[dict[str, str]]:
+def get_all_keys(db: Session = Depends(get_session)) -> list[PulseKeyRegistryRead]:
     return read_all_keys(db=db)
 
 
@@ -26,13 +26,7 @@ def get_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
 ) -> list[int] | list[str]:
-    try:
-        return read_all_values_on_key(key=key, db=db)
-    except AttrKeyNotFoundError as e:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=str(e),
-        ) from e
+    return read_all_values_on_key(key=key, db=db)
 
 
 @router.post("/filter")

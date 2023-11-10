@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 
 from api.database import get_session
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead, TemporaryPulseIdTable
+from api.utils.exceptions import PulseNotFoundError
 
 
 def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> PulseRead:
@@ -26,7 +27,7 @@ def read_pulses(
 def read_pulses_with_ids(
     ids: list[int],
     db: Session = Depends(get_session),
-) -> list[Pulse]:
+) -> list[PulseRead]:
     # Save wanted ID's in a temporary table
     db.bulk_save_objects([TemporaryPulseIdTable(pulse_id=idx) for idx in ids])
     db.commit()
@@ -43,8 +44,11 @@ def read_pulses_with_ids(
     # Delete the entries from the temporary table again
     db.query(TemporaryPulseIdTable).delete()
     db.commit()
-    return pulses
+    return [PulseRead.from_orm(pulse) for pulse in pulses]
 
 
-def read_pulse(pulse_id: int, db: Session = Depends(get_session)) -> Pulse | None:
-    return db.get(Pulse, pulse_id)
+def read_pulse(pulse_id: int, db: Session = Depends(get_session)) -> PulseRead:
+    result = db.get(Pulse, pulse_id)
+    if not result:
+        raise PulseNotFoundError(pulse_id=pulse_id)
+    return PulseRead.from_orm(result)

@@ -3,16 +3,16 @@ from sqlmodel import Session, select
 
 from api.database import get_session
 from api.public.attrs.models import (
-    KeyValuePair,
     PulseIntAttrs,
     PulseIntAttrsFilter,
     PulseIntAttrsRead,
     PulseKeyRegistry,
+    PulseKeyRegistryRead,
     PulseStrAttrs,
     PulseStrAttrsFilter,
     PulseStrAttrsRead,
 )
-from api.public.pulse.models import Pulse, PulseRead
+from api.public.pulse.models import Pulse
 from api.utils.exceptions import (
     AttrDataTypeExistsError,
     AttrDataTypeUnsupportedError,
@@ -28,10 +28,7 @@ def check_attr_data_type(
     """Check the data type of a key."""
     # Find the index in PulseKeyRegistry for this key
     statement = select(PulseKeyRegistry).where(PulseKeyRegistry.key == key)
-    result = db.exec(statement).first()
-    if not result:
-        return None
-    return result
+    return db.exec(statement).first()
 
 
 def read_key_values(
@@ -56,15 +53,13 @@ def read_key_values(
 
 def create_attr(
     pulse_id: int,
-    kv_pair: KeyValuePair,
+    kv_pair: PulseStrAttrsRead | PulseIntAttrsRead,
     db: Session = Depends(get_session),
 ) -> Pulse:
     """Create a new EAV attribute for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         raise PulseNotFoundError(pulse_id=pulse_id)
-
-    pulse_read = PulseRead.from_orm(pulse)
 
     existing_key = check_attr_data_type(key=kv_pair.key, db=db)
 
@@ -81,9 +76,24 @@ def create_attr(
         db.commit()
 
     # Add the new EAV attribute
-    pulse_attr = kv_pair.data_model_class(pulse_read.pulse_id)
-
-    db.add(pulse_attr)
+    if kv_pair.data_type == "string":
+        pulse_attr_str = PulseStrAttrs.from_orm(
+            PulseStrAttrs(
+                key=kv_pair.key,
+                value=kv_pair.value,
+                pulse_id=pulse_id,
+            ),
+        )
+        db.add(pulse_attr_str)
+    elif kv_pair.data_type == "integer":
+        pulse_attr_int = PulseIntAttrs.from_orm(
+            PulseIntAttrs(
+                key=kv_pair.key,
+                value=kv_pair.value,
+                pulse_id=pulse_id,
+            ),
+        )
+        db.add(pulse_attr_int)
 
     db.commit()
     db.refresh(pulse)
@@ -121,12 +131,10 @@ def read_pulse_attrs(
 
 def read_all_keys(
     db: Session = Depends(get_session),
-) -> list[dict[str, str]]:
+) -> list[PulseKeyRegistryRead]:
     """Get all unique keys and their corresponding data type."""
-    return [
-        {"name": key[0], "data_type": key[1]}
-        for key in db.query(PulseKeyRegistry.key, PulseKeyRegistry.data_type).all()
-    ]
+    result = db.exec(select(PulseKeyRegistry).distinct(PulseKeyRegistry.key)).all()
+    return [PulseKeyRegistryRead.from_orm(obj) for obj in result]
 
 
 def read_all_values_on_key(
@@ -158,9 +166,9 @@ def filter_on_key_value_pairs(
 
     for kv in key_value_pairs:
         if isinstance(kv, PulseStrAttrsFilter):
-            results = create_attr_str_filter_statement(kv, db=db)
+            results = attr_str_filter(kv, db=db)
         elif isinstance(kv, PulseIntAttrsFilter):
-            results = create_attr_int_filter_statement(kv, db=db)
+            results = attr_int_filter(kv, db=db)
         else:
             raise AttrDataTypeUnsupportedError(kv.data_type)
         pulse_ids = set(results)
@@ -172,7 +180,7 @@ def filter_on_key_value_pairs(
     return list(common_pulse_ids)
 
 
-def create_attr_str_filter_statement(
+def attr_str_filter(
     kv_pair: PulseStrAttrsFilter,
     db: Session = Depends(get_session),
 ) -> list[int]:
@@ -189,7 +197,7 @@ def create_attr_str_filter_statement(
     return db.exec(statement).all()
 
 
-def create_attr_int_filter_statement(
+def attr_int_filter(
     kv_pair: PulseIntAttrsFilter,
     db: Session = Depends(get_session),
 ) -> list[int]:

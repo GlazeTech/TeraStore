@@ -10,8 +10,17 @@ from api.public import make_api
 from api.utils.exception_handlers import (
     attr_data_conversion_exception_handler,
     attr_data_type_unsupported_exception_handler,
+    attr_key_not_found_exception_handler,
+    device_not_found_exception_handler,
+    pulse_not_found_exception_handler,
 )
-from api.utils.exceptions import AttrDataConversionError, AttrDataTypeUnsupportedError
+from api.utils.exceptions import (
+    AttrDataConversionError,
+    AttrDataTypeUnsupportedError,
+    AttrKeyNotFoundError,
+    DeviceNotFoundError,
+    PulseNotFoundError,
+)
 from api.utils.logging import EndpointFilter
 from api.utils.mock_data_generator import (
     create_devices_and_pulses,
@@ -59,6 +68,18 @@ def create_app(lifespan: Lifespan) -> FastAPI:
     app.add_exception_handler(
         AttrDataConversionError,
         attr_data_conversion_exception_handler,
+    )
+    app.add_exception_handler(
+        AttrKeyNotFoundError,
+        attr_key_not_found_exception_handler,
+    )
+    app.add_exception_handler(
+        PulseNotFoundError,
+        pulse_not_found_exception_handler,
+    )
+    app.add_exception_handler(
+        DeviceNotFoundError,
+        device_not_found_exception_handler,
     )
 
     # Add logging filters
