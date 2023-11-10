@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import Depends
 from sqlalchemy import and_
 from sqlmodel import Session, select
@@ -10,7 +8,7 @@ from api.public.pulse.models import Pulse
 
 
 def add_str_attr(
-    pulse_id: UUID,
+    pulse_id: int,
     key: str,
     value: str,
     db: Session = Depends(get_session),
@@ -39,7 +37,7 @@ def add_str_attr(
 
 
 def read_pulse_attrs(
-    pulse_id: UUID,
+    pulse_id: int,
     db: Session = Depends(get_session),
 ) -> list[dict[str, str]] | None:
     """Get all the keys for a pulse with id pulse_id."""
@@ -74,7 +72,7 @@ def read_all_values_on_key(
 def filter_on_key_value_pairs(
     key_value_pairs: list[dict[str, str]],
     db: Session = Depends(get_session),
-) -> list[UUID]:
+) -> list[int]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
     pulse_ids_list = []

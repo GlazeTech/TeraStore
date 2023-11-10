@@ -1,5 +1,3 @@
-from uuid import uuid4
-
 from fastapi.testclient import TestClient
 
 from api.utils.mock_data_generator import create_devices_and_pulses
@@ -93,7 +91,7 @@ def test_create_pulse_with_nonexistent_device_id(
     client: TestClient,
 ) -> None:
     pulse_payload = {
-        "device_id": str(uuid4()),
+        "device_id": 1000,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -128,8 +126,8 @@ def test_create_pulse_with_invalid_device_id(
     )
 
     assert response.status_code == 422
-    assert response.json()["detail"][0]["msg"] == "value is not a valid uuid"
-    assert response.json()["detail"][0]["type"] == "type_error.uuid"
+    assert response.json()["detail"][0]["msg"] == "value is not a valid integer"
+    assert response.json()["detail"][0]["type"] == "type_error.integer"
 
 
 def test_create_pulse_with_invalid_creation_time(
@@ -185,12 +183,12 @@ def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid uuid"
-    assert data["detail"][0]["type"] == "type_error.uuid"
+    assert data["detail"][0]["msg"] == "value is not a valid integer"
+    assert data["detail"][0]["type"] == "type_error.integer"
 
 
 def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
-    pulse_id = uuid4()
+    pulse_id = 1000
     response = client.get(f"/pulses/{pulse_id}")
     data = response.json()
 

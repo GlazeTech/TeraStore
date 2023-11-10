@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlmodel import Field, SQLModel
 
 
@@ -10,7 +8,7 @@ class PulseStrAttrs(SQLModel, table=True):
 
     key: str
     value: str
-    pulse_id: UUID = Field(foreign_key="pulses.pulse_id", index=True)
+    pulse_id: int = Field(foreign_key="pulses.pulse_id", index=True)
 
     index: int | None = Field(default=None, primary_key=True)
 
@@ -20,4 +18,6 @@ class PulseKeyRegistry(SQLModel, table=True):
 
     __tablename__ = "pulse_key_registry"
 
-    key: str = Field(primary_key=True)
+    key: str
+
+    index: int | None = Field(default=None, primary_key=True)

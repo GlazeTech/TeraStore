@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import Depends
 from sqlmodel import Session, select
 
@@ -26,5 +24,5 @@ def read_devices(
     return db.exec(select(Device).offset(offset).limit(limit)).all()
 
 
-def read_device(device_id: UUID, db: Session = Depends(get_session)) -> Device | None:
+def read_device(device_id: int, db: Session = Depends(get_session)) -> Device | None:
     return db.get(Device, device_id)
