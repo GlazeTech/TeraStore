@@ -30,9 +30,9 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
     assert response.json() == []
 
 
-def test_get_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
+def test_get_attrs_on_pulse(client: TestClient, device_id: str) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
@@ -77,9 +77,9 @@ def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
     assert response.json()["detail"] == f"Pulse not found with id: {pulse_id}"
 
 
-def test_add_pulse_attrs_on_pulse(client: TestClient, device_uuid: str) -> None:
+def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: str) -> None:
     pulse_payload = {
-        "device_id": device_uuid,
+        "device_id": device_id,
         "delays": [1, 2, 3],
         "signal": [1, 2, 3],
         "integration_time": 100,
