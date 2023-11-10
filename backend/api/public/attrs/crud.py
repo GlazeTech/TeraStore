@@ -1,10 +1,14 @@
 from fastapi import Depends
-from sqlalchemy import and_
+from pydantic.types import StrictStr
 from sqlmodel import Session, select
 
 from api.database import get_session
-from api.public.attrs.models import PulseKeyRegistry, PulseStrAttrs
-from api.public.pulse.models import Pulse
+from api.public.attrs.models import (
+    PulseAttrsStr,
+    PulseAttrsStrRead,
+    PulseKeyRegistry,
+)
+from api.public.pulse.models import Pulse, PulseRead
 from api.utils.exceptions import PulseNotFoundError
 
 
@@ -13,7 +17,7 @@ def add_str_attr(
     key: str,
     value: str,
     db: Session = Depends(get_session),
-) -> Pulse:
+) -> PulseRead:
     """Add a key-value pair to a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
@@ -29,74 +33,75 @@ def add_str_attr(
         db.add(new_key)
 
     # Now, add the new EAV string attribute
-    pulse_str_attr = PulseStrAttrs(key=key, value=value, pulse_id=pulse_id)
+    pulse_str_attr = PulseAttrsStr(key=key, value=value, pulse_id=pulse_id)
     db.add(pulse_str_attr)
 
     db.commit()
     db.refresh(pulse)
-    return pulse
+    return PulseRead.from_orm(pulse)
 
 
 def read_pulse_attrs(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[dict[str, str]]:
+) -> list[PulseAttrsStrRead]:
     """Get all the keys for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         raise PulseNotFoundError(pulse_id=pulse_id)
 
-    statement = select([PulseStrAttrs.key, PulseStrAttrs.value]).where(
-        PulseStrAttrs.pulse_id == pulse_id,
+    statement = select(PulseAttrsStr).where(
+        PulseAttrsStr.pulse_id == pulse_id,
     )
-    results = db.execute(statement).fetchall()
-
-    return [{"key": row[0], "value": row[1]} for row in results]
+    attrs = db.exec(statement).all()
+    return [PulseAttrsStrRead.from_orm(attr) for attr in attrs]
 
 
 def read_all_keys(
     db: Session = Depends(get_session),
 ) -> list[str]:
     """Get all unique keys."""
-    return [key[0] for key in db.query(PulseKeyRegistry.key).all()]
+    statement = select(PulseKeyRegistry.key).distinct()
+    return db.exec(statement).all()
 
 
 def read_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> list[str]:
+) -> list[StrictStr]:
     """Get all unique values associated with a key."""
-    statement = select(PulseStrAttrs.value).where(PulseStrAttrs.key == key).distinct()
-    return db.execute(statement).scalars().all()
+    statement = select(PulseAttrsStr.value).where(PulseAttrsStr.key == key).distinct()
+    return db.exec(statement).all()
 
 
 def filter_on_key_value_pairs(
-    key_value_pairs: list[dict[str, str]],
+    kv_pairs: list[PulseAttrsStrRead],
     db: Session = Depends(get_session),
 ) -> list[int]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
-    pulse_ids_list = []
+    pulse_ids_list: list[set[int]] = []
 
     # If no filters applied, select all pulses
-    if len(key_value_pairs) == 0:
-        return db.execute(select(Pulse.pulse_id)).scalars().all()
+    if len(kv_pairs) == 0:
+        pulses = db.exec(select(Pulse.pulse_id)).all()
+        if pulses[0] is None:
+            return []
 
-    for kv in key_value_pairs:
-        key = kv.get("key")
-        value = kv.get("value")
+    for kv in kv_pairs:
+        key = kv.key
+        value = kv.value
 
         # Perform query for this key-value pair
-        statement = select(PulseStrAttrs.pulse_id).where(
-            and_(PulseStrAttrs.key == key, PulseStrAttrs.value == value),
+        statement = (
+            select(PulseAttrsStr.pulse_id)
+            .where(PulseAttrsStr.key == key)
+            .where(PulseAttrsStr.value == value)
         )
-        results = db.execute(statement).fetchall()
-
-        # Convert results to set of pulse_ids and add to list
-        pulse_ids = {row[0] for row in results}
-        pulse_ids_list.append(pulse_ids)
+        pulse_ids = db.exec(statement).all()
+        pulse_ids_list.append(set(pulse_ids))
 
     # Find the intersection of all sets of pulse_ids
-    common_pulse_ids = set.intersection(*pulse_ids_list)
+    common_pulse_ids: set[int] = set.intersection(*pulse_ids_list)
 
     return list(common_pulse_ids)

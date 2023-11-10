@@ -19,15 +19,17 @@ def read_pulses(
     offset: int = 0,
     limit: int = 20,
     db: Session = Depends(get_session),
-) -> list[Pulse]:
+) -> list[PulseRead]:
     """Get all pulses in the database."""
-    return db.exec(select(Pulse).offset(offset).limit(limit)).all()
+    statement = select(Pulse).offset(offset).limit(limit)
+    pulses = db.exec(statement).all()
+    return [PulseRead.from_orm(pulse) for pulse in pulses]
 
 
 def read_pulses_with_ids(
     ids: list[int],
     db: Session = Depends(get_session),
-) -> list[Pulse]:
+) -> list[PulseRead]:
     # Save wanted ID's in a temporary table
     db.bulk_save_objects([TemporaryPulseIdTable(pulse_id=idx) for idx in ids])
     db.commit()
@@ -44,11 +46,11 @@ def read_pulses_with_ids(
     # Delete the entries from the temporary table again
     db.query(TemporaryPulseIdTable).delete()
     db.commit()
-    return pulses
+    return [PulseRead.from_orm(pulse) for pulse in pulses]
 
 
-def read_pulse(pulse_id: int, db: Session = Depends(get_session)) -> Pulse:
+def read_pulse(pulse_id: int, db: Session = Depends(get_session)) -> PulseRead:
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         raise PulseNotFoundError(pulse_id=pulse_id)
-    return pulse
+    return PulseRead.from_orm(pulse)
