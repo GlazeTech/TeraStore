@@ -2,18 +2,18 @@ from fastapi import Depends
 from sqlmodel import Session, select
 
 from api.database import get_session
-from api.public.device.models import Device, DeviceCreate
+from api.public.device.models import Device, DeviceCreate, DeviceRead
 
 
 def create_device(
     device: DeviceCreate,
     db: Session = Depends(get_session),
-) -> Device:
+) -> DeviceRead:
     device_to_db = Device.from_orm(device)
     db.add(device_to_db)
     db.commit()
     db.refresh(device_to_db)
-    return device_to_db
+    return DeviceRead.from_orm(device_to_db)
 
 
 def read_devices(

@@ -12,7 +12,7 @@ router = APIRouter()
 def create_a_device(
     device: DeviceCreate,
     db: Session = Depends(get_session),
-) -> Device:
+) -> DeviceRead:
     return create_device(device=device, db=db)
 
 

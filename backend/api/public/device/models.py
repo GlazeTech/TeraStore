@@ -24,7 +24,7 @@ class Device(DeviceBase, table=True):
 
     __tablename__ = "devices"
 
-    device_id: int = Field(default=None, primary_key=True)
+    device_id: int | None = Field(default=None, primary_key=True)
 
 
 class DeviceCreate(DeviceBase):
