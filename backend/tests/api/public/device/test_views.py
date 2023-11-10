@@ -102,11 +102,11 @@ def test_get_device_with_invalid_device_id(client: TestClient) -> None:
 
 
 def test_get_device_with_nonexistent_device_id(client: TestClient) -> None:
-    response = client.get("/devices/10000000")
+    response = client.get("/devices/1000")
     data = response.json()
 
     assert response.status_code == 404
-    assert data["detail"] == "Device not found with id: 10000000"
+    assert data["detail"] == "Device not found with id: 1000"
 
 
 def test_get_all_devices(client: TestClient) -> None:
