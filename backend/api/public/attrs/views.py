@@ -13,7 +13,7 @@ router = APIRouter()
 
 
 @router.get("/keys")
-def get_all_keys(db: Session = Depends(get_session)) -> dict[str, str]:
+def get_all_keys(db: Session = Depends(get_session)) -> list[dict[str, str]]:
     return read_all_keys(db=db)
 
 

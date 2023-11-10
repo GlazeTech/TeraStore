@@ -99,10 +99,10 @@ class PulseIntAttrsFilter(PulseAttrsBase):
         """Validate, with Pydantic, that the min_value and max_value fields are okay."""
         min_value, max_value = values.get("min_value"), values.get("max_value")
         # We need to guard against None to satisfy Mypy.
-        if not min_value:
+        if min_value is None:
             error_message = "min_value must be set"
             raise ValueError(error_message)
-        if not max_value:
+        if max_value is None:
             error_message = "max_value must be set"
             raise ValueError(error_message)
         # Check if min_value and max_value can be coaxed to int.

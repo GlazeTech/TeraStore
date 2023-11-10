@@ -120,12 +120,12 @@ def read_pulse_attrs(
 
 def read_all_keys(
     db: Session = Depends(get_session),
-) -> dict[str, str]:
+) -> list[dict[str, str]]:
     """Get all unique keys and their corresponding data type."""
-    return {
-        key[0]: key[1]
+    return [
+        {"name": key[0], "data_type": key[1]}
         for key in db.query(PulseKeyRegistry.key, PulseKeyRegistry.data_type).all()
-    }
+    ]
 
 
 def read_all_values_on_key(
