@@ -5,6 +5,7 @@ from sqlmodel import Session, select
 from api.database import get_session
 from api.public.attrs.models import PulseKeyRegistry, PulseStrAttrs
 from api.public.pulse.models import Pulse
+from api.utils.exceptions import PulseNotFoundError
 
 
 def add_str_attr(
@@ -12,11 +13,11 @@ def add_str_attr(
     key: str,
     value: str,
     db: Session = Depends(get_session),
-) -> Pulse | None:
+) -> Pulse:
     """Add a key-value pair to a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
-        return None
+        raise PulseNotFoundError(pulse_id=pulse_id)
 
     existing_key = (
         db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
@@ -39,11 +40,11 @@ def add_str_attr(
 def read_pulse_attrs(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[dict[str, str]] | None:
+) -> list[dict[str, str]]:
     """Get all the keys for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
-        return None
+        raise PulseNotFoundError(pulse_id=pulse_id)
 
     statement = select([PulseStrAttrs.key, PulseStrAttrs.value]).where(
         PulseStrAttrs.pulse_id == pulse_id,

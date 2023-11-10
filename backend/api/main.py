@@ -7,6 +7,11 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from api.database import create_db_and_tables, drop_tables
 from api.public import make_api
+from api.utils.exception_handlers import (
+    device_not_found_exception_handler,
+    pulse_not_found_exception_handler,
+)
+from api.utils.exceptions import DeviceNotFoundError, PulseNotFoundError
 from api.utils.logging import EndpointFilter
 from api.utils.mock_data_generator import (
     create_devices_and_pulses,
@@ -46,6 +51,17 @@ def create_app(lifespan: Lifespan) -> FastAPI:
         allow_headers=["*"],
     )
 
+    # Add exception handlers
+    app.add_exception_handler(
+        PulseNotFoundError,
+        pulse_not_found_exception_handler,
+    )
+    app.add_exception_handler(
+        DeviceNotFoundError,
+        device_not_found_exception_handler,
+    )
+
+    # Add logging filters
     uvicorn_logger = logging.getLogger("uvicorn.access")
     uvicorn_logger.addFilter(EndpointFilter(path="/health"))
 

@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 
 from api.database import get_session
 from api.public.device.models import Device, DeviceCreate, DeviceRead
+from api.utils.exceptions import DeviceNotFoundError
 
 
 def create_device(
@@ -24,5 +25,8 @@ def read_devices(
     return db.exec(select(Device).offset(offset).limit(limit)).all()
 
 
-def read_device(device_id: int, db: Session = Depends(get_session)) -> Device | None:
-    return db.get(Device, device_id)
+def read_device(device_id: int, db: Session = Depends(get_session)) -> Device:
+    device = db.get(Device, device_id)
+    if not device:
+        raise DeviceNotFoundError(device_id=device_id)
+    return device

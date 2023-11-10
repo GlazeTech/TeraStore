@@ -51,13 +51,7 @@ def get_pulses_from_ids(
 
 @router.get("/{pulse_id}", response_model=PulseRead)
 def get_pulse(pulse_id: int, db: Session = Depends(get_session)) -> Pulse:
-    pulse = read_pulse(pulse_id=pulse_id, db=db)
-    if not pulse:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
-        )
-    return pulse
+    return read_pulse(pulse_id=pulse_id, db=db)
 
 
 @router.put("/{pulse_id}/attrs", response_model=PulseRead)
@@ -67,13 +61,7 @@ def add_kv_str(
     value: str,
     db: Session = Depends(get_session),
 ) -> Pulse:
-    pulse = add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
-    if not pulse:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
-        )
-    return pulse
+    return add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
 
 
 @router.get("/{pulse_id}/attrs")
@@ -81,10 +69,4 @@ def get_pulse_keys(
     pulse_id: int,
     db: Session = Depends(get_session),
 ) -> list[dict[str, str]]:
-    pulse_attrs = read_pulse_attrs(pulse_id=pulse_id, db=db)
-    if not pulse_attrs:
-        raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"Pulse not found with id: {pulse_id}",
-        )
-    return pulse_attrs
+    return read_pulse_attrs(pulse_id=pulse_id, db=db)
