@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
 
@@ -27,7 +25,7 @@ def get_all_values_on_key(key: str, db: Session = Depends(get_session)) -> list[
 def filter_attrs(
     key_value_pairs: list[dict[str, str]],
     db: Session = Depends(get_session),
-) -> list[UUID]:
+) -> list[int]:
     """Filter pulses based on key-value pairs.
 
     Example usage:

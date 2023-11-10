@@ -97,19 +97,16 @@ def test_get_device_with_invalid_device_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid uuid"
-    assert data["detail"][0]["type"] == "type_error.uuid"
+    assert data["detail"][0]["msg"] == "value is not a valid integer"
+    assert data["detail"][0]["type"] == "type_error.integer"
 
 
 def test_get_device_with_nonexistent_device_id(client: TestClient) -> None:
-    response = client.get("/devices/00000000-0000-0000-0000-000000000000")
+    response = client.get("/devices/1000")
     data = response.json()
 
     assert response.status_code == 404
-    assert (
-        data["detail"]
-        == "Device not found with id: 00000000-0000-0000-0000-000000000000"
-    )
+    assert data["detail"] == "Device not found with id: 1000"
 
 
 def test_get_all_devices(client: TestClient) -> None:
