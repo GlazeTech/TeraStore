@@ -3,6 +3,7 @@ from sqlmodel import Session, select
 
 from api.database import get_session
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead, TemporaryPulseIdTable
+from api.utils.exceptions import PulseNotFoundError
 
 
 def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> PulseRead:
@@ -46,5 +47,8 @@ def read_pulses_with_ids(
     return pulses
 
 
-def read_pulse(pulse_id: int, db: Session = Depends(get_session)) -> Pulse | None:
-    return db.get(Pulse, pulse_id)
+def read_pulse(pulse_id: int, db: Session = Depends(get_session)) -> Pulse:
+    pulse = db.get(Pulse, pulse_id)
+    if not pulse:
+        raise PulseNotFoundError(pulse_id=pulse_id)
+    return pulse
