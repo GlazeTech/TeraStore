@@ -5,18 +5,19 @@ from sqlmodel import Session
 
 from api.database import get_session
 from api.public.attrs.crud import add_str_attr, read_pulse_attrs
+from api.public.attrs.models import PulseAttrsStrRead
 from api.public.pulse.crud import (
     create_pulse,
     read_pulse,
     read_pulses,
     read_pulses_with_ids,
 )
-from api.public.pulse.models import Pulse, PulseCreate, PulseRead
+from api.public.pulse.models import PulseCreate, PulseRead
 
 router = APIRouter()
 
 
-@router.post("/create", response_model=PulseRead)
+@router.post("/create")
 def create_a_pulse(
     pulse: PulseCreate,
     db: Session = Depends(get_session),
@@ -32,35 +33,35 @@ def create_a_pulse(
         raise
 
 
-@router.get("", response_model=list[PulseRead])
+@router.get("")
 def get_pulses(
     offset: int = 0,
     limit: int = Query(default=100, lte=100),
     db: Session = Depends(get_session),
-) -> list[Pulse]:
+) -> list[PulseRead]:
     return read_pulses(offset=offset, limit=limit, db=db)
 
 
-@router.post("/get", response_model=list[PulseRead])
+@router.post("/get")
 def get_pulses_from_ids(
     ids: list[int],
     db: Session = Depends(get_session),
-) -> list[Pulse]:
+) -> list[PulseRead]:
     return read_pulses_with_ids(ids, db=db)
 
 
-@router.get("/{pulse_id}", response_model=PulseRead)
-def get_pulse(pulse_id: int, db: Session = Depends(get_session)) -> Pulse:
+@router.get("/{pulse_id}")
+def get_pulse(pulse_id: int, db: Session = Depends(get_session)) -> PulseRead:
     return read_pulse(pulse_id=pulse_id, db=db)
 
 
-@router.put("/{pulse_id}/attrs", response_model=PulseRead)
+@router.put("/{pulse_id}/attrs")
 def add_kv_str(
     pulse_id: int,
     key: str,
     value: str,
     db: Session = Depends(get_session),
-) -> Pulse:
+) -> PulseRead:
     return add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
 
 
@@ -68,5 +69,5 @@ def add_kv_str(
 def get_pulse_keys(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[dict[str, str]]:
+) -> list[PulseAttrsStrRead]:
     return read_pulse_attrs(pulse_id=pulse_id, db=db)
