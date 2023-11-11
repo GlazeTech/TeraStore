@@ -3,11 +3,7 @@ from pydantic.types import StrictStr
 from sqlmodel import Session, select
 
 from api.database import get_session
-from api.public.attrs.models import (
-    PulseAttrsStr,
-    PulseAttrsStrRead,
-    PulseKeyRegistry,
-)
+from api.public.attrs.models import PulseAttrsStr, PulseAttrsStrRead, PulseKeyRegistry
 from api.public.pulse.models import Pulse, PulseRead
 from api.utils.exceptions import PulseNotFoundError
 
@@ -89,14 +85,11 @@ def filter_on_key_value_pairs(
             return []
 
     for kv in kv_pairs:
-        key = kv.key
-        value = kv.value
-
         # Perform query for this key-value pair
         statement = (
             select(PulseAttrsStr.pulse_id)
-            .where(PulseAttrsStr.key == key)
-            .where(PulseAttrsStr.value == value)
+            .where(PulseAttrsStr.key == kv.key)
+            .where(PulseAttrsStr.value == kv.value)
         )
         pulse_ids = db.exec(statement).all()
         pulse_ids_list.append(set(pulse_ids))
