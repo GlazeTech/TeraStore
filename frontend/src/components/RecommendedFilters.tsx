@@ -1,11 +1,12 @@
 import * as M from "@mantine/core";
 import { FilterResult } from "classes";
-import { getFilterResultsForEachKeyValue } from "helpers";
+import { getFilterResultsForEachStringValue } from "helpers";
+import { IAttrKey } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
 
 interface KeyFilterResult {
-	key: string;
+	key: IAttrKey;
 	filterResults: FilterResult[];
 }
 interface RecommendedFilterCardProps {
@@ -20,10 +21,7 @@ function RecommendedFilterCard({
 	const [addPulseFilter] = useFiltersStore((state) => [state.addPulseFilter]);
 
 	const addFilter = (idx: number) => {
-		addPulseFilter({
-			key: keyFilterResult.key,
-			value: keyFilterResult.filterResults[idx].lastFilter.value,
-		});
+		addPulseFilter(keyFilterResult.filterResults[idx].lastFilter);
 	};
 	return (
 		<M.Card
@@ -35,7 +33,7 @@ function RecommendedFilterCard({
 		>
 			<M.Card.Section withBorder inheritPadding>
 				<M.Group justify="space-between" mt="md" mb="xs">
-					<M.Text fw={600}>{keyFilterResult.key}</M.Text>
+					<M.Text fw={600}>{keyFilterResult.key.name}</M.Text>
 					<M.Text>(total: {totalPulses(keyFilterResult.filterResults)})</M.Text>
 				</M.Group>
 			</M.Card.Section>
@@ -48,7 +46,7 @@ function RecommendedFilterCard({
 						key={`filterResults-${idx}`}
 					>
 						<M.Badge variant="light" onClick={() => addFilter(idx)}>
-							{filterResult.lastFilter.value}
+							{filterResult.lastFilter.displayValue()}
 						</M.Badge>
 						<M.Text fw={400}>({filterResult.nPulses})</M.Text>
 					</M.Group>
@@ -71,7 +69,7 @@ function RecommendedFilters() {
 		if (notAppliedPulseKeys) {
 			Promise.all(
 				notAppliedPulseKeys.map((key) =>
-					getFilterResultsForEachKeyValue(key, pulseFilters),
+					getFilterResultsForEachStringValue(key, pulseFilters),
 				),
 			).then((results) =>
 				setSortedFilterResults(

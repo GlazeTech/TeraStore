@@ -1,23 +1,27 @@
 import * as M from "@mantine/core";
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { cachedGetFilteredPulses, cachedGetPulse, cachedGetPulses } from "api";
+import { getFilteredPulses, getPulse, getPulses } from "api";
 import { Pulse } from "classes";
 import { downloadJson } from "helpers";
+import { PulseID } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
-interface PulseCardProps {
-	pulseID: string;
-	isSelected: boolean;
-	setSelected: (value: React.SetStateAction<string | null>) => void;
-}
 
-function PulseCard({ pulseID, isSelected, setSelected }: PulseCardProps) {
+function PulseCard({
+	pulseID,
+	isSelected,
+	setSelected,
+}: {
+	pulseID: number;
+	isSelected: boolean;
+	setSelected: (value: React.SetStateAction<PulseID | null>) => void;
+}) {
 	const [pulse, setPulse] = useState<Pulse | null>(null);
 
 	useEffect(() => {
 		if (isSelected) {
-			cachedGetPulse(pulseID).then((p) => setPulse(p));
+			getPulse(pulseID).then((p) => setPulse(p));
 		}
 	}, [isSelected]);
 
@@ -58,7 +62,7 @@ function PulseCard({ pulseID, isSelected, setSelected }: PulseCardProps) {
 	);
 }
 
-function DownloadModalContent({ pulseIds }: { pulseIds: string[] }) {
+function DownloadModalContent({ pulseIds }: { pulseIds: PulseID[] }) {
 	const [allSelected, allSelectedHandler] = useDisclosure(true);
 	const [pulses, pulsesHandlers] = useListState(
 		pulseIds.map((pulseId) => {
@@ -85,8 +89,7 @@ function DownloadModalContent({ pulseIds }: { pulseIds: string[] }) {
 			});
 			return;
 		}
-		cachedGetPulses(selectedPulses.map((pulse) => pulse.id)).then((result) => {
-			console.log(result);
+		getPulses(selectedPulses.map((pulse) => pulse.id)).then((result) => {
 			downloadJson(result, "TeraStore - pulses");
 		});
 	};
@@ -132,13 +135,15 @@ function DownloadModalContent({ pulseIds }: { pulseIds: string[] }) {
 }
 
 function MatchingPulses() {
-	const [filteredPulses, setFilteredPulses] = useState<string[] | null>(null);
-	const [selectedItem, setSelectedItem] = useState<string | null>(null);
+	const [filteredPulses, setFilteredPulses] = useState<PulseID[] | null>(null);
+	const [selectedItem, setSelectedItem] = useState<PulseID | null>(null);
 	const [pulseFilters] = useFiltersStore((state) => [state.pulseFilters]);
 	const [modalIsOpen, modalHandler] = useDisclosure(false);
 
 	useEffect(() => {
-		cachedGetFilteredPulses(pulseFilters).then((res) => setFilteredPulses(res));
+		getFilteredPulses(pulseFilters).then((res) =>
+			setFilteredPulses(res.pulseIDs),
+		);
 	}, [pulseFilters]);
 
 	return (
