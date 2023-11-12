@@ -5,7 +5,6 @@ import { IAttrKey, Option, PulseFilter } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
 
-
 function filterResultsToOptions(filterResults: FilterResult[]): Option[] {
 	return filterResults.map((filter) => {
 		if (filter.lastFilter instanceof PulseStringFilter) {
@@ -23,7 +22,8 @@ function FilterMenu() {
 	const [newFilterIsOpen, setNewFilterIsOpen] = useState(false);
 	const [selectedPulseKey, setSelectedPulseKey] = useState<IAttrKey | null>(
 		null,
-	);	const [selectedKeyValue, setSelectedKeyValue] = useState<string | null>(null);
+	);
+	const [selectedKeyValue, setSelectedKeyValue] = useState<string | null>(null);
 	const [selectValueOptions, setSelectValueOptions] = useState<Option[]>([]);
 	const [pulseKeys, pulseFilters, addPulseFilter, removePulseFilter] =
 		useFiltersStore((state) => [
@@ -68,7 +68,7 @@ function FilterMenu() {
 		return filters.map((filter) => (
 			<M.Pill
 				m={5}
-				key={filter.key.name}
+				key={filter.hash()}
 				withRemoveButton
 				onRemove={() => removePulseFilter(filter)}
 			>

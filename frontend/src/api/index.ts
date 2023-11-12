@@ -20,14 +20,6 @@ const api = setupCache(
 	{ methods: ["get", "post"] },
 );
 
-// export async function getPulseKeys(): Promise<IAttrKey[]> {
-// 	return api.get<BackendAttrKey[]>("/attrs/keys").then((resp) => {
-// 		return resp.data.map((attrKey) =>
-// 			attrKeyFactory(attrKey.name, attrKey.data_type),
-// 		);
-// 	});
-// }
-
 export async function getPulseKeys(): Promise<IAttrKey[]> {
 	return api.get<BackendAttrKey[]>("/attrs/keys").then((resp) => {
 		return resp.data.map((attrKey) => attrKeyFactory(attrKey, KVType.STRING));
