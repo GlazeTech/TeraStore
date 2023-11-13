@@ -1,3 +1,5 @@
+from typing import cast
+
 from fastapi import Depends
 from pydantic.types import StrictStr
 from sqlmodel import Session, select
@@ -83,6 +85,7 @@ def filter_on_key_value_pairs(
         pulses = db.exec(select(Pulse.pulse_id)).all()
         if pulses[0] is None:
             return []
+        return cast(list[int], pulses)
 
     for kv in kv_pairs:
         # Perform query for this key-value pair
