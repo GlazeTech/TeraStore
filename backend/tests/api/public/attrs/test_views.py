@@ -19,7 +19,7 @@ def test_get_all_values_on_key(client: TestClient) -> None:
     response = client.get("/attrs/angle/values/")
 
     assert response.status_code == 200
-    assert response.json() == ["17", "23", "29"]
+    assert response.json() == [17.1, 23.2, 24.5, 29.0]
 
 
 def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
@@ -27,8 +27,8 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
 
     response = client.get("/attrs/non-existing-key/values/")
 
-    assert response.status_code == 200
-    assert response.json() == []
+    assert response.status_code == 404
+    assert response.json()["detail"] == "Key non-existing-key does not exist."
 
 
 def test_get_attrs_on_pulse(client: TestClient, device_id: str) -> None:
@@ -46,17 +46,19 @@ def test_get_attrs_on_pulse(client: TestClient, device_id: str) -> None:
     pulse_data = pulse_response.json()
 
     attrs_1_key = "angle"
-    attrs_1_value = "29"
+    attrs_1_value = 29.0
 
     client.put(
-        f"/pulses/{pulse_data['pulse_id']}/attrs?key={attrs_1_key}&value={attrs_1_value}",
+        f"/pulses/{pulse_data['pulse_id']}/attrs/",
+        json={"key": attrs_1_key, "value": attrs_1_value},
     )
 
     attrs_2_key = "substrate"
     attrs_2_value = "sand-blasted steel"
 
     client.put(
-        f"/pulses/{pulse_data['pulse_id']}/attrs?key={attrs_2_key}&value={attrs_2_value}",
+        f"/pulses/{pulse_data['pulse_id']}/attrs/",
+        json={"key": attrs_2_key, "value": attrs_2_value},
     )
 
     response = client.get(f"/pulses/{pulse_data['pulse_id']}/attrs/")
@@ -64,10 +66,20 @@ def test_get_attrs_on_pulse(client: TestClient, device_id: str) -> None:
 
     assert response.status_code == 200
     assert len(response_data) == 2
-    assert response_data[0]["key"] == attrs_1_key
-    assert response_data[0]["value"] == attrs_1_value
-    assert response_data[1]["key"] == attrs_2_key
-    assert response_data[1]["value"] == attrs_2_value
+    assert (
+        response_data[0]["key"] == attrs_1_key
+        and response_data[0]["value"] == attrs_1_value
+    ) or (
+        response_data[0]["key"] == attrs_2_key
+        and response_data[0]["value"] == attrs_2_value
+    )
+    assert (
+        response_data[1]["key"] == attrs_1_key
+        and response_data[1]["value"] == attrs_1_value
+    ) or (
+        response_data[1]["key"] == attrs_2_key
+        and response_data[1]["value"] == attrs_2_value
+    )
 
 
 def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
@@ -96,7 +108,8 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: str) -> None:
     attrs_value = "29"
 
     client.put(
-        f"/pulses/{pulse_data['pulse_id']}/attrs?key={attrs_key}&value={attrs_value}",
+        f"/pulses/{pulse_data['pulse_id']}/attrs/",
+        json={"key": attrs_key, "value": attrs_value},
     )
 
     response = client.get(f"/pulses/{pulse_data['pulse_id']}/attrs/")
@@ -113,7 +126,8 @@ def test_add_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
     attrs_value = "29"
 
     response = client.put(
-        f"/pulses/{pulse_id}/attrs?key={attrs_key}&value={attrs_value}",
+        f"/pulses/{pulse_id}/attrs/",
+        json={"key": attrs_key, "value": attrs_value},
     )
 
     assert response.status_code == 404
