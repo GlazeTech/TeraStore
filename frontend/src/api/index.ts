@@ -1,42 +1,53 @@
 import axios from "axios";
-import { Pulse } from "classes";
-import { cacheFunction } from "helpers";
-import { PulseFilter, PulseFromBackend } from "interfaces";
+import { setupCache } from "axios-cache-interceptor";
+import { FilterResult, Pulse, attrKeyFactory } from "classes";
+import { sortPulseFilters } from "helpers";
+import {
+	BackendAttrKey,
+	BackendPulse,
+	IAttrKey,
+	KVType,
+	PulseFilter,
+	PulseID,
+} from "interfaces";
 
-const api = axios.create({
-	baseURL: import.meta.env.PROD
-		? import.meta.env.VITE_BACKEND_URL
-		: "http://0.0.0.0:8000",
-});
+const api = setupCache(
+	axios.create({
+		baseURL: import.meta.env.PROD
+			? import.meta.env.VITE_BACKEND_URL
+			: "http://0.0.0.0:8000",
+	}),
+	{ methods: ["get", "post"] },
+);
 
-export async function pingBackend(): Promise<string> {
-	return api.get("/").then((resp) => {
-		return resp.data.message;
+export async function getPulseKeys(): Promise<IAttrKey[]> {
+	return api.get<BackendAttrKey[]>("/attrs/keys").then((resp) => {
+		return resp.data.map((attrKey) => attrKeyFactory(attrKey, KVType.STRING));
 	});
 }
 
-export async function getPulseKeys(): Promise<string[]> {
-	return api.get("/attrs/keys").then((resp) => {
-		return resp.data;
-	});
-}
-
-export async function getKeyValues(key: string): Promise<string[]> {
-	return api.get(`/attrs/${key}/values`).then((resp) => {
+export async function getKeyValues<T>(key: IAttrKey): Promise<T> {
+	return api.get<T>(`/attrs/${key.name}/values`).then((resp) => {
 		return resp.data;
 	});
 }
 
 export async function getFilteredPulses(
 	filters: PulseFilter[],
-): Promise<string[]> {
-	return api.post("/attrs/filter", filters).then((resp) => {
-		return resp.data;
-	});
+): Promise<FilterResult> {
+	return api
+		.post<PulseID[]>(
+			"/attrs/filter",
+			// Sort pulsefilters for improved caching
+			sortPulseFilters(filters).map((filter) => filter.asBackendFilter()),
+		)
+		.then((resp) => {
+			return new FilterResult(filters, resp.data);
+		});
 }
 
-export async function getPulse(pulseID: string): Promise<Pulse> {
-	return api.get(`/pulses/${pulseID}`).then((resp) => {
+export async function getPulse(pulseID: PulseID): Promise<Pulse> {
+	return api.get<BackendPulse>(`/pulses/${pulseID}`).then((resp) => {
 		return new Pulse(
 			resp.data.delays,
 			resp.data.signal,
@@ -47,39 +58,22 @@ export async function getPulse(pulseID: string): Promise<Pulse> {
 	});
 }
 
-export async function getPulses(pulseIDs: string[]): Promise<Pulse[]> {
-	return api.post("/pulses/get", pulseIDs).then((resp) => {
-		return resp.data.map(
-			(el: PulseFromBackend) =>
-				new Pulse(
-					el.delays,
-					el.signal,
-					el.integration_time,
-					new Date(el.creation_time),
-					el.pulse_id,
-				),
-		);
-	});
+export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
+	return (
+		api
+			// sort pulse IDs for improved caching
+			.post<BackendPulse[]>("/pulses/get", [...pulseIDs].sort())
+			.then((resp) => {
+				return resp.data.map(
+					(el: BackendPulse) =>
+						new Pulse(
+							el.delays,
+							el.signal,
+							el.integration_time,
+							new Date(el.creation_time),
+							el.pulse_id,
+						),
+				);
+			})
+	);
 }
-
-export const cachedGetKeyValues = cacheFunction(
-	getKeyValues,
-	100,
-	(arg) => arg,
-);
-
-export const cachedGetFilteredPulses = cacheFunction(
-	getFilteredPulses,
-	50,
-	(arg) =>
-		[...arg]
-			.sort((a, b) => a.key.localeCompare(b.key))
-			.map((filter) => `${filter.key}:${filter.value}`)
-			.join(","),
-);
-
-export const cachedGetPulse = cacheFunction(getPulse, 100, (arg) => arg);
-
-export const cachedGetPulses = cacheFunction(getPulses, 15, (arg) =>
-	[...arg].sort((a, b) => a.localeCompare(b)).join(","),
-);

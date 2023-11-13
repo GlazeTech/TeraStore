@@ -1,22 +1,18 @@
-import { cachedGetFilteredPulses, cachedGetKeyValues } from "api";
-import { FilterResult } from "classes";
+import { getFilteredPulses, getKeyValues } from "api";
+import { FilterResult, PulseStringFilter, StringAttrKey } from "classes";
 import { PulseFilter } from "interfaces";
-import { LRUCache } from "./LRUCache";
 
-export async function getFilterResultsForEachKeyValue(
-	key: string,
+export async function getFilterResultsForEachStringValue(
+	key: StringAttrKey,
 	pulseFilters: PulseFilter[],
 ): Promise<FilterResult[]> {
-	const keyValues = await cachedGetKeyValues(key);
-	const newFilters = keyValues.map((value) => [
+	const keyValues = await getKeyValues<string[]>(key);
+	const allFilters = keyValues.map((attrValue) => [
 		...pulseFilters,
-		{ key: key, value: value },
+		new PulseStringFilter(key, attrValue as string),
 	]);
-	const pulsesPerFilter = await Promise.all(
-		newFilters.map(async (filter) => cachedGetFilteredPulses(filter)),
-	);
-	return pulsesPerFilter.map(
-		(pulseArr, idx) => new FilterResult(newFilters[idx], pulseArr),
+	return Promise.all(
+		allFilters.map(async (filters) => getFilteredPulses(filters)),
 	);
 }
 
@@ -35,24 +31,20 @@ export function downloadJson(jsonData: object, fileName: string): undefined {
 	URL.revokeObjectURL(url);
 }
 
-export function cacheFunction<T, U>(
-	func: (args: U) => Promise<T>,
-	capacity: number,
-	hashFunction: (arg: U) => string,
-) {
-	const cache = new LRUCache<T>(capacity);
-
-	return async function (args: U): Promise<T> {
-		const cacheKey = hashFunction(args);
-
-		let result = cache.get(cacheKey);
-
-		if (result) {
-			return result;
-		} else {
-			result = await func(args);
-			cache.set(cacheKey, result);
-			return result;
-		}
-	};
-}
+export const sortPulseFilters = (filters: PulseFilter[]) => {
+	// Sorts pulsefilters according to their hash
+	return filters
+		.map((filter) => {
+			return { filter: filter, hash: filter.hash() };
+		})
+		.sort((a, b) => {
+			if (a.hash > b.hash) {
+				return 1;
+			} else if (a.hash < b.hash) {
+				return -1;
+			} else {
+				return 0;
+			}
+		})
+		.map((obj) => obj.filter);
+};

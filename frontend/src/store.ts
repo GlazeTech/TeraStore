@@ -1,11 +1,11 @@
 import { getPulseKeys } from "api";
 import { produce } from "immer";
-import { PulseFilter } from "interfaces";
+import { IAttrKey, PulseFilter } from "interfaces";
 import { create } from "zustand";
 
 interface filtersStore {
-	notAppliedPulseKeys: string[] | undefined;
-	setNotAppliedPulseKeys: (keys: string[]) => void;
+	notAppliedPulseKeys: IAttrKey[] | undefined;
+	setNotAppliedPulseKeys: (keys: IAttrKey[]) => void;
 	pulseFilters: PulseFilter[];
 	addPulseFilter: (filter: PulseFilter) => void;
 	removePulseFilter: (filter: PulseFilter) => void;
@@ -20,7 +20,9 @@ export const useFiltersStore = create<filtersStore>()((set, get) => ({
 	pulseFilters: [],
 	addPulseFilter: (filter) => {
 		const filters = [...get().pulseFilters, filter];
-		const keys = get().notAppliedPulseKeys?.filter((key) => key !== filter.key);
+		const keys = get().notAppliedPulseKeys?.filter(
+			(key) => !key.isEqualTo(filter.key),
+		);
 		set(
 			produce((_state) => ({
 				pulseFilters: filters,
