@@ -1,6 +1,5 @@
 import { IAttrKey, IPulseFilterString } from "interfaces";
 
-
 export class PulseStringFilter implements IPulseFilterString {
 	constructor(public key: IAttrKey, public value: string) {}
 

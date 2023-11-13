@@ -1,28 +1,27 @@
-import { PulseFilter } from "interfaces";
+import { FilterResult, attrKeyFactory } from "classes";
+import { IAttrKey, KVType, PulseFilter } from "interfaces";
 import { vi } from "vitest";
 
 export const mockApi = async () => {
 	vi.mock("api", async () => {
 		return {
-			getPulseKeys: vi.fn(async () => ["mocked_key1", "mocked_key2"]),
-			getKeyValues: vi.fn(async (key: string) => [
-				`${key}_val1`,
-				`${key}_val2`,
-				`${key}_val3`,
-			]),
-			getFilteredPulses: vi.fn(async (_: PulseFilter[]) => [
-				"pulseId1",
-				"pulseId2",
-			]),
-			cachedGetKeyValues: vi.fn(async (key: string) => [
-				`${key}_val1`,
-				`${key}_val2`,
-				`${key}_val3`,
-			]),
-			cachedGetFilteredPulses: vi.fn(async (_: PulseFilter[]) => [
-				"pulseId1",
-				"pulseId2",
-			]),
+			getPulseKeys: vi.fn(
+				async (): Promise<IAttrKey[]> => [
+					attrKeyFactory("mocked_key1", KVType.STRING),
+					attrKeyFactory("mocked_key2", KVType.STRING),
+				],
+			),
+			getKeyValues: vi.fn(
+				async (key: IAttrKey): Promise<string[]> => [
+					`${key.name}_val1`,
+					`${key.name}_val2`,
+					`${key.name}_val3`,
+				],
+			),
+			getFilteredPulses: vi.fn(
+				async (filters: PulseFilter[]): Promise<FilterResult> =>
+					new FilterResult(filters, [1, 2]),
+			),
 		};
 	});
 };
