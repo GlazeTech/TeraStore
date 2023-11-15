@@ -1,9 +1,62 @@
 import * as M from "@mantine/core";
-import { FilterResult, PulseStringFilter } from "classes";
+import {
+	FilterResult,
+	NumberAttrKey,
+	PulseStringFilter,
+	StringAttrKey,
+} from "classes";
 import { getFilterResultsForEachStringValue } from "helpers";
 import { IAttrKey, Option, PulseFilter } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
+import { NumberFilterCard } from "./RecommendedFilterCard";
+
+function selectValueFactory(pulseKey: IAttrKey) {
+	if (pulseKey instanceof NumberAttrKey) {
+		return <NumberFilterCard attrKey={pulseKey} />;
+	} else if (pulseKey instanceof StringAttrKey) {
+		return <SelectStringFilter selectedPulseKey={pulseKey} />;
+	} else {
+		throw new Error("Unhandled type of attr key");
+	}
+}
+
+function SelectStringFilter({
+	selectedPulseKey,
+}: { selectedPulseKey: StringAttrKey }) {
+	const [selectValueOptions, setSelectValueOptions] = useState<Option[]>([]);
+	const [addPulseFilter, pulseFilters] = useFiltersStore((state) => [
+		state.addPulseFilter,
+		state.pulseFilters,
+	]);
+
+	// When a filter key is set, get available values and format a display value
+	useEffect(() => {
+		if (selectedPulseKey) {
+			getFilterResultsForEachStringValue(selectedPulseKey, pulseFilters).then(
+				(filterResults) => {
+					setSelectValueOptions(filterResultsToOptions(filterResults));
+				},
+			);
+		}
+	}, [selectedPulseKey, pulseFilters]);
+
+	const handleSelectValue = (value: string | null) => {
+		if (selectedPulseKey && value) {
+			addPulseFilter(new PulseStringFilter(selectedPulseKey, value));
+		}
+	};
+
+	return (
+		<M.Select
+			label="Value"
+			placeholder="Value"
+			data={selectValueOptions}
+			onChange={(value) => handleSelectValue(value)}
+			disabled={!selectedPulseKey}
+		/>
+	);
+}
 
 function filterResultsToOptions(filterResults: FilterResult[]): Option[] {
 	return filterResults.map((filter) => {
@@ -23,36 +76,22 @@ function FilterMenu() {
 	const [selectedPulseKey, setSelectedPulseKey] = useState<IAttrKey | null>(
 		null,
 	);
-	const [selectedKeyValue, setSelectedKeyValue] = useState<string | null>(null);
-	const [selectValueOptions, setSelectValueOptions] = useState<Option[]>([]);
-	const [pulseKeys, pulseFilters, addPulseFilter, removePulseFilter] =
-		useFiltersStore((state) => [
+	const [pulseKeys, pulseFilters, removePulseFilter] = useFiltersStore(
+		(state) => [
 			state.notAppliedPulseKeys,
 			state.pulseFilters,
-			state.addPulseFilter,
 			state.removePulseFilter,
-		]);
+		],
+	);
 
-	// When a filter key is set, get available values and format a display value
+	// When a new filter is added, close the "New filter" if it was open.
 	useEffect(() => {
-		if (selectedPulseKey) {
-			getFilterResultsForEachStringValue(selectedPulseKey, pulseFilters).then(
-				(filterResults) => {
-					setSelectValueOptions(filterResultsToOptions(filterResults));
-				},
-			);
-		}
-	}, [selectedPulseKey]);
-
-	// When the value of a key is selected, add the filter and close the "add filter" menu
-	useEffect(() => {
-		if (selectedPulseKey && selectedKeyValue) {
-			addPulseFilter(new PulseStringFilter(selectedPulseKey, selectedKeyValue));
-			setNewFilterIsOpen(false);
+		if (newFilterIsOpen) {
 			setSelectedPulseKey(null);
-			setSelectedKeyValue(null);
+			setNewFilterIsOpen(false);
 		}
-	}, [selectedPulseKey, selectedKeyValue]);
+	}, [pulseFilters]);
+
 	const handleDropdownChange = (key: string | null) => {
 		if (pulseKeys) {
 			const pulseKey = pulseKeys.find((el) => el.name === key);
@@ -62,19 +101,6 @@ function FilterMenu() {
 				throw new Error("Expected to find a pulse key, nothing found.");
 			}
 		}
-	};
-
-	const displayPulseFilters = (filters: PulseFilter[]) => {
-		return filters.map((filter) => (
-			<M.Pill
-				m={5}
-				key={filter.hash()}
-				withRemoveButton
-				onRemove={() => removePulseFilter(filter)}
-			>
-				{filter.displayFilter()}
-			</M.Pill>
-		));
 	};
 
 	return (
@@ -96,21 +122,20 @@ function FilterMenu() {
 						value={selectedPulseKey?.name}
 						onChange={handleDropdownChange}
 					/>
-					{selectedPulseKey ? (
-						<M.Select
-							label="Value"
-							placeholder="Value"
-							data={selectValueOptions}
-							onChange={setSelectedKeyValue}
-							disabled={!selectedPulseKey}
-						/>
-					) : (
-						""
-					)}
+					{selectedPulseKey && selectValueFactory(selectedPulseKey)}
 				</M.Popover.Dropdown>
 			</M.Popover>
 			<div style={{ display: "flex", flexWrap: "wrap" }}>
-				{displayPulseFilters(pulseFilters)}
+				{pulseFilters.map((filter) => (
+					<M.Pill
+						m={5}
+						key={filter.hash()}
+						withRemoveButton
+						onRemove={() => removePulseFilter(filter)}
+					>
+						{filter.displayFilter()}
+					</M.Pill>
+				))}
 			</div>
 		</>
 	);

@@ -48,3 +48,20 @@ export const sortPulseFilters = (filters: PulseFilter[]) => {
 		})
 		.map((obj) => obj.filter);
 };
+
+export const findMinDifference = (numbers: number[]): number | undefined => {
+	if (numbers.length < 2) {
+		return undefined;
+	}
+	const all = [...numbers].sort((a, b) => a - b);
+	let minDifference = all[1] - all[0];
+	for (let i = 0; i < all.length - 1; i++) {
+		minDifference = Math.min(minDifference, numbers[i + 1] - numbers[i]);
+	}
+	return minDifference;
+};
+
+export function uniqueElements<T>(list: T[]): T[] {
+	const uniqueSet = new Set(list);
+	return [...uniqueSet];
+}

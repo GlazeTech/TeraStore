@@ -1,3 +1,5 @@
+import { KVType } from "interfaces";
+
 export interface BackendPulse {
 	delays: number[];
 	signal: number[];
@@ -5,6 +7,8 @@ export interface BackendPulse {
 	creation_time: string;
 	pulse_id: number;
 }
-
-export type BackendAttrKey = string;
+export interface BackendAttrKey {
+	name: string;
+	data_type: KVType;
+}
 export type BackendPulseAttrValues = string[] | number[];
