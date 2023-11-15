@@ -1,27 +1,28 @@
 import * as M from "@mantine/core";
-import { FilterResult } from "classes";
-import { getFilterResultsForEachKeyValue } from "helpers";
-import { PulseFilter } from "interfaces";
+import { FilterResult, PulseStringFilter } from "classes";
+import { getFilterResultsForEachStringValue } from "helpers";
+import { IAttrKey, Option, PulseFilter } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
 
-interface Option {
-	value: string;
-	label: string;
-}
-
 function filterResultsToOptions(filterResults: FilterResult[]): Option[] {
 	return filterResults.map((filter) => {
-		return {
-			value: filter.lastFilter.value,
-			label: `${filter.lastFilter.value} (${filter.nPulses})`,
-		};
+		if (filter.lastFilter instanceof PulseStringFilter) {
+			return {
+				value: filter.lastFilter.value,
+				label: `${filter.lastFilter.value} (${filter.nPulses})`,
+			};
+		} else {
+			throw new Error("Not implemented");
+		}
 	});
 }
 
 function FilterMenu() {
 	const [newFilterIsOpen, setNewFilterIsOpen] = useState(false);
-	const [selectedPulseKey, setSelectedPulseKey] = useState<string | null>(null);
+	const [selectedPulseKey, setSelectedPulseKey] = useState<IAttrKey | null>(
+		null,
+	);
 	const [selectedKeyValue, setSelectedKeyValue] = useState<string | null>(null);
 	const [selectValueOptions, setSelectValueOptions] = useState<Option[]>([]);
 	const [pulseKeys, pulseFilters, addPulseFilter, removePulseFilter] =
@@ -35,7 +36,7 @@ function FilterMenu() {
 	// When a filter key is set, get available values and format a display value
 	useEffect(() => {
 		if (selectedPulseKey) {
-			getFilterResultsForEachKeyValue(selectedPulseKey, pulseFilters).then(
+			getFilterResultsForEachStringValue(selectedPulseKey, pulseFilters).then(
 				(filterResults) => {
 					setSelectValueOptions(filterResultsToOptions(filterResults));
 				},
@@ -46,21 +47,33 @@ function FilterMenu() {
 	// When the value of a key is selected, add the filter and close the "add filter" menu
 	useEffect(() => {
 		if (selectedPulseKey && selectedKeyValue) {
-			addPulseFilter({ key: selectedPulseKey, value: selectedKeyValue });
+			addPulseFilter(new PulseStringFilter(selectedPulseKey, selectedKeyValue));
 			setNewFilterIsOpen(false);
 			setSelectedPulseKey(null);
 			setSelectedKeyValue(null);
 		}
 	}, [selectedPulseKey, selectedKeyValue]);
+	const handleDropdownChange = (key: string | null) => {
+		if (pulseKeys) {
+			const pulseKey = pulseKeys.find((el) => el.name === key);
+			if (pulseKey) {
+				setSelectedPulseKey(pulseKey);
+			} else {
+				throw new Error("Expected to find a pulse key, nothing found.");
+			}
+		}
+	};
 
 	const displayPulseFilters = (filters: PulseFilter[]) => {
 		return filters.map((filter) => (
 			<M.Pill
 				m={5}
-				key={filter.key}
+				key={filter.hash()}
 				withRemoveButton
 				onRemove={() => removePulseFilter(filter)}
-			>{`${filter.key}: ${filter.value}`}</M.Pill>
+			>
+				{filter.displayFilter()}
+			</M.Pill>
 		));
 	};
 
@@ -79,9 +92,9 @@ function FilterMenu() {
 					<M.Select
 						label="Key"
 						placeholder="Key"
-						data={pulseKeys}
-						value={selectedPulseKey}
-						onChange={setSelectedPulseKey}
+						data={pulseKeys?.map((e) => e.name)}
+						value={selectedPulseKey?.name}
+						onChange={handleDropdownChange}
 					/>
 					{selectedPulseKey ? (
 						<M.Select
