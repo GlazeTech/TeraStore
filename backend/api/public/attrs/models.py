@@ -2,10 +2,14 @@ from __future__ import annotations
 
 from enum import Enum
 
-from pydantic.types import StrictFloat, StrictStr  # noqa: TCH002
+from pydantic.types import StrictFloat, StrictStr
 from sqlmodel import Field, SQLModel
 
 from api.utils.exceptions import AttrDataTypeDoesNotExistError
+
+# Must be defined early in file to avoid Pydantic panic
+attr_data_type = StrictStr | StrictFloat
+attr_data_type_list = list[StrictStr] | list[StrictFloat]
 
 
 class AttrDataType(str, Enum):
@@ -16,6 +20,20 @@ class AttrDataType(str, Enum):
 
 
 class PulseAttrsBase(SQLModel):
+    key: str
+
+
+class PulseAttrsReadBase(SQLModel):
+    key: str
+
+
+class PulseAttrsCreateBase(SQLModel):
+    key: str
+    data_type: AttrDataType
+    value: attr_data_type
+
+
+class PulseAttrsFilterBase(SQLModel):
     key: str
 
 
@@ -30,16 +48,16 @@ class PulseAttrsStr(PulseAttrsBase, table=True):
     index: int | None = Field(default=None, primary_key=True)
 
 
-class PulseAttrsStrRead(PulseAttrsBase):
+class PulseAttrsStrRead(PulseAttrsReadBase):
     value: StrictStr
 
 
-class PulseAttrsStrCreate(PulseAttrsBase):
+class PulseAttrsStrCreate(PulseAttrsCreateBase):
     value: StrictStr
     data_type: AttrDataType = Field(default=AttrDataType.STRING.value)
 
 
-class PulseAttrsStrFilter(PulseAttrsBase):
+class PulseAttrsStrFilter(PulseAttrsFilterBase):
     value: StrictStr
 
 
@@ -54,18 +72,23 @@ class PulseAttrsFloat(PulseAttrsBase, table=True):
     index: int | None = Field(default=None, primary_key=True)
 
 
-class PulseAttrsFloatRead(PulseAttrsBase):
+class PulseAttrsFloatRead(PulseAttrsReadBase):
     value: StrictFloat
 
 
-class PulseAttrsFloatCreate(PulseAttrsBase):
+class PulseAttrsFloatCreate(PulseAttrsCreateBase):
     value: StrictFloat
     data_type: AttrDataType = Field(default=AttrDataType.FLOAT.value)
 
 
-class PulseAttrsFloatFilter(PulseAttrsBase):
+class PulseAttrsFloatFilter(PulseAttrsFilterBase):
     min_value: StrictFloat
     max_value: StrictFloat
+
+
+# Has to be defined after definition of both classes
+attr_read_data_type = PulseAttrsStrRead | PulseAttrsFloatRead
+attr_filter_data_type = PulseAttrsStrFilter | PulseAttrsFloatFilter
 
 
 # Factory function for finding the correct PulseAttrs class

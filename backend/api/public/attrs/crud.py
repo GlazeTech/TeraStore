@@ -1,21 +1,24 @@
-from collections.abc import Callable
+from collections.abc import Callable, Sequence
 
 from fastapi import Depends
-from pydantic.types import StrictFloat, StrictStr
+from sqlalchemy import union
+from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session, select
+from sqlmodel.sql.expression import SelectOfScalar
 
 from api.database import get_session
 from api.public.attrs.models import (
     AttrDataType,
+    PulseAttrsCreateBase,
+    PulseAttrsFilterBase,
     PulseAttrsFloat,
-    PulseAttrsFloatCreate,
     PulseAttrsFloatFilter,
-    PulseAttrsFloatRead,
     PulseAttrsStr,
-    PulseAttrsStrCreate,
     PulseAttrsStrFilter,
-    PulseAttrsStrRead,
     PulseKeyRegistry,
+    attr_data_type_list,
+    attr_filter_data_type,
+    attr_read_data_type,
     get_pulse_attrs_class,
     get_pulse_attrs_read_class,
 )
@@ -26,12 +29,12 @@ from api.utils.exceptions import (
     PulseNotFoundError,
 )
 
-FilterFunctionType = Callable[..., list[int]]
+FilterFunctionType = Callable[..., SelectOfScalar[int]]
 
 
 def add_attr(
     pulse_id: int,
-    kv_pair: PulseAttrsStrCreate | PulseAttrsFloatCreate,
+    kv_pair: PulseAttrsCreateBase,
     db: Session = Depends(get_session),
 ) -> PulseRead:
     """Add a key-value pair to a pulse with id pulse_id."""
@@ -67,13 +70,14 @@ def add_attr(
 def read_pulse_attrs(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[PulseAttrsStrRead | PulseAttrsFloatRead]:
+) -> list[attr_read_data_type]:
     """Get all the keys for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
-    if not pulse:
-        raise PulseNotFoundError(pulse_id=pulse_id)
 
     attrs_list = []
+
+    if not pulse:
+        raise PulseNotFoundError(pulse_id=pulse_id)
 
     for data_type in AttrDataType:
         attrs_class = get_pulse_attrs_class(data_type)
@@ -96,7 +100,7 @@ def read_all_keys(
 def read_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> list[StrictStr] | list[StrictFloat]:
+) -> attr_data_type_list:
     """Get all unique values associated with a key."""
     # Get key if it exists from PulseKeyRegistry
     existing_key = (
@@ -111,12 +115,12 @@ def read_all_values_on_key(
 
 
 def filter_on_key_value_pairs(
-    kv_pairs: list[PulseAttrsStrFilter | PulseAttrsFloatFilter],
+    kv_pairs: Sequence[attr_filter_data_type],
     db: Session = Depends(get_session),
 ) -> list[int]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
-    pulse_ids_list: list[set[int]] = []
+    select_statements: list[SelectOfScalar[int]] = []
 
     # If no filters applied, select all pulses
     if len(kv_pairs) == 0:
@@ -125,50 +129,49 @@ def filter_on_key_value_pairs(
             return []
 
     for kv in kv_pairs:
-        filter_function = get_attr_filter_function(kv)
-        pulse_ids = filter_function(kv, db)
-        pulse_ids_list.append(set(pulse_ids))
+        try:
+            kv_data_type = db.exec(
+                select(PulseKeyRegistry.data_type).filter(
+                    PulseKeyRegistry.key == kv.key,
+                ),
+            ).one()
+        except NoResultFound as e:
+            raise AttrKeyDoesNotExistError(key=kv.key) from e
+        select_statements.append(create_filter_query(kv, kv_data_type))
 
-    # Find the intersection of all sets of pulse_ids
-    common_pulse_ids: set[int] = set.intersection(*pulse_ids_list)
+    combined_select = union(*select_statements)
 
-    return list(common_pulse_ids)
+    result = db.execute(combined_select).all()
+    return [pulse_id["pulse_id"] for pulse_id in result]
 
 
-def get_attr_filter_function(
-    kv_pair: PulseAttrsStrFilter | PulseAttrsFloatFilter,
-) -> FilterFunctionType:
-    if isinstance(kv_pair, PulseAttrsStrFilter):
-        return filter_attr_str
-    if isinstance(kv_pair, PulseAttrsFloatFilter):
-        return filter_attr_float
+def create_filter_query(
+    kv_pair: PulseAttrsFilterBase,
+    kv_data_type: str,
+) -> SelectOfScalar[int]:
+    if kv_data_type == AttrDataType.STRING.value:
+        return create_attr_str_filter_query(PulseAttrsStrFilter(**kv_pair.dict()))
+    if kv_data_type == AttrDataType.FLOAT.value:
+        return create_attr_float_filter_query(PulseAttrsFloatFilter(**kv_pair.dict()))
 
     error_str = "kv_pair must be of type PulseAttrsStrFilter or PulseAttrsFloatFilter"
     raise TypeError(error_str)
 
 
-def filter_attr_str(
-    kv_pair: PulseAttrsStrFilter,
-    db: Session = Depends(get_session),
-) -> list[int]:
-    """Get all pulses that match the key-value pair."""
-    statement = (
+def create_attr_str_filter_query(kv_pair: PulseAttrsStrFilter) -> SelectOfScalar[int]:
+    return (
         select(PulseAttrsStr.pulse_id)
         .where(PulseAttrsStr.key == kv_pair.key)
         .where(PulseAttrsStr.value == kv_pair.value)
     )
-    return db.exec(statement).all()
 
 
-def filter_attr_float(
+def create_attr_float_filter_query(
     kv_pair: PulseAttrsFloatFilter,
-    db: Session = Depends(get_session),
-) -> list[int]:
-    """Get all pulses that match the key-value pair."""
-    statement = (
+) -> SelectOfScalar[int]:
+    return (
         select(PulseAttrsFloat.pulse_id)
         .where(PulseAttrsFloat.key == kv_pair.key)
         .where(PulseAttrsFloat.value >= kv_pair.min_value)
         .where(PulseAttrsFloat.value <= kv_pair.max_value)
     )
-    return db.exec(statement).all()

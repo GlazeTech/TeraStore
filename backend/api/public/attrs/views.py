@@ -1,5 +1,6 @@
+from collections.abc import Sequence
+
 from fastapi import APIRouter, Depends
-from pydantic.types import StrictFloat, StrictStr
 from sqlmodel import Session
 
 from api.database import get_session
@@ -9,8 +10,8 @@ from api.public.attrs.crud import (
     read_all_values_on_key,
 )
 from api.public.attrs.models import (
-    PulseAttrsFloatFilter,
-    PulseAttrsStrFilter,
+    attr_data_type_list,
+    attr_filter_data_type,
 )
 
 router = APIRouter()
@@ -25,13 +26,13 @@ def get_all_keys(db: Session = Depends(get_session)) -> list[str]:
 def get_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> list[StrictStr] | list[StrictFloat]:
+) -> attr_data_type_list:
     return read_all_values_on_key(key=key, db=db)
 
 
 @router.post("/filter")
 def filter_attrs(
-    kv_pairs: list[PulseAttrsStrFilter | PulseAttrsFloatFilter],
+    kv_pairs: Sequence[attr_filter_data_type],
     db: Session = Depends(get_session),
 ) -> list[int]:
     return filter_on_key_value_pairs(kv_pairs, db)
