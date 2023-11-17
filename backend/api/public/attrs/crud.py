@@ -1,4 +1,5 @@
 from collections.abc import Callable, Sequence
+from typing import cast
 
 from fastapi import Depends
 from sqlalchemy import union
@@ -127,6 +128,7 @@ def filter_on_key_value_pairs(
         pulses = db.exec(select(Pulse.pulse_id)).all()
         if not pulses:
             return []
+        return cast(list[int], pulses)
 
     for kv in kv_pairs:
         try:
