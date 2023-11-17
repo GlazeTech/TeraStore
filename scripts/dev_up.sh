@@ -43,6 +43,7 @@ echo "Starting services..."
 # Build if the hashes don't match or if it's the first time
 if [ "$current_hash_backend" != "$last_hash_backend" ] || [ "$current_hash_frontend" != "$last_hash_frontend" ]; then
   echo -e "${YELLOW}Detected changes in pyproject.toml and/or package.json, rebuilding...${NC}"
+  docker compose -f ./docker-compose-dev.yml down -v
   docker compose -f ./docker-compose-dev.yml build
   echo $current_hash_frontend > $last_hash_file_frontend
   echo $current_hash_backend > $last_hash_file_backend
