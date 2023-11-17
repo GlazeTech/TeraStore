@@ -1,5 +1,7 @@
 from fastapi.testclient import TestClient
 
+from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
+from api.public.pulse.models import PulseCreate
 from api.utils.mock_data_generator import create_devices_and_pulses
 
 
@@ -8,9 +10,11 @@ def test_get_all_keys(client: TestClient) -> None:
 
     response = client.get("/attrs/keys/")
 
+    response_data = response.json()
+
     assert response.status_code == 200
-    assert "angle" in response.json()
-    assert "substrate" in response.json()
+    assert "angle" in response_data
+    assert "substrate" in response_data
 
 
 def test_get_all_values_on_key(client: TestClient) -> None:
@@ -18,8 +22,10 @@ def test_get_all_values_on_key(client: TestClient) -> None:
 
     response = client.get("/attrs/angle/values/")
 
+    response_data = response.json()
+
     assert response.status_code == 200
-    assert response.json() == [17.1, 23.2, 24.5, 29.0]
+    assert response_data == [17.1, 23.2, 24.5, 29.0]
 
 
 def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
@@ -27,108 +33,292 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
 
     response = client.get("/attrs/non-existing-key/values/")
 
+    response_data = response.json()
+
     assert response.status_code == 404
-    assert response.json()["detail"] == "Key non-existing-key does not exist."
+    assert response_data["detail"] == "Key non-existing-key does not exist."
 
 
-def test_get_attrs_on_pulse(client: TestClient, device_id: str) -> None:
-    pulse_payload = {
-        "device_id": device_id,
-        "delays": [1, 2, 3],
-        "signal": [1, 2, 3],
-        "integration_time": 100,
-        "creation_time": "2021-01-01T00:00:00",
-    }
+def test_get_attrs_on_pulse(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
+
     pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
 
-    attrs_1_key = "angle"
-    attrs_1_value = 29.0
+    attrs_1_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
-    client.put(
-        f"/pulses/{pulse_data['pulse_id']}/attrs/",
-        json={"key": attrs_1_key, "value": attrs_1_value},
+    attrs_1_data = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=attrs_1_payload,
     )
 
-    attrs_2_key = "substrate"
-    attrs_2_value = "sand-blasted steel"
+    attrs_2_payload = PulseAttrsFloatCreate.create_mock().as_dict()
 
-    client.put(
+    attrs_2_data = client.put(
         f"/pulses/{pulse_data['pulse_id']}/attrs/",
-        json={"key": attrs_2_key, "value": attrs_2_value},
+        json=attrs_2_payload,
     )
 
     response = client.get(f"/pulses/{pulse_data['pulse_id']}/attrs/")
     response_data = response.json()
 
+    response_keys = [d["key"] for d in response_data]
+    response_values = [d["value"] for d in response_data]
+
+    assert pulse_response.status_code == 200
+    assert attrs_1_data.status_code == 200
+    assert attrs_2_data.status_code == 200
     assert response.status_code == 200
     assert len(response_data) == 2
-    assert (
-        response_data[0]["key"] == attrs_1_key
-        and response_data[0]["value"] == attrs_1_value
-    ) or (
-        response_data[0]["key"] == attrs_2_key
-        and response_data[0]["value"] == attrs_2_value
-    )
-    assert (
-        response_data[1]["key"] == attrs_1_key
-        and response_data[1]["value"] == attrs_1_value
-    ) or (
-        response_data[1]["key"] == attrs_2_key
-        and response_data[1]["value"] == attrs_2_value
-    )
+    assert attrs_1_payload["key"] in response_keys
+    assert attrs_2_payload["key"] in response_keys
+    assert attrs_1_payload["value"] in response_values
+    assert attrs_2_payload["value"] in response_values
 
 
 def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
     pulse_id = 1000
+
     response = client.get(f"/pulses/{pulse_id}/attrs/")
 
+    response_data = response.json()
+
     assert response.status_code == 404
-    assert response.json()["detail"] == f"Pulse not found with id: {pulse_id}"
+    assert response_data["detail"] == f"Pulse not found with id: {pulse_id}"
 
 
-def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: str) -> None:
-    pulse_payload = {
-        "device_id": device_id,
-        "delays": [1, 2, 3],
-        "signal": [1, 2, 3],
-        "integration_time": 100,
-        "creation_time": "2021-01-01T00:00:00",
-    }
+def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
+
     pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
 
-    attrs_key = "angle"
-    attrs_value = "29"
+    attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
-    client.put(
-        f"/pulses/{pulse_data['pulse_id']}/attrs/",
-        json={"key": attrs_key, "value": attrs_value},
+    attrs_response = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=attrs_payload,
     )
 
     response = client.get(f"/pulses/{pulse_data['pulse_id']}/attrs/")
     response_data = response.json()
 
+    response_keys = [d["key"] for d in response_data]
+    response_values = [d["value"] for d in response_data]
+
+    assert pulse_response.status_code == 200
+    assert attrs_response.status_code == 200
     assert response.status_code == 200
-    assert response_data[0]["key"] == attrs_key
-    assert response_data[0]["value"] == attrs_value
+    assert len(response_data) == 1
+    assert attrs_payload["key"] in response_keys
+    assert attrs_payload["value"] in response_values
 
 
 def test_add_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
     pulse_id = 1000
-    attrs_key = "angle"
-    attrs_value = "29"
+
+    attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
     response = client.put(
         f"/pulses/{pulse_id}/attrs/",
-        json={"key": attrs_key, "value": attrs_value},
+        json=attrs_payload,
     )
 
+    response_data = response.json()
+
     assert response.status_code == 404
-    assert response.json()["detail"] == f"Pulse not found with id: {pulse_id}"
+    assert response_data["detail"] == f"Pulse not found with id: {pulse_id}"
+
+
+def test_add_existing_attr_wrong_type(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
+
+    attrs_1_response = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=attrs_payload,
+    )
+
+    attrs_payload["data_type"] = "float"
+
+    attrs_2_response = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=attrs_payload,
+    )
+
+    attrs_2_response_data = attrs_2_response.json()
+
+    assert pulse_response.status_code == 200
+    assert attrs_1_response.status_code == 200
+    assert attrs_2_response.status_code == 400
+    assert attrs_2_response_data["detail"] == (
+        f"Key {attrs_payload['key']} already exists with data type 'string'. "
+        f"You gave 'float'."
+    )
+
+
+def test_filtering_pulses_float(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    pulse_attrs_payload = PulseAttrsFloatCreate.create_mock(value=42.0).as_dict()
+
+    pulse_attrs_data = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=pulse_attrs_payload,
+    )
+
+    filtering_json = [
+        {
+            "key": "mock_float_key",
+            "min_value": 42.0,
+            "max_value": 42.0,
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+    response_data = response.json()
+
+    assert pulse_response.status_code == 200
+    assert pulse_attrs_data.status_code == 200
+    assert response.status_code == 200
+    assert len(response_data) == 1
+    assert pulse_id in response_data
+
+
+def test_filtering_pulses_string(
+    client: TestClient,
+    device_id: int,
+) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    pulse_attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
+
+    pulse_attrs_data = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=pulse_attrs_payload,
+    )
+
+    filtering_json = [
+        {
+            "key": "mock_string_key",
+            "value": "mock_string_value",
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+    response_data = response.json()
+
+    assert pulse_response.status_code == 200
+    assert pulse_attrs_data.status_code == 200
+    assert response.status_code == 200
+    assert len(response_data) == 1
+    assert pulse_id in response_data
+
+
+def test_filter_all_datatypes(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    pulse_attrs_1_payload = PulseAttrsStrCreate.create_mock().as_dict()
+
+    pulse_1_attrs_response = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=pulse_attrs_1_payload,
+    )
+
+    pulse_attrs_2_payload = PulseAttrsFloatCreate.create_mock().as_dict()
+
+    pulse_2_attrs_response = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=pulse_attrs_2_payload,
+    )
+
+    filtering_json = [
+        {
+            "key": "mock_float_key",
+            "min_value": 42.0,
+            "max_value": 42.0,
+        },
+        {
+            "key": "mock_string_key",
+            "value": "mock_string_value",
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+
+    response_data = response.json()
+
+    assert pulse_response.status_code == 200
+    assert pulse_1_attrs_response.status_code == 200
+    assert pulse_2_attrs_response.status_code == 200
+    assert response.status_code == 200
+    assert len(response_data) == 1
+    assert pulse_id in response_data
+
+
+def test_filter_no_kv_given(client: TestClient, device_id: str) -> None:
+    response = client.post("/attrs/filter/", json=[])
+
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data == []
+
+
+def test_filter_non_existent_key(client: TestClient, device_id: str) -> None:
+    filtering_json = [
+        {
+            "key": "non-existent-key",
+            "value": "test",
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+
+    response_data = response.json()
+
+    assert response.status_code == 404
+    assert response_data["detail"] == "Key non-existent-key does not exist."

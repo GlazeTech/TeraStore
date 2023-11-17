@@ -32,7 +32,7 @@ class AttrDataTypeExistsError(Exception):
         self.existing_data_type = existing_data_type
         self.incoming_data_type = incoming_data_type
         super().__init__(
-            f"Key {key} already exists with data type '{existing_data_type}'."
+            f"Key {key} already exists with data type '{existing_data_type}'. "
             f"You gave '{incoming_data_type}'.",
         )
 

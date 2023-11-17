@@ -50,7 +50,7 @@ def add_attr(
         raise AttrDataTypeExistsError(
             key=kv_pair.key,
             existing_data_type=existing_key.data_type,
-            incoming_data_type=kv_pair.data_type,
+            incoming_data_type=kv_pair.data_type.value,
         )
 
     # If key doesn't exist, add it to PulseKeyRegistry
@@ -125,7 +125,7 @@ def filter_on_key_value_pairs(
     # If no filters applied, select all pulses
     if len(kv_pairs) == 0:
         pulses = db.exec(select(Pulse.pulse_id)).all()
-        if pulses[0] is None:
+        if not pulses:
             return []
 
     for kv in kv_pairs:

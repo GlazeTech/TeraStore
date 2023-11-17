@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Self
 
 from pydantic.types import StrictFloat, StrictStr
 from sqlmodel import Field, SQLModel
@@ -56,6 +57,17 @@ class PulseAttrsStrCreate(PulseAttrsCreateBase):
     value: StrictStr
     data_type: AttrDataType = Field(default=AttrDataType.STRING.value)
 
+    @classmethod
+    def create_mock(
+        cls: type[PulseAttrsStrCreate],
+        key: str = "mock_string_key",
+        value: str = "mock_string_value",
+    ) -> PulseAttrsStrCreate:
+        return cls(key=key, value=value)
+
+    def as_dict(self: Self) -> dict[str, str]:
+        return {"key": self.key, "value": self.value, "data_type": self.data_type}
+
 
 class PulseAttrsStrFilter(PulseAttrsFilterBase):
     value: StrictStr
@@ -79,6 +91,17 @@ class PulseAttrsFloatRead(PulseAttrsReadBase):
 class PulseAttrsFloatCreate(PulseAttrsCreateBase):
     value: StrictFloat
     data_type: AttrDataType = Field(default=AttrDataType.FLOAT.value)
+
+    @classmethod
+    def create_mock(
+        cls: type[PulseAttrsFloatCreate],
+        key: str = "mock_float_key",
+        value: float = 42.0,
+    ) -> PulseAttrsFloatCreate:
+        return cls(key=key, value=value)
+
+    def as_dict(self: Self) -> dict[str, str | float]:
+        return {"key": self.key, "value": self.value, "data_type": self.data_type}
 
 
 class PulseAttrsFloatFilter(PulseAttrsFilterBase):

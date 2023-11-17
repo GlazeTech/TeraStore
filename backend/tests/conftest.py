@@ -39,7 +39,7 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture()
-def device_id(client: TestClient) -> Generator[str, None, None]:
+def device_id(client: TestClient) -> Generator[int, None, None]:
     """Create a Device for testing purposes."""
     device_payload = {"friendly_name": "Glaze I"}
     response = client.post(
