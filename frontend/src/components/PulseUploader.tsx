@@ -202,9 +202,11 @@ const ErrorNotificationContent = ({ deniedFile }: { deniedFile: File }) => {
 				>
 					Tip
 				</M.Badge>
-				<M.UnstyledButton size="sm" onClick={handleClick}>
-					<M.Text size="sm">Click here to download an example file.</M.Text>
-				</M.UnstyledButton>
+				<M.Button size="xs" variant="subtle" onClick={handleClick}>
+					<M.Text size="sm" c={"var(--mantine-color-pink-6)"}>
+						Click here to download an example file.
+					</M.Text>
+				</M.Button>
 			</M.Card.Section>
 		</M.Card>
 	);
