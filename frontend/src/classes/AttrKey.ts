@@ -9,7 +9,7 @@ export function attrKeyFactory(name: string, type: KVType) {
 	} else if (type === KVType.STRING) {
 		return new StringAttrKey(name);
 	} else {
-		throw new Error("Unhandled pulse attribute key type");
+		throw new Error(`Unhandled pulse attribute key type: "${type}"`);
 	}
 }
 

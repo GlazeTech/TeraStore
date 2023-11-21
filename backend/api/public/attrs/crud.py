@@ -92,9 +92,9 @@ def read_pulse_attrs(
 
 def read_all_keys(
     db: Session = Depends(get_session),
-) -> list[str]:
+) -> list[tuple[str, str]]:
     """Get all unique keys."""
-    statement = select(PulseKeyRegistry.key).distinct()
+    statement = select(PulseKeyRegistry.key, PulseKeyRegistry.data_type).distinct()
     return db.exec(statement).all()
 
 
@@ -144,7 +144,7 @@ def filter_on_key_value_pairs(
     combined_select = intersect(*select_statements)
 
     result = db.execute(combined_select).all()
-    return [pulse_id["pulse_id"] for pulse_id in result]
+    return list({pulse_id["pulse_id"] for pulse_id in result})
 
 
 def create_filter_query(

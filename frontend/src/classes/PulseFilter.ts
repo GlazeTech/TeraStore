@@ -23,7 +23,6 @@ export class PulseNumberFilter implements IPulseFilterNumber {
 			key: this.key.name,
 			min_value: this.lower,
 			max_value: this.upper,
-			data_type: "integer",
 		};
 	}
 }
@@ -47,7 +46,6 @@ export class PulseStringFilter implements IPulseFilterString {
 		return {
 			key: this.key.name,
 			value: this.value,
-			data_type: "string",
 		};
 	}
 }

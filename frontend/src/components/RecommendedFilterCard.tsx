@@ -6,11 +6,7 @@ import {
 	PulseNumberFilter,
 	StringAttrKey,
 } from "classes";
-import {
-	findMinDifference,
-	getFilterResultsForEachStringValue,
-	uniqueElements,
-} from "helpers";
+import { getFilterResultsForEachStringValue, uniqueElements } from "helpers";
 import { IAttrKey, SliderMark } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
@@ -55,6 +51,7 @@ export function NumberFilterCard({ attrKey }: { attrKey: NumberAttrKey }) {
 	const [sliderMinValue, setSliderMinValue] = useState(0);
 	const [nPulsesInRange, setNPulsesInRange] = useState<number | null>(null);
 	const [sliderMaxValue, setSliderMaxValue] = useState(1);
+	const [sliderPrecision, setSliderPrecision] = useState(0);
 	const [sliderStepsize, setSliderStepsize] = useState<number | undefined>(
 		undefined,
 	);
@@ -90,11 +87,13 @@ export function NumberFilterCard({ attrKey }: { attrKey: NumberAttrKey }) {
 		if (attrValues) {
 			const max = Math.max(...attrValues);
 			const min = Math.min(...attrValues);
+			const sliderPrecision = getSliderPrecision(min, max);
 			setSliderMaxValue(max);
 			setSliderMinValue(min);
-			setSliderStepsize(findMinDifference(attrValues));
+			setSliderStepsize(10 ** -sliderPrecision);
 			setDisplayValue([min, max]);
 			setSelectedValue([min, max]);
+			setSliderPrecision(sliderPrecision);
 			setSliderMarks(
 				attrValues.map((value) => {
 					return { value: value };
@@ -144,8 +143,8 @@ export function NumberFilterCard({ attrKey }: { attrKey: NumberAttrKey }) {
 					value={selectedValue[1]}
 					min={sliderMinValue}
 					max={sliderMaxValue}
-					step={sliderStepsize}
 					onChange={handleUpperChange}
+					hideControls
 				/>
 			</M.Group>
 			<M.Group mt="5" mb="5" justify="space-between">
@@ -155,8 +154,8 @@ export function NumberFilterCard({ attrKey }: { attrKey: NumberAttrKey }) {
 					value={selectedValue[0]}
 					min={sliderMinValue}
 					max={sliderMaxValue}
-					step={sliderStepsize}
 					onChange={handleLowerChange}
+					hideControls
 				/>
 			</M.Group>
 
@@ -169,6 +168,7 @@ export function NumberFilterCard({ attrKey }: { attrKey: NumberAttrKey }) {
 				step={sliderStepsize}
 				min={sliderMinValue}
 				max={sliderMaxValue}
+				precision={sliderPrecision}
 				disabled={sliderMinValue === sliderMaxValue}
 				marks={sliderMarks}
 			/>
@@ -214,3 +214,9 @@ function StringFilterCard({ attrKey }: { attrKey: StringAttrKey }) {
 		</>
 	);
 }
+
+const getSliderPrecision = (min: number, max: number) => {
+	return max - min > 0
+		? Math.abs(Math.round(Math.min(Math.log10((max - min) / 100) - 0.5, 0)))
+		: 0;
+};

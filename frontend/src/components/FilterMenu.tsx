@@ -6,7 +6,7 @@ import {
 	StringAttrKey,
 } from "classes";
 import { getFilterResultsForEachStringValue } from "helpers";
-import { IAttrKey, Option, PulseFilter } from "interfaces";
+import { IAttrKey, Option } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
 import { NumberFilterCard } from "./RecommendedFilterCard";
