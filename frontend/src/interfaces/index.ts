@@ -29,6 +29,18 @@ export interface IPulseFilterNumber extends PulseFilterBase {
 	upper: number;
 }
 
+// export type AnnotatedPulse = {
+// 	pulse: {
+// 		time: number[];
+// 		signal: number[];
+// 		signal_err: number[] | null;
+// 	};
+// 	integration_time_ms: number;
+// 	creation_time: string;
+// 	device_id: number;
+// 	kv_pairs: { key: string; value: string | number }[];
+// };
+
 export type PulseFilter = IPulseFilterString | IPulseFilterNumber;
 
 export type PulseID = number;
