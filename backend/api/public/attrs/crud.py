@@ -18,8 +18,8 @@ from api.public.attrs.models import (
     PulseAttrsStrFilter,
     PulseKeyRegistry,
     TAttrDataTypeList,
-    attr_filter_data_type,
-    attr_read_data_type,
+    TAttrFilterDataType,
+    TAttrReadDataType,
     get_pulse_attrs_class,
     get_pulse_attrs_read_class,
 )
@@ -71,7 +71,7 @@ def add_attr(
 def read_pulse_attrs(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[attr_read_data_type]:
+) -> list[TAttrReadDataType]:
     """Get all the keys for a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
 
@@ -116,7 +116,7 @@ def read_all_values_on_key(
 
 
 def filter_on_key_value_pairs(
-    kv_pairs: Sequence[attr_filter_data_type],
+    kv_pairs: Sequence[TAttrFilterDataType],
     db: Session = Depends(get_session),
 ) -> list[int]:
     """Get all pulses that match the key-value pairs."""

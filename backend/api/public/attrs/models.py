@@ -110,8 +110,8 @@ class PulseAttrsFloatFilter(PulseAttrsFilterBase):
 
 
 # Has to be defined after definition of both classes
-attr_read_data_type = PulseAttrsStrRead | PulseAttrsFloatRead
-attr_filter_data_type = PulseAttrsStrFilter | PulseAttrsFloatFilter
+TAttrReadDataType: TypeAlias = PulseAttrsStrRead | PulseAttrsFloatRead
+TAttrFilterDataType: TypeAlias = PulseAttrsStrFilter | PulseAttrsFloatFilter
 
 
 # Factory function for finding the correct PulseAttrs class

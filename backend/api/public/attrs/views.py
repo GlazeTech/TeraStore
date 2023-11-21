@@ -11,7 +11,7 @@ from api.public.attrs.crud import (
 )
 from api.public.attrs.models import (
     TAttrDataTypeList,
-    attr_filter_data_type,
+    TAttrFilterDataType,
 )
 
 router = APIRouter()
@@ -32,7 +32,7 @@ def get_all_values_on_key(
 
 @router.post("/filter")
 def filter_attrs(
-    kv_pairs: Sequence[attr_filter_data_type],
+    kv_pairs: Sequence[TAttrFilterDataType],
     db: Session = Depends(get_session),
 ) -> list[int]:
     return filter_on_key_value_pairs(kv_pairs, db)

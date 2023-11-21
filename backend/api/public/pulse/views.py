@@ -7,7 +7,7 @@ from api.database import get_session
 from api.public.attrs.crud import add_attr, read_pulse_attrs
 from api.public.attrs.models import (
     PulseAttrsCreateBase,
-    attr_read_data_type,
+    TAttrReadDataType,
 )
 from api.public.pulse.crud import (
     create_pulse,
@@ -71,5 +71,5 @@ def add_kv_pair(
 def get_pulse_keys(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[attr_read_data_type]:
+) -> list[TAttrReadDataType]:
     return read_pulse_attrs(pulse_id=pulse_id, db=db)
