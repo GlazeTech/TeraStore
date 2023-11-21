@@ -322,3 +322,52 @@ def test_filter_non_existent_key(client: TestClient, device_id: str) -> None:
 
     assert response.status_code == 404
     assert response_data["detail"] == "Key non-existent-key does not exist."
+
+
+def test_filter_one_wrong(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    pulse_attrs_1_payload = PulseAttrsStrCreate.create_mock().as_dict()
+
+    pulse_1_attrs_response = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=pulse_attrs_1_payload,
+    )
+
+    pulse_attrs_2_payload = PulseAttrsFloatCreate.create_mock().as_dict()
+
+    pulse_2_attrs_response = client.put(
+        f"/pulses/{pulse_id}/attrs/",
+        json=pulse_attrs_2_payload,
+    )
+
+    filtering_json = [
+        {
+            # Value is incorrect, so zero results should be returned.
+            "key": "mock_float_key",
+            "min_value": 40.0,
+            "max_value": 41.0,
+        },
+        {
+            "key": "mock_string_key",
+            "value": "mock_string_value",
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+
+    response_data = response.json()
+
+    assert pulse_response.status_code == 200
+    assert pulse_1_attrs_response.status_code == 200
+    assert pulse_2_attrs_response.status_code == 200
+    assert response.status_code == 200
+    assert len(response_data) == 0

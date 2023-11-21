@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from typing import Self
+from typing import Self, TypeAlias
 
 from pydantic.types import StrictFloat, StrictStr
 from sqlmodel import Field, SQLModel
@@ -9,8 +9,8 @@ from sqlmodel import Field, SQLModel
 from api.utils.exceptions import AttrDataTypeDoesNotExistError
 
 # Must be defined early in file to avoid Pydantic panic
-attr_data_type = StrictStr | StrictFloat
-attr_data_type_list = list[StrictStr] | list[StrictFloat]
+TAttrDataType: TypeAlias = StrictStr | StrictFloat
+TAttrDataTypeList: TypeAlias = list[StrictStr] | list[StrictFloat]
 
 
 class AttrDataType(str, Enum):
@@ -31,7 +31,7 @@ class PulseAttrsReadBase(SQLModel):
 class PulseAttrsCreateBase(SQLModel):
     key: str
     data_type: AttrDataType
-    value: attr_data_type
+    value: TAttrDataType
 
 
 class PulseAttrsFilterBase(SQLModel):

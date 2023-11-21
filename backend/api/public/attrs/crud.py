@@ -1,8 +1,8 @@
 from collections.abc import Callable, Sequence
-from typing import cast
+from typing import TypeAlias, cast
 
 from fastapi import Depends
-from sqlalchemy import union
+from sqlalchemy import intersect
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session, select
 from sqlmodel.sql.expression import SelectOfScalar
@@ -17,7 +17,7 @@ from api.public.attrs.models import (
     PulseAttrsStr,
     PulseAttrsStrFilter,
     PulseKeyRegistry,
-    attr_data_type_list,
+    TAttrDataTypeList,
     attr_filter_data_type,
     attr_read_data_type,
     get_pulse_attrs_class,
@@ -30,7 +30,7 @@ from api.utils.exceptions import (
     PulseNotFoundError,
 )
 
-FilterFunctionType = Callable[..., SelectOfScalar[int]]
+TFilterFunctionType: TypeAlias = Callable[..., SelectOfScalar[int]]
 
 
 def add_attr(
@@ -101,7 +101,7 @@ def read_all_keys(
 def read_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> attr_data_type_list:
+) -> TAttrDataTypeList:
     """Get all unique values associated with a key."""
     # Get key if it exists from PulseKeyRegistry
     existing_key = (
@@ -141,7 +141,7 @@ def filter_on_key_value_pairs(
             raise AttrKeyDoesNotExistError(key=kv.key) from e
         select_statements.append(create_filter_query(kv, kv_data_type))
 
-    combined_select = union(*select_statements)
+    combined_select = intersect(*select_statements)
 
     result = db.execute(combined_select).all()
     return [pulse_id["pulse_id"] for pulse_id in result]

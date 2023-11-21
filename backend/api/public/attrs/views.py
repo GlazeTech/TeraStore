@@ -10,7 +10,7 @@ from api.public.attrs.crud import (
     read_all_values_on_key,
 )
 from api.public.attrs.models import (
-    attr_data_type_list,
+    TAttrDataTypeList,
     attr_filter_data_type,
 )
 
@@ -26,7 +26,7 @@ def get_all_keys(db: Session = Depends(get_session)) -> list[str]:
 def get_all_values_on_key(
     key: str,
     db: Session = Depends(get_session),
-) -> attr_data_type_list:
+) -> TAttrDataTypeList:
     return read_all_values_on_key(key=key, db=db)
 
 
