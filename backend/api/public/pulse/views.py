@@ -4,8 +4,11 @@ from sqlalchemy.exc import DBAPIError
 from sqlmodel import Session
 
 from api.database import get_session
-from api.public.attrs.crud import add_str_attr, read_pulse_attrs
-from api.public.attrs.models import PulseAttrsStrRead
+from api.public.attrs.crud import add_attr, read_pulse_attrs
+from api.public.attrs.models import (
+    PulseAttrsCreateBase,
+    TAttrReadDataType,
+)
 from api.public.pulse.crud import (
     create_pulse,
     read_pulse,
@@ -56,18 +59,17 @@ def get_pulse(pulse_id: int, db: Session = Depends(get_session)) -> PulseRead:
 
 
 @router.put("/{pulse_id}/attrs")
-def add_kv_str(
+def add_kv_pair(
     pulse_id: int,
-    key: str,
-    value: str,
+    kv_pair: PulseAttrsCreateBase,
     db: Session = Depends(get_session),
 ) -> PulseRead:
-    return add_str_attr(key=key, value=value, pulse_id=pulse_id, db=db)
+    return add_attr(kv_pair=kv_pair, pulse_id=pulse_id, db=db)
 
 
 @router.get("/{pulse_id}/attrs")
 def get_pulse_keys(
     pulse_id: int,
     db: Session = Depends(get_session),
-) -> list[PulseAttrsStrRead]:
+) -> list[TAttrReadDataType]:
     return read_pulse_attrs(pulse_id=pulse_id, db=db)

@@ -1,7 +1,8 @@
 from sqlmodel import Session
 
 from api.database import app_engine
-from api.public.attrs.crud import add_str_attr
+from api.public.attrs.crud import add_attr
+from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
 from api.public.device.crud import create_device
 from api.public.device.models import DeviceCreate
 from api.public.pulse.crud import create_pulse
@@ -28,14 +29,31 @@ def create_devices_and_pulses() -> None:
             sess,
         )
 
-        add_str_attr(pulse_1.pulse_id, "angle", "29", sess)
-        add_str_attr(pulse_1.pulse_id, "substrate", "sand-blasted steel", sess)
+        add_attr(pulse_1.pulse_id, PulseAttrsFloatCreate(key="angle", value=29.0), sess)
+        add_attr(
+            pulse_1.pulse_id,
+            PulseAttrsStrCreate(key="substrate", value="sand-blasted steel"),
+            sess,
+        )
+        add_attr(
+            pulse_1.pulse_id,
+            PulseAttrsFloatCreate(key="angle", value=17.1),
+            sess,
+        )
 
-        add_str_attr(pulse_2.pulse_id, "angle", "23", sess)
-        add_str_attr(pulse_2.pulse_id, "substrate", "plastic", sess)
+        add_attr(pulse_2.pulse_id, PulseAttrsFloatCreate(key="angle", value=23.2), sess)
+        add_attr(
+            pulse_2.pulse_id,
+            PulseAttrsStrCreate(key="substrate", value="plastic"),
+            sess,
+        )
 
-        add_str_attr(pulse_3.pulse_id, "angle", "17", sess)
-        add_str_attr(pulse_3.pulse_id, "substrate", "polymer", sess)
+        add_attr(pulse_3.pulse_id, PulseAttrsFloatCreate(key="angle", value=24.5), sess)
+        add_attr(
+            pulse_3.pulse_id,
+            PulseAttrsStrCreate(key="substrate", value="polymer"),
+            sess,
+        )
 
 
 def create_frontend_dev_data() -> None:
@@ -64,52 +82,45 @@ def create_frontend_dev_data() -> None:
                 for _ in range(n_pulses)
             ]
             for pulse in pulses:
-                add_str_attr(
+                add_attr(
                     pulse_id=pulse.pulse_id,
-                    key="project",
-                    value=project,
+                    kv_pair=PulseAttrsStrCreate(key="project", value=project),
                     db=sess,
                 )
                 if count % 2 == 0:
-                    add_str_attr(
+                    add_attr(
                         pulse_id=pulse.pulse_id,
-                        key="substrate",
-                        value="PMMA",
+                        kv_pair=PulseAttrsStrCreate(key="substrate", value="PMMA"),
                         db=sess,
                     )
                 if count % 2 == 1:
-                    add_str_attr(
+                    add_attr(
                         pulse_id=pulse.pulse_id,
-                        key="spotsize (mm)",
-                        value="5.6",
+                        kv_pair=PulseAttrsFloatCreate(key="spotsize (mm)", value=5.6),
                         db=sess,
                     )
                 if count % 3 == 0:
-                    add_str_attr(
+                    add_attr(
                         pulse_id=pulse.pulse_id,
-                        key="mode",
-                        value="reflection",
+                        kv_pair=PulseAttrsStrCreate(key="mode", value="reflection"),
                         db=sess,
                     )
                 else:
-                    add_str_attr(
+                    add_attr(
                         pulse_id=pulse.pulse_id,
-                        key="mode",
-                        value="transmission",
+                        kv_pair=PulseAttrsStrCreate(key="mode", value="transmission"),
                         db=sess,
                     )
                 if count % 5 == 0:
-                    add_str_attr(
+                    add_attr(
                         pulse_id=pulse.pulse_id,
-                        key="antennas",
-                        value="HHI",
+                        kv_pair=PulseAttrsStrCreate(key="antennas", value="HHI"),
                         db=sess,
                     )
                 else:
-                    add_str_attr(
+                    add_attr(
                         pulse_id=pulse.pulse_id,
-                        key="antennas",
-                        value="Toptica",
+                        kv_pair=PulseAttrsStrCreate(key="antennas", value="Toptica"),
                         db=sess,
                     )
                 count += 1
@@ -127,11 +138,23 @@ def create_frontend_dev_data() -> None:
             sess,
         )
 
-        add_str_attr(pulse_1.pulse_id, "angle", "29", sess)
-        add_str_attr(pulse_1.pulse_id, "substrate", "sand-blasted steel", sess)
+        add_attr(pulse_1.pulse_id, PulseAttrsFloatCreate(key="angle", value=29.0), sess)
+        add_attr(
+            pulse_1.pulse_id,
+            PulseAttrsStrCreate(key="substrate", value="sand-blasted steel"),
+            sess,
+        )
 
-        add_str_attr(pulse_2.pulse_id, "angle", "23", sess)
-        add_str_attr(pulse_2.pulse_id, "substrate", "plastic", sess)
+        add_attr(pulse_2.pulse_id, PulseAttrsFloatCreate(key="angle", value=23.0), sess)
+        add_attr(
+            pulse_2.pulse_id,
+            PulseAttrsStrCreate(key="substrate", value="plastic"),
+            sess,
+        )
 
-        add_str_attr(pulse_3.pulse_id, "angle", "17", sess)
-        add_str_attr(pulse_3.pulse_id, "substrate", "polymer", sess)
+        add_attr(pulse_3.pulse_id, PulseAttrsFloatCreate(key="angle", value=17.2), sess)
+        add_attr(
+            pulse_3.pulse_id,
+            PulseAttrsStrCreate(key="substrate", value="polymer"),
+            sess,
+        )
