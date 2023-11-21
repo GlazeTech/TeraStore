@@ -308,6 +308,24 @@ def test_filter_no_kv_given(client: TestClient, device_id: str) -> None:
     assert response_data == []
 
 
+def test_filter_no_kv_one_pulse(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    response = client.post("/attrs/filter/", json=[])
+
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data == [pulse_id]
+
+
 def test_filter_non_existent_key(client: TestClient, device_id: str) -> None:
     filtering_json = [
         {
