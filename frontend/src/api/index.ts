@@ -1,6 +1,6 @@
 import axios from "axios";
 import { setupCache } from "axios-cache-interceptor";
-import { FilterResult, Pulse, attrKeyFactory } from "classes";
+import { AnnotatedPulse, FilterResult, Pulse, attrKeyFactory } from "classes";
 import { sortPulseFilters } from "helpers";
 import {
 	BackendAttrKey,
@@ -78,4 +78,12 @@ export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
 				);
 			})
 	);
+}
+
+export async function uploadPulses(pulses: AnnotatedPulse[]) {
+	return new Promise<void>((resolve) => {
+		setTimeout(() => {
+			resolve();
+		}, 1000);
+	});
 }

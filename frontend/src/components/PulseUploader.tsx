@@ -2,30 +2,47 @@ import * as M from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
+import { uploadPulses } from "api";
+import AnnotatedPulseExample from "assets/valid-annotated-pulse-example.json";
 import { AnnotatedPulse } from "classes";
-import { filesAreIdentical, formatFileSize, makeFileID, processUploadFiles } from "helpers/data-io";
+import { downloadJson } from "helpers";
+import {
+	filesAreIdentical,
+	formatFileSize,
+	makeFileID,
+	processUploadFiles,
+} from "helpers/data-io";
+import { useState } from "react";
+
+enum UploaderState {
+	IDLE = "idle",
+	UPLOADING = "uploading",
+}
 
 export default function PulseUploader() {
+	const [uploaderState, setUploaderState] = useState<UploaderState>(
+		UploaderState.IDLE,
+	);
 	const [modalIsOpen, modalHandler] = useDisclosure(true);
 	const [selectedFiles, selectedFilesHandlers] = useListState<File>([]);
 	const [pulses, pulsesHandler] = useListState<AnnotatedPulse>([]);
 
 	const handleDropFiles = (files: File[]) => {
-		processUploadFiles(selectedFiles, files).then(({ accepted, denied, newPulses }) => {
-			
-			// Show a notification about denied files
-			denied.forEach((deniedFile) => {
-				notifications.show({
-					title: "Invalid file",
-					message: `Could not parse file "${deniedFile.name}"`,
-					autoClose: 2500,
-					color: "red",
+		processUploadFiles(selectedFiles, files).then(
+			({ accepted, denied, newPulses }) => {
+				// Show a notification about denied files
+				denied.forEach((deniedFile) => {
+					notifications.show({
+						title: "Invalid file",
+						message: <ErrorNotificationContent deniedFile={deniedFile} />,
+						autoClose: 2500,
+						color: "red",
+					});
 				});
-	
-			})
-			selectedFilesHandlers.append(...accepted);
-			pulsesHandler.append(...newPulses)
-		});
+				selectedFilesHandlers.append(...accepted);
+				pulsesHandler.append(...newPulses);
+			},
+		);
 	};
 
 	const handleRejectFiles = (msg: string) => {
@@ -51,8 +68,23 @@ export default function PulseUploader() {
 				autoClose: 2500,
 				color: "red",
 			});
+			return;
 		}
-		console.log("not implemented yet");
+		setUploaderState(UploaderState.UPLOADING);
+		uploadPulses(pulses).then((_) => {
+			notifications.show({
+				title: "Upload completed",
+				message: `Uploaded ${pulses.length} ${
+					pulses.length > 1 ? "pulses" : "pulse"
+				} successfully!`,
+				autoClose: 2500,
+				color: "green",
+			});
+			setUploaderState(UploaderState.IDLE);
+			selectedFilesHandlers.setState([]);
+			pulsesHandler.setState([]);
+			modalHandler.toggle();
+		});
 	};
 
 	return (
@@ -72,8 +104,21 @@ export default function PulseUploader() {
 				>
 					<DropzoneText />
 				</Dropzone>
-				<M.Button mt={15} mb={10} fullWidth onClick={handleUpload}>
-					Upload
+				<M.Button
+					mt={15}
+					mb={10}
+					fullWidth
+					onClick={handleUpload}
+					disabled={
+						uploaderState === UploaderState.UPLOADING ||
+						selectedFiles.length === 0
+					}
+				>
+					{uploaderState === UploaderState.UPLOADING ? (
+						<M.Loader size={"sm"} />
+					) : (
+						"Upload"
+					)}
 				</M.Button>
 				<div style={{ height: "40vh", overflow: "hidden" }}>
 					<M.ScrollArea type="hover" style={{ height: "100%" }}>
@@ -137,4 +182,30 @@ const DropzoneText = () => (
 	</M.Stack>
 );
 
-
+const ErrorNotificationContent = ({ deniedFile }: { deniedFile: File }) => {
+	const handleClick = () => {
+		downloadJson(AnnotatedPulseExample, "annotated-pulses-example.json");
+	};
+	return (
+		<M.Card>
+			<M.Card.Section>
+				<M.Text size="sm">{`Could not parse file "${deniedFile.name}."`}</M.Text>
+			</M.Card.Section>
+			<M.Card.Section>
+				<M.Badge
+					variant="light"
+					color="pink"
+					mr={10}
+					mt={10}
+					mb={10}
+					onClick={handleClick}
+				>
+					Tip
+				</M.Badge>
+				<M.UnstyledButton size="sm" onClick={handleClick}>
+					<M.Text size="sm">Click here to download an example file.</M.Text>
+				</M.UnstyledButton>
+			</M.Card.Section>
+		</M.Card>
+	);
+};

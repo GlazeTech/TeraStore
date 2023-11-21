@@ -1,0 +1,32 @@
+[
+    {
+        "pulse": {
+            "time": [1, 2, 3],
+            "signal": [1, 2, 3],
+            "signal_err": null
+        },
+        "integration_time_ms": 2000,
+        "creation_time": "2023-11-19T01:30:10.175500",
+        "device_id": 1,
+        "kv_pairs": [
+            {
+                "key": "project",
+                "value": "ACME"
+            },
+            {
+                "key": "angle",
+                "value": 17
+            }
+        ]
+    },
+    {
+        "pulse": {
+            "time": [1, 2],
+            "signal": [1, 2]
+        },
+        "integration_time_ms": 1000,
+        "creation_time": "2023-11-19",
+        "device_id": 1,
+        "kv_pairs": []
+    }
+]
