@@ -11,7 +11,7 @@ dynamic = ["version"]
 
 dependencies = [
   "fastapi[all]==0.99.1",
-  "sqlmodel==0.0.8",
+  "sqlmodel==0.0.12",
   "psycopg2-binary==2.9.9",
 ]
 

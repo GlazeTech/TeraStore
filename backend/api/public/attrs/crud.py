@@ -83,8 +83,10 @@ def read_pulse_attrs(
     for data_type in AttrDataType:
         attrs_class = get_pulse_attrs_class(data_type)
         attrs_read_class = get_pulse_attrs_read_class(data_type)
-        statement = select(attrs_class).where(attrs_class.pulse_id == pulse_id)
-        attrs = [attrs_read_class.from_orm(obj) for obj in db.exec(statement).all()]
+        results = db.exec(
+            select(attrs_class).where(attrs_class.pulse_id == pulse_id),
+        ).all()
+        attrs = [attrs_read_class.from_orm(obj) for obj in results]
         attrs_list += attrs
 
     return attrs_list
@@ -111,8 +113,9 @@ def read_all_values_on_key(
         raise AttrKeyDoesNotExistError(key=key)
 
     attrs_class = get_pulse_attrs_class(AttrDataType(existing_key.data_type))
-    statement = select(attrs_class.value).where(attrs_class.key == key).distinct()
-    return db.exec(statement).all()
+    return db.exec(
+        select(attrs_class.value).where(attrs_class.key == key).distinct(),
+    ).all()
 
 
 def filter_on_key_value_pairs(
