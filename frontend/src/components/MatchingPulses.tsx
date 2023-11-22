@@ -142,7 +142,7 @@ function MatchingPulses() {
 
 	useEffect(() => {
 		getFilteredPulses(pulseFilters).then((res) =>
-			setFilteredPulses(res.pulseIDs),
+			setFilteredPulses([...res.pulseIDs].sort((a, b) => a - b)),
 		);
 	}, [pulseFilters]);
 

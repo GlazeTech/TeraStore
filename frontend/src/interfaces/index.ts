@@ -2,7 +2,7 @@ export * from "./backend";
 export * from "./mantine";
 
 export enum KVType {
-	NUMBER = "integer",
+	NUMBER = "float",
 	STRING = "string",
 }
 export interface IAttrKey {
