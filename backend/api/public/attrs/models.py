@@ -4,7 +4,7 @@ from collections.abc import Sequence
 from enum import Enum
 from typing import Self, TypeAlias
 
-from pydantic.types import StrictFloat, StrictStr
+from pydantic.types import StrictFloat, StrictInt, StrictStr
 from sqlmodel import Field, SQLModel
 
 from api.utils.exceptions import AttrDataTypeDoesNotExistError
@@ -108,8 +108,8 @@ class PulseAttrsFloatCreate(PulseAttrsCreateBase):
 
 
 class PulseAttrsFloatFilter(PulseAttrsFilterBase):
-    min_value: StrictFloat
-    max_value: StrictFloat
+    min_value: StrictFloat | StrictInt
+    max_value: StrictFloat | StrictInt
 
 
 # Has to be defined after definition of both classes

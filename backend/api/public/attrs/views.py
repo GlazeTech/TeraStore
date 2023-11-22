@@ -9,17 +9,17 @@ from api.public.attrs.crud import (
     read_all_keys,
     read_all_values_on_key,
 )
-from api.public.attrs.models import (
-    TAttrDataTypeList,
-    TAttrFilterDataType,
-)
+from api.public.attrs.models import TAttrDataTypeList, TAttrFilterDataType
 
 router = APIRouter()
 
 
 @router.get("/keys")
-def get_all_keys(db: Session = Depends(get_session)) -> Sequence[str]:
-    return read_all_keys(db=db)
+def get_all_keys(db: Session = Depends(get_session)) -> list[dict[str, str]]:
+    return [
+        {"name": key_and_type[0], "data_type": key_and_type[1]}
+        for key_and_type in read_all_keys(db=db)
+    ]
 
 
 @router.get("/{key}/values")

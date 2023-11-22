@@ -94,9 +94,9 @@ def read_pulse_attrs(
 
 def read_all_keys(
     db: Session = Depends(get_session),
-) -> Sequence[str]:
+) -> Sequence[tuple[str, str]]:
     """Get all unique keys."""
-    statement = select(PulseKeyRegistry.key).distinct()
+    statement = select(PulseKeyRegistry.key, PulseKeyRegistry.data_type).distinct()
     return db.exec(statement).all()
 
 
@@ -149,10 +149,7 @@ def filter_on_key_value_pairs(
     # We need to use SQLAlchemy's execute method here because we need to
     # run a compound select statement
     result = db.execute(combined_select).all()
-    # SQLAlchemy 2 seems to have changed the return type of execute to tuples
-    # We can no longer retrieve `pulse_id["pulse_id"]` but have to use `pulse_id[0]
-    # It is ok, as we only return `pulse_id` for each select
-    return [pulse_id[0] for pulse_id in result]
+    return list({pulse_id[0] for pulse_id in result})
 
 
 def create_filter_query(

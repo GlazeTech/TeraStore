@@ -48,3 +48,8 @@ export const sortPulseFilters = (filters: PulseFilter[]) => {
 		})
 		.map((obj) => obj.filter);
 };
+
+export function uniqueElements<T>(list: T[]): T[] {
+	const uniqueSet = new Set(list);
+	return [...uniqueSet];
+}

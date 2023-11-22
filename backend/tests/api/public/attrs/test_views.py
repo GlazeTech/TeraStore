@@ -13,8 +13,8 @@ def test_get_all_keys(client: TestClient) -> None:
     response_data = response.json()
 
     assert response.status_code == 200
-    assert "angle" in response_data
-    assert "substrate" in response_data
+    assert {"data_type": "float", "name": "angle"} in response_data
+    assert {"data_type": "string", "name": "substrate"} in response_data
 
 
 def test_get_all_values_on_key(client: TestClient) -> None:
