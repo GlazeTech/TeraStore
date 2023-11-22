@@ -1,7 +1,10 @@
+from datetime import timedelta
+
 from fastapi.testclient import TestClient
 
 from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
 from api.public.pulse.models import PulseCreate
+from api.utils.helpers import get_now
 from api.utils.mock_data_generator import create_devices_and_pulses
 
 
@@ -389,3 +392,83 @@ def test_filter_one_wrong(client: TestClient, device_id: int) -> None:
     assert pulse_2_attrs_response.status_code == 200
     assert response.status_code == 200
     assert len(response_data) == 0
+
+
+def test_filter_valid_creation_time(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    today = get_now()
+    yesterday = today - timedelta(days=1)
+    tomorrow = today + timedelta(days=1)
+
+    filtering_json = [
+        {
+            "key": "creation_time",
+            "min_value": yesterday.isoformat(),
+            "max_value": tomorrow.isoformat(),
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+    response_data = response.json()
+
+    assert pulse_response.status_code == 200
+    assert response.status_code == 200
+    assert len(response_data) == 1
+    assert pulse_id in response_data
+
+
+def test_filter_invalid_creation_time(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    filtering_json = [
+        {
+            "key": "creation_time",
+            "min_value": "invalid",
+            "max_value": "invalid",
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+
+    assert pulse_response.status_code == 200
+    assert response.status_code == 422
+
+
+def test_filter_valid_creation_time_no_hits(client: TestClient, device_id: int) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data["pulse_id"]
+
+    today = get_now()
+    tomorrow = today + timedelta(days=1)
+
+    filtering_json = [
+        {
+            "key": "creation_time",
+            "min_value": tomorrow.isoformat(),
+            "max_value": tomorrow.isoformat(),
+        },
+    ]
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+    response_data = response.json()
+
+    assert pulse_response.status_code == 200
+    assert response.status_code == 200
+    assert len(response_data) == 0
+    assert pulse_id not in response_data

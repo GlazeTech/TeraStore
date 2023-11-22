@@ -11,6 +11,7 @@ from api.database import get_session
 from api.public.attrs.models import (
     AttrDataType,
     PulseAttrsCreateBase,
+    PulseAttrsDatetimeFilter,
     PulseAttrsFilterBase,
     PulseAttrsFloat,
     PulseAttrsFloatFilter,
@@ -124,7 +125,7 @@ def filter_on_key_value_pairs(
 ) -> list[int]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
-    select_statements: list[SelectOfScalar[int]] = []
+    select_statements: list[SelectOfScalar[int] | SelectOfScalar[None]] = []
 
     # If no filters applied, select all pulses
     if len(kv_pairs) == 0:
@@ -134,6 +135,11 @@ def filter_on_key_value_pairs(
         return cast(list[int], pulses)
 
     for kv in kv_pairs:
+        # Because creation_time is in the pulses table, we need to handle it separately
+        # As we do not allow datetime attrs, we can simply check the instance type
+        if isinstance(kv, PulseAttrsDatetimeFilter):
+            select_statements.append(create_attr_creation_time_filter_query(kv))
+            continue
         try:
             kv_data_type = db.exec(
                 select(PulseKeyRegistry.data_type).where(
@@ -163,6 +169,16 @@ def create_filter_query(
 
     error_str = "kv_pair must be of type PulseAttrsStrFilter or PulseAttrsFloatFilter"
     raise TypeError(error_str)
+
+
+def create_attr_creation_time_filter_query(
+    kv_pair: PulseAttrsDatetimeFilter,
+) -> SelectOfScalar[int] | SelectOfScalar[None]:
+    return (
+        select(Pulse.pulse_id)
+        .where(Pulse.creation_time >= kv_pair.min_value)
+        .where(Pulse.creation_time <= kv_pair.max_value)
+    )
 
 
 def create_attr_str_filter_query(kv_pair: PulseAttrsStrFilter) -> SelectOfScalar[int]:
