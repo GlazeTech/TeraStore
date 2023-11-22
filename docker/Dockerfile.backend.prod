@@ -5,7 +5,7 @@ WORKDIR /tmp
 COPY ./pyproject.toml /tmp/
 
 # Create webserver image
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.12
+FROM python:3.12
 WORKDIR /app
 COPY --from=requirements-stage /tmp/pyproject.toml /app/pyproject.toml
 RUN pip install --no-cache-dir --upgrade .
