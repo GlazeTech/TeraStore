@@ -9,6 +9,7 @@ import {
 	PulseFilter,
 	PulseID,
 } from "interfaces";
+import { BackendTHzDevice } from "interfaces/backend";
 
 // Potential TODO: Reset cache when pulses are uploaded - see this https://axios-cache-interceptor.js.org/guide/invalidating-cache
 const api = setupCache(
@@ -80,10 +81,15 @@ export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
 	);
 }
 
+// TODO: Implement uploadPulses
 export async function uploadPulses(pulses: AnnotatedPulse[]) {
 	return new Promise<void>((resolve) => {
 		setTimeout(() => {
 			resolve();
 		}, 1000);
 	});
+}
+
+export async function getDevices() {
+	return api.get<BackendTHzDevice[]>("/devices").then((resp) => resp.data);
 }

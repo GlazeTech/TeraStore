@@ -2,45 +2,71 @@ import * as M from "@mantine/core";
 import { Dropzone } from "@mantine/dropzone";
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { uploadPulses } from "api";
+import { getDevices, uploadPulses } from "api";
 import AnnotatedPulseExample from "assets/valid-annotated-pulse-example.json";
-import { AnnotatedPulse } from "classes";
+import {
+	AnnotatedPulse,
+	AnnotatedPulseParsingError,
+	InvalidCreationTimeError,
+	InvalidDeviceIDError,
+} from "classes";
 import { downloadJson } from "helpers";
 import {
+	extractPulses,
 	filesAreIdentical,
 	formatFileSize,
 	makeFileID,
-	processUploadFiles,
+	readTextFile,
 } from "helpers/data-io";
-import { useState } from "react";
+import { BackendTHzDevice } from "interfaces/backend";
+import { ReactNode, useEffect, useState } from "react";
 
 enum UploaderState {
 	IDLE = "idle",
 	UPLOADING = "uploading",
 }
 
+interface LoadedFile {
+	file: File;
+	pulses: AnnotatedPulse[];
+}
 export default function PulseUploader() {
 	const [uploaderState, setUploaderState] = useState<UploaderState>(
 		UploaderState.IDLE,
 	);
 	const [modalIsOpen, modalHandler] = useDisclosure(true);
-	const [selectedFiles, selectedFilesHandlers] = useListState<File>([]);
+	const [selectedFiles, selectedFilesHandlers] = useListState<LoadedFile>([]);
 	const [pulses, pulsesHandler] = useListState<AnnotatedPulse>([]);
+	const [devices, setDevices] = useState<BackendTHzDevice[] | null>(null);
+
+	// Fetch devices
+	useEffect(() => {
+		getDevices().then((devices) => setDevices(devices));
+	}, []);
 
 	const handleDropFiles = (files: File[]) => {
-		processUploadFiles(selectedFiles, files).then(
-			({ accepted, denied, newPulses }) => {
+		if (devices === null) {
+			notifications.show({
+				title: "No devices",
+				message: "No devices found. Please contact an administrator.",
+				autoClose: 2500,
+				color: "red",
+			});
+			return;
+		}
+
+		processUploadFiles(selectedFiles, files, devices).then(
+			({ accepted, errorNotificationContent }) => {
 				// Show a notification about denied files
-				denied.forEach((deniedFile) => {
+				errorNotificationContent.forEach((content) => {
 					notifications.show({
 						title: "Invalid file",
-						message: <ErrorNotificationContent deniedFile={deniedFile} />,
+						message: content,
 						autoClose: 2500,
 						color: "red",
 					});
 				});
 				selectedFilesHandlers.append(...accepted);
-				pulsesHandler.append(...newPulses);
 			},
 		);
 	};
@@ -54,9 +80,9 @@ export default function PulseUploader() {
 		});
 	};
 
-	const handleRemoveFile = (fileToDelete: File) => {
+	const handleRemoveFile = (fileToDelete: LoadedFile) => {
 		selectedFilesHandlers.filter(
-			(file) => !filesAreIdentical(fileToDelete, file),
+			(file) => !filesAreIdentical(fileToDelete.file, file.file),
 		);
 	};
 
@@ -122,10 +148,10 @@ export default function PulseUploader() {
 				</M.Button>
 				<div style={{ height: "40vh", overflow: "hidden" }}>
 					<M.ScrollArea type="hover" style={{ height: "100%" }}>
-						{selectedFiles.map((file) => (
+						{selectedFiles.map((selected) => (
 							<File
-								file={file}
-								key={makeFileID(file)}
+								file={selected}
+								key={makeFileID(selected.file)}
 								deleteHandler={handleRemoveFile}
 							/>
 						))}
@@ -142,7 +168,7 @@ export default function PulseUploader() {
 function File({
 	file,
 	deleteHandler,
-}: { file: File; deleteHandler: (key: File) => void }) {
+}: { file: LoadedFile; deleteHandler: (file: LoadedFile) => void }) {
 	return (
 		<M.Card
 			p={5}
@@ -153,8 +179,12 @@ function File({
 		>
 			<M.Group justify="space-between">
 				<M.Group>
-					<M.Text>{file.name}</M.Text>
-					<M.Text c={"dimmed"}>({formatFileSize(file.size)})</M.Text>
+					<M.Text>{file.file.name}</M.Text>
+					<M.Text c={"dimmed"}>
+						{`(${file.pulses.length}
+						${file.pulses.length > 1 ? "pulses" : "pulse"},
+						${formatFileSize(file.file.size)})`}
+					</M.Text>
 				</M.Group>
 				<M.CloseButton onClick={() => deleteHandler(file)} />
 			</M.Group>
@@ -182,7 +212,56 @@ const DropzoneText = () => (
 	</M.Stack>
 );
 
-const ErrorNotificationContent = ({ deniedFile }: { deniedFile: File }) => {
+export const processUploadFiles = async (
+	verifiedFiles: LoadedFile[],
+	candidateFiles: File[],
+	devices: BackendTHzDevice[],
+) => {
+	// Find new files that haven't been uploaded before
+	const newFiles = candidateFiles.filter(
+		(candidate) =>
+			!verifiedFiles.some((verified) =>
+				filesAreIdentical(candidate, verified.file),
+			),
+	);
+
+	// Read and extract pulses
+	const accepted: LoadedFile[] = [];
+	const errorNotificationContent: ReactNode[] = [];
+	return Promise.all(newFiles.map(readTextFile))
+		.then((filesContent) => {
+			filesContent.forEach((content, idx) => {
+				try {
+					accepted.push({
+						file: newFiles[idx],
+						pulses: extractPulses(content, devices),
+					});
+				} catch (error) {
+					errorNotificationContent.push(
+						errorNotificationFactory(newFiles[idx], error as Error),
+					);
+				}
+			});
+		})
+		.then(() => {
+			return { accepted, errorNotificationContent };
+		});
+};
+
+const errorNotificationFactory = (file: File, error: Error): ReactNode => {
+	if (error instanceof AnnotatedPulseParsingError) {
+		return <ParseErrorNotifContent deniedFile={file} />;
+	} else if (
+		error instanceof InvalidDeviceIDError ||
+		error instanceof InvalidCreationTimeError
+	) {
+		return `At least 1 pulse could not be parsed: ${error.message}`;
+	} else {
+		return error.message;
+	}
+};
+
+const ParseErrorNotifContent = ({ deniedFile }: { deniedFile: File }) => {
 	const handleClick = () => {
 		downloadJson(AnnotatedPulseExample, "annotated-pulses-example.json");
 	};

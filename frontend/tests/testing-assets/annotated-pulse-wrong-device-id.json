@@ -5,8 +5,8 @@
         "signal_err": null
     },
     "integration_time_ms": 30,
-    "creation_time": "2023-11-19T01:30:10.175500",
-    "device_id": 1,
+    "creation_time": "2023",
+    "device_id": -1,
     "pulse_attributes": [
         {
             "key": "project",

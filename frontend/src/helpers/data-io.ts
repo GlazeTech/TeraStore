@@ -1,4 +1,5 @@
-import { AnnotatedPulse, annotatedPulseSchema } from "classes";
+import { AnnotatedPulse } from "classes";
+import { BackendTHzDevice } from "interfaces";
 
 export const makeFileID = (file: File) =>
 	`${file.name}-${file.size}-${file.lastModified}`;
@@ -37,38 +38,10 @@ export const filesAreIdentical = (A: File, B: File) => {
 	);
 };
 
-
-export const processUploadFiles = async (
-	verifiedFiles: File[],
-	candidateFiles: File[]
+export const extractPulses = (
+	fileContent: unknown,
+	devices: BackendTHzDevice[],
 ) => {
-	// Find new files that haven't been uploaded before
-	const newFiles = candidateFiles.filter(
-		(candidate) => !verifiedFiles.some((verified) => filesAreIdentical(candidate, verified))
-	);
-
-	// Read and extract pulses
-	const accepted: File[] = [];
-	const denied: File[] = [];
-	let newPulses: AnnotatedPulse[] = [];
-	return Promise.all(newFiles.map(readTextFile))
-		.then((filesContent) => {
-			filesContent.forEach((content, idx) => {
-				try {
-					newPulses = [...newPulses, ...extractPulses(content)];
-					accepted.push(newFiles[idx]);
-				} catch {
-					// Fail if we can't parse files
-					denied.push(newFiles[idx]);
-				}
-			});
-		})
-		.then(() => {
-			return { accepted, denied, newPulses };
-		});
-};
-
-const extractPulses = (fileContent: unknown) => {
 	if (typeof fileContent !== "string") {
 		throw new Error("fileContent is not a string");
 	}
@@ -76,9 +49,11 @@ const extractPulses = (fileContent: unknown) => {
 	const fileAsJSON = JSON.parse(fileContent);
 	let pulses: AnnotatedPulse[] = [];
 	if (Array.isArray(fileAsJSON)) {
-		pulses = fileAsJSON.map((pulse) => annotatedPulseSchema.parse(pulse) as AnnotatedPulse);
+		pulses = fileAsJSON.map((pulse) =>
+			AnnotatedPulse.validateAndParse(pulse, devices),
+		);
 	} else {
-		pulses.push(annotatedPulseSchema.parse(fileAsJSON) as AnnotatedPulse);
+		pulses.push(AnnotatedPulse.validateAndParse(fileAsJSON, devices));
 	}
 	return pulses;
 };

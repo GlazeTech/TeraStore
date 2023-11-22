@@ -7,7 +7,7 @@
     "integration_time_ms": 30,
     "creation_time": "somestring",
     "device_id": 1,
-    "kv_pairs": [
+    "pulse_attributes": [
         {
             "key": "project",
             "value": "ACME"
