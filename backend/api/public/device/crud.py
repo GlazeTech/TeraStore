@@ -22,8 +22,7 @@ def read_devices(
     limit: int = 20,
     db: Session = Depends(get_session),
 ) -> list[DeviceRead]:
-    statement = select(Device).offset(offset).limit(limit)
-    devices = db.exec(statement).all()
+    devices = db.exec(select(Device).offset(offset).limit(limit)).all()
     return [DeviceRead.from_orm(device) for device in devices]
 
 

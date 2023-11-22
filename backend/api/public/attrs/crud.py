@@ -43,9 +43,9 @@ def add_attr(
     if not pulse:
         raise PulseNotFoundError(pulse_id=pulse_id)
 
-    existing_key = (
-        db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == kv_pair.key).first()
-    )
+    existing_key = db.exec(
+        select(PulseKeyRegistry).where(PulseKeyRegistry.key == kv_pair.key),
+    ).first()
     # Check if key already exists and if so, check if data type matches
     if existing_key and existing_key.data_type != kv_pair.data_type:
         raise AttrDataTypeExistsError(
@@ -83,8 +83,10 @@ def read_pulse_attrs(
     for data_type in AttrDataType:
         attrs_class = get_pulse_attrs_class(data_type)
         attrs_read_class = get_pulse_attrs_read_class(data_type)
-        statement = select(attrs_class).where(attrs_class.pulse_id == pulse_id)
-        attrs = [attrs_read_class.from_orm(obj) for obj in db.exec(statement).all()]
+        results = db.exec(
+            select(attrs_class).where(attrs_class.pulse_id == pulse_id),
+        ).all()
+        attrs = [attrs_read_class.from_orm(obj) for obj in results]
         attrs_list += attrs
 
     return attrs_list
@@ -92,7 +94,7 @@ def read_pulse_attrs(
 
 def read_all_keys(
     db: Session = Depends(get_session),
-) -> list[tuple[str, str]]:
+) -> Sequence[tuple[str, str]]:
     """Get all unique keys."""
     statement = select(PulseKeyRegistry.key, PulseKeyRegistry.data_type).distinct()
     return db.exec(statement).all()
@@ -104,15 +106,16 @@ def read_all_values_on_key(
 ) -> TAttrDataTypeList:
     """Get all unique values associated with a key."""
     # Get key if it exists from PulseKeyRegistry
-    existing_key = (
-        db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
-    )
+    existing_key = db.exec(
+        select(PulseKeyRegistry).where(PulseKeyRegistry.key == key),
+    ).first()
     if not existing_key:
         raise AttrKeyDoesNotExistError(key=key)
 
     attrs_class = get_pulse_attrs_class(AttrDataType(existing_key.data_type))
-    statement = select(attrs_class.value).where(attrs_class.key == key).distinct()
-    return db.exec(statement).all()
+    return db.exec(
+        select(attrs_class.value).where(attrs_class.key == key).distinct(),
+    ).all()
 
 
 def filter_on_key_value_pairs(
@@ -133,7 +136,7 @@ def filter_on_key_value_pairs(
     for kv in kv_pairs:
         try:
             kv_data_type = db.exec(
-                select(PulseKeyRegistry.data_type).filter(
+                select(PulseKeyRegistry.data_type).where(
                     PulseKeyRegistry.key == kv.key,
                 ),
             ).one()
@@ -143,8 +146,10 @@ def filter_on_key_value_pairs(
 
     combined_select = intersect(*select_statements)
 
+    # We need to use SQLAlchemy's execute method here because we need to
+    # run a compound select statement
     result = db.execute(combined_select).all()
-    return list({pulse_id["pulse_id"] for pulse_id in result})
+    return list({pulse_id[0] for pulse_id in result})
 
 
 def create_filter_query(

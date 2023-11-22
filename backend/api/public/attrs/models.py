@@ -1,5 +1,6 @@
 from __future__ import annotations
 
+from collections.abc import Sequence
 from enum import Enum
 from typing import Self, TypeAlias
 
@@ -9,8 +10,10 @@ from sqlmodel import Field, SQLModel
 from api.utils.exceptions import AttrDataTypeDoesNotExistError
 
 # Must be defined early in file to avoid Pydantic panic
+# As soon as Mypy supports PEP 695, we should implement the new type syntax
+# See: https://github.com/python/mypy/issues/15238
 TAttrDataType: TypeAlias = StrictStr | StrictFloat
-TAttrDataTypeList: TypeAlias = list[StrictStr] | list[StrictFloat]
+TAttrDataTypeList: TypeAlias = Sequence[StrictStr] | Sequence[StrictFloat]
 
 
 class AttrDataType(str, Enum):

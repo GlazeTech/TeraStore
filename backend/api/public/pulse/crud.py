@@ -21,8 +21,7 @@ def read_pulses(
     db: Session = Depends(get_session),
 ) -> list[PulseRead]:
     """Get all pulses in the database."""
-    statement = select(Pulse).offset(offset).limit(limit)
-    pulses = db.exec(statement).all()
+    pulses = db.exec(select(Pulse).offset(offset).limit(limit)).all()
     return [PulseRead.from_orm(pulse) for pulse in pulses]
 
 
@@ -38,7 +37,7 @@ def read_pulses_with_ids(
     pulses = db.exec(
         select(Pulse).join(
             TemporaryPulseIdTable,
-            TemporaryPulseIdTable.pulse_id == Pulse.pulse_id,
+            TemporaryPulseIdTable.pulse_id == Pulse.pulse_id,  # type: ignore[arg-type]
             isouter=False,
         ),
     ).all()
