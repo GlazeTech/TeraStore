@@ -1,11 +1,11 @@
 # Strongly inspired by https://fastapi.tiangolo.com/deployment/docker/#build-a-docker-image-for-fastapi
 # Requirements stage to avoid having unnecesary files in final image
-FROM python:3.11 as requirements-stage
+FROM python:3.12 as requirements-stage
 WORKDIR /tmp
 COPY ./pyproject.toml /tmp/
 
 # Create webserver image
-FROM tiangolo/uvicorn-gunicorn-fastapi:python3.11
+FROM tiangolo/uvicorn-gunicorn-fastapi:python3.12
 WORKDIR /app
 COPY --from=requirements-stage /tmp/pyproject.toml /app/pyproject.toml
 RUN pip install --no-cache-dir --upgrade .

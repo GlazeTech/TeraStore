@@ -43,9 +43,9 @@ def add_attr(
     if not pulse:
         raise PulseNotFoundError(pulse_id=pulse_id)
 
-    existing_key = (
-        db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == kv_pair.key).first()
-    )
+    existing_key = db.exec(
+        select(PulseKeyRegistry).where(PulseKeyRegistry.key == kv_pair.key),
+    ).first()
     # Check if key already exists and if so, check if data type matches
     if existing_key and existing_key.data_type != kv_pair.data_type:
         raise AttrDataTypeExistsError(
@@ -94,7 +94,7 @@ def read_pulse_attrs(
 
 def read_all_keys(
     db: Session = Depends(get_session),
-) -> list[str]:
+) -> Sequence[str]:
     """Get all unique keys."""
     statement = select(PulseKeyRegistry.key).distinct()
     return db.exec(statement).all()
@@ -106,9 +106,9 @@ def read_all_values_on_key(
 ) -> TAttrDataTypeList:
     """Get all unique values associated with a key."""
     # Get key if it exists from PulseKeyRegistry
-    existing_key = (
-        db.query(PulseKeyRegistry).filter(PulseKeyRegistry.key == key).first()
-    )
+    existing_key = db.exec(
+        select(PulseKeyRegistry).where(PulseKeyRegistry.key == key),
+    ).first()
     if not existing_key:
         raise AttrKeyDoesNotExistError(key=key)
 
@@ -136,7 +136,7 @@ def filter_on_key_value_pairs(
     for kv in kv_pairs:
         try:
             kv_data_type = db.exec(
-                select(PulseKeyRegistry.data_type).filter(
+                select(PulseKeyRegistry.data_type).where(
                     PulseKeyRegistry.key == kv.key,
                 ),
             ).one()
@@ -146,8 +146,13 @@ def filter_on_key_value_pairs(
 
     combined_select = intersect(*select_statements)
 
+    # We need to use SQLAlchemy's execute method here because we need to
+    # run a compound select statement
     result = db.execute(combined_select).all()
-    return [pulse_id["pulse_id"] for pulse_id in result]
+    # SQLAlchemy 2 seems to have changed the return type of execute to tuples
+    # We can no longer retrieve `pulse_id["pulse_id"]` but have to use `pulse_id[0]
+    # It is ok, as we only return `pulse_id` for each select
+    return [pulse_id[0] for pulse_id in result]
 
 
 def create_filter_query(

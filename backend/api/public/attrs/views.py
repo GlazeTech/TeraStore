@@ -18,7 +18,7 @@ router = APIRouter()
 
 
 @router.get("/keys")
-def get_all_keys(db: Session = Depends(get_session)) -> list[str]:
+def get_all_keys(db: Session = Depends(get_session)) -> Sequence[str]:
     return read_all_keys(db=db)
 
 

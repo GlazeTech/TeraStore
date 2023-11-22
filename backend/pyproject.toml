@@ -5,7 +5,7 @@ authors = [
   { name = "Mads Ehrhorn", email = "mehkj@dtu.dk" },
   { name = "Bjørn Mølvig", email = "bhymo@dtu.dk" },
 ]
-requires-python = ">=3.11,<3.12"
+requires-python = ">=3.12,<3.13"
 readme = "README.md"
 dynamic = ["version"]
 
@@ -17,19 +17,19 @@ dependencies = [
 
 [project.optional-dependencies]
 test = [
-  "mypy==1.5.1",
-  "black==23.9.1",
-  "ruff==0.0.292",
-  "pytest==7.4.2",
-  "types-psycopg2==2.9.21.14",
+  "mypy==1.7.0",
+  "black==23.11.0",
+  "ruff==0.1.6",
+  "pytest==7.4.3",
+  "types-psycopg2==2.9.21.16",
   "pytest-cov==4.1.0",
 ]
 dev = [
-  "mypy==1.5.1",
-  "black==23.9.1",
-  "ruff==0.0.292",
-  "pytest==7.4.2",
-  "types-psycopg2==2.9.21.14",
+  "mypy==1.7.0",
+  "black==23.11.0",
+  "ruff==0.1.6",
+  "pytest==7.4.3",
+  "types-psycopg2==2.9.21.16",
   "pytest-cov==4.1.0",
 ]
 
