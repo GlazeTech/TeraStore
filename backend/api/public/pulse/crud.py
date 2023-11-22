@@ -1,18 +1,35 @@
 from fastapi import Depends
+from psycopg2.errors import ForeignKeyViolation
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from api.database import get_session
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead, TemporaryPulseIdTable
-from api.utils.exceptions import PulseNotFoundError
+from api.utils.exceptions import (
+    DeviceNotFoundError,
+    PulseNotFoundError,
+)
+from api.utils.helpers import extract_device_id_from_pgerror
 
 
-def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> PulseRead:
-    pulse_to_db = Pulse.from_orm(pulse)
-
-    db.add(pulse_to_db)
-    db.commit()
-    db.refresh(pulse_to_db)
-    return PulseRead.from_orm(pulse_to_db)
+def create_pulses(
+    pulses: list[PulseCreate],
+    db: Session = Depends(get_session),
+) -> list[int]:
+    pulses_to_db = [Pulse.from_orm(pulse) for pulse in pulses]
+    for pulse_to_db in pulses_to_db:
+        db.add(pulse_to_db)
+    try:
+        db.commit()
+    except IntegrityError as e:
+        if isinstance(e.orig, ForeignKeyViolation):
+            if e.orig.pgerror is None:
+                raise
+            device_id = extract_device_id_from_pgerror(e.orig.pgerror)
+            raise DeviceNotFoundError(device_id=device_id) from e
+    for pulse_to_db in pulses_to_db:
+        db.refresh(pulse_to_db)
+    return [PulseRead.from_orm(pulse_to_db).pulse_id for pulse_to_db in pulses_to_db]
 
 
 def read_pulses(

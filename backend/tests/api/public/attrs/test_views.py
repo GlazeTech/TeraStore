@@ -40,7 +40,7 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
 
 
 def test_get_attrs_on_pulse(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -48,7 +48,7 @@ def test_get_attrs_on_pulse(client: TestClient, device_id: int) -> None:
     )
 
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     attrs_1_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
@@ -60,11 +60,11 @@ def test_get_attrs_on_pulse(client: TestClient, device_id: int) -> None:
     attrs_2_payload = PulseAttrsFloatCreate.create_mock().as_dict()
 
     attrs_2_data = client.put(
-        f"/pulses/{pulse_data['pulse_id']}/attrs/",
+        f"/pulses/{pulse_id}/attrs/",
         json=attrs_2_payload,
     )
 
-    response = client.get(f"/pulses/{pulse_data['pulse_id']}/attrs/")
+    response = client.get(f"/pulses/{pulse_id}/attrs/")
     response_data = response.json()
 
     response_keys = [d["key"] for d in response_data]
@@ -93,7 +93,7 @@ def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
 
 
 def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -101,7 +101,7 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: int) -> None:
     )
 
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
@@ -110,7 +110,7 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: int) -> None:
         json=attrs_payload,
     )
 
-    response = client.get(f"/pulses/{pulse_data['pulse_id']}/attrs/")
+    response = client.get(f"/pulses/{pulse_id}/attrs/")
     response_data = response.json()
 
     response_keys = [d["key"] for d in response_data]
@@ -141,7 +141,7 @@ def test_add_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
 
 
 def test_add_existing_attr_wrong_type(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -149,7 +149,7 @@ def test_add_existing_attr_wrong_type(client: TestClient, device_id: int) -> Non
     )
 
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
@@ -177,7 +177,7 @@ def test_add_existing_attr_wrong_type(client: TestClient, device_id: int) -> Non
 
 
 def test_filtering_pulses_float(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -185,7 +185,7 @@ def test_filtering_pulses_float(client: TestClient, device_id: int) -> None:
     )
 
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     pulse_attrs_payload = PulseAttrsFloatCreate.create_mock(value=42.0).as_dict()
 
@@ -216,7 +216,7 @@ def test_filtering_pulses_string(
     client: TestClient,
     device_id: int,
 ) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -224,7 +224,7 @@ def test_filtering_pulses_string(
     )
 
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     pulse_attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
@@ -251,7 +251,7 @@ def test_filtering_pulses_string(
 
 
 def test_filter_all_datatypes(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -259,7 +259,7 @@ def test_filter_all_datatypes(client: TestClient, device_id: int) -> None:
     )
 
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     pulse_attrs_1_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
@@ -309,14 +309,14 @@ def test_filter_no_kv_given(client: TestClient, device_id: str) -> None:
 
 
 def test_filter_no_kv_one_pulse(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     response = client.post("/attrs/filter/", json=[])
 
@@ -343,7 +343,7 @@ def test_filter_non_existent_key(client: TestClient, device_id: str) -> None:
 
 
 def test_filter_one_wrong(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -351,7 +351,7 @@ def test_filter_one_wrong(client: TestClient, device_id: int) -> None:
     )
 
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     pulse_attrs_1_payload = PulseAttrsStrCreate.create_mock().as_dict()
 

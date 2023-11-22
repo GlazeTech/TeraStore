@@ -1,7 +1,7 @@
 from __future__ import annotations
 
 from datetime import datetime  # noqa: TCH003
-from typing import Self
+from typing import Self, TypedDict
 
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
@@ -12,6 +12,14 @@ from api.utils.helpers import (
     generate_scaled_numbers,
     get_now,
 )
+
+
+class TPulseDict(TypedDict):
+    delays: list[float]
+    signal: list[float]
+    integration_time: int
+    creation_time: str
+    device_id: str
 
 
 class PulseBase(SQLModel):
@@ -71,7 +79,7 @@ class PulseCreate(PulseBase):
             device_id=device_id,
         )
 
-    def as_dict(self: Self) -> dict[str, list[float] | int | str]:
+    def as_dict(self: Self) -> TPulseDict:
         return {
             "delays": self.delays,
             "signal": self.signal,
