@@ -1,6 +1,10 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+
+# Ruff wants this import to be in a TYPE_CHECKING block
+# THIS WILL BREAK PYDANTIC, DO NO DO IT
+from datetime import datetime  # noqa: TCH003
 from enum import Enum
 from typing import Self, TypeAlias
 
@@ -112,9 +116,16 @@ class PulseAttrsFloatFilter(PulseAttrsFilterBase):
     max_value: StrictFloat | StrictInt
 
 
+class PulseAttrsDatetimeFilter(PulseAttrsFilterBase):
+    min_value: datetime
+    max_value: datetime
+
+
 # Has to be defined after definition of both classes
 TAttrReadDataType: TypeAlias = PulseAttrsStrRead | PulseAttrsFloatRead
-TAttrFilterDataType: TypeAlias = PulseAttrsStrFilter | PulseAttrsFloatFilter
+TAttrFilterDataType: TypeAlias = (
+    PulseAttrsStrFilter | PulseAttrsFloatFilter | PulseAttrsDatetimeFilter
+)
 
 
 # Factory function for finding the correct PulseAttrs class
