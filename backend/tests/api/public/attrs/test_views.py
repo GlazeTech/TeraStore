@@ -395,13 +395,15 @@ def test_filter_one_wrong(client: TestClient, device_id: int) -> None:
 
 
 def test_filter_valid_creation_time(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
+
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     today = get_now()
     yesterday = today - timedelta(days=1)
@@ -425,7 +427,8 @@ def test_filter_valid_creation_time(client: TestClient, device_id: int) -> None:
 
 
 def test_filter_invalid_creation_time(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
@@ -446,13 +449,15 @@ def test_filter_invalid_creation_time(client: TestClient, device_id: int) -> Non
 
 
 def test_filter_valid_creation_time_no_hits(client: TestClient, device_id: int) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
+
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     today = get_now()
     tomorrow = today + timedelta(days=1)
