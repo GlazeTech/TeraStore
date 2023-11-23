@@ -1,20 +1,20 @@
 {
-    "pulse": {
-        "time": [1, 2, 3],
-        "signal": [1, 2, 3],
-        "signal_err": null
-    },
-    "integration_time_ms": 30,
-    "creation_time": "somestring",
-    "device_id": 1,
-    "pulse_attributes": [
-        {
-            "key": "project",
-            "value": "ACME"
-        },
-        {
-            "key": "angle",
-            "value": 17
-        }
-    ]
+	"pulse": {
+		"time": [1, 2, 3],
+		"signal": [1, 2, 3],
+		"signal_err": null
+	},
+	"integration_time_ms": 30,
+	"creation_time": "somestring",
+	"device_id": 1,
+	"pulse_attributes": [
+		{
+			"key": "project",
+			"value": "ACME"
+		},
+		{
+			"key": "angle",
+			"value": 17
+		}
+	]
 }

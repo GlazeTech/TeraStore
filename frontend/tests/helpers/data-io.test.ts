@@ -1,13 +1,13 @@
+import fs from "fs";
+import path from "path";
 import {
 	AnnotatedPulse,
 	AnnotatedPulseParsingError,
 	InvalidCreationTimeError,
 	InvalidDeviceIDError,
 } from "classes";
-import fs from "fs";
 import { extractPulses, formatFileSize } from "helpers/data-io";
 import { BackendTHzDevice } from "interfaces";
-import path from "path";
 import { describe, expect, test } from "vitest";
 
 describe("extractPulses", () => {
