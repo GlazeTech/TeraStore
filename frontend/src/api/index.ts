@@ -82,7 +82,11 @@ export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
 }
 
 // TODO: Implement uploadPulses
-export async function uploadPulses(pulses: AnnotatedPulse[]) {
+// export async function uploadPulses(pulses: AnnotatedPulse[]) {
+// 	return api.post<boolean>("/pulses/upload", pulses).then((resp) => resp.data);
+// }
+
+export async function uploadPulses(_: AnnotatedPulse[]) {
 	return new Promise<void>((resolve) => {
 		setTimeout(() => {
 			resolve();

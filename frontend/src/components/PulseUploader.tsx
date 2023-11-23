@@ -24,19 +24,20 @@ import { ReactNode, useEffect, useState } from "react";
 enum UploaderState {
 	IDLE = "idle",
 	UPLOADING = "uploading",
+	REFRESHING = "refreshing",
 }
 
 interface LoadedFile {
 	file: File;
 	pulses: AnnotatedPulse[];
 }
+
 export default function PulseUploader() {
 	const [uploaderState, setUploaderState] = useState<UploaderState>(
 		UploaderState.IDLE,
 	);
-	const [modalIsOpen, modalHandler] = useDisclosure(true);
+	const [modalIsOpen, modalHandler] = useDisclosure(false);
 	const [selectedFiles, selectedFilesHandlers] = useListState<LoadedFile>([]);
-	const [pulses, pulsesHandler] = useListState<AnnotatedPulse>([]);
 	const [devices, setDevices] = useState<BackendTHzDevice[] | null>(null);
 
 	// Fetch devices
@@ -55,7 +56,7 @@ export default function PulseUploader() {
 			return;
 		}
 
-		processUploadFiles(selectedFiles, files, devices).then(
+		processSelectedFiles(selectedFiles, files, devices).then(
 			({ accepted, errorNotificationContent }) => {
 				// Show a notification about denied files
 				errorNotificationContent.forEach((content) => {
@@ -97,19 +98,25 @@ export default function PulseUploader() {
 			return;
 		}
 		setUploaderState(UploaderState.UPLOADING);
+		const pulses = selectedFiles.flatMap((file) => file.pulses);
+		const refreshDuration = 1000;
+
 		uploadPulses(pulses).then((_) => {
 			notifications.show({
 				title: "Upload completed",
 				message: `Uploaded ${pulses.length} ${
 					pulses.length > 1 ? "pulses" : "pulse"
 				} successfully!`,
-				autoClose: 2500,
+				autoClose: refreshDuration,
 				color: "green",
 			});
-			setUploaderState(UploaderState.IDLE);
-			selectedFilesHandlers.setState([]);
-			pulsesHandler.setState([]);
-			modalHandler.toggle();
+			setUploaderState(UploaderState.REFRESHING);
+
+			// Once uploaded, refresh the page to get newest content
+			setTimeout(() => {
+				modalHandler.toggle();
+				window.location.reload();
+			}, refreshDuration);
 		});
 	};
 
@@ -127,6 +134,7 @@ export default function PulseUploader() {
 					accept={["application/json"]}
 					maxSize={50 * 1024 * 1024}
 					mih={200}
+					disabled={uploaderState !== UploaderState.IDLE}
 				>
 					<DropzoneText />
 				</Dropzone>
@@ -136,8 +144,7 @@ export default function PulseUploader() {
 					fullWidth
 					onClick={handleUpload}
 					disabled={
-						uploaderState === UploaderState.UPLOADING ||
-						selectedFiles.length === 0
+						uploaderState !== UploaderState.IDLE || selectedFiles.length === 0
 					}
 				>
 					{uploaderState === UploaderState.UPLOADING ? (
@@ -212,7 +219,7 @@ const DropzoneText = () => (
 	</M.Stack>
 );
 
-export const processUploadFiles = async (
+export const processSelectedFiles = async (
 	verifiedFiles: LoadedFile[],
 	candidateFiles: File[],
 	devices: BackendTHzDevice[],
@@ -225,7 +232,7 @@ export const processUploadFiles = async (
 			),
 	);
 
-	// Read and extract pulses
+	// Read, extract and validate pulses
 	const accepted: LoadedFile[] = [];
 	const errorNotificationContent: ReactNode[] = [];
 	return Promise.all(newFiles.map(readTextFile))
