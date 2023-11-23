@@ -1,4 +1,4 @@
-import { AnnotatedPulse } from "classes";
+import { AnnotatedPulse, AnnotatedPulseParsingError } from "classes";
 import { BackendTHzDevice } from "interfaces";
 
 export const makeFileID = (file: File) =>
@@ -43,10 +43,16 @@ export const extractPulses = (
 	devices: BackendTHzDevice[],
 ) => {
 	if (typeof fileContent !== "string") {
-		throw new Error("fileContent is not a string");
+		throw new AnnotatedPulseParsingError("file content is not a string");
 	}
 
-	const fileAsJSON = JSON.parse(fileContent);
+	let fileAsJSON: unknown;
+	try {
+		fileAsJSON = JSON.parse(fileContent);
+	} catch (error) {
+		throw new AnnotatedPulseParsingError("file content is not valid JSON");
+	}
+
 	let pulses: AnnotatedPulse[] = [];
 	if (Array.isArray(fileAsJSON)) {
 		pulses = fileAsJSON.map((pulse) =>

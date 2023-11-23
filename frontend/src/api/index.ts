@@ -11,7 +11,6 @@ import {
 } from "interfaces";
 import { BackendTHzDevice } from "interfaces/backend";
 
-// Potential TODO: Reset cache when pulses are uploaded - see this https://axios-cache-interceptor.js.org/guide/invalidating-cache
 const api = setupCache(
 	axios.create({
 		baseURL: import.meta.env.PROD
