@@ -1,4 +1,5 @@
 from collections.abc import Generator
+from uuid import UUID
 
 import pytest
 from fastapi.testclient import TestClient
@@ -39,7 +40,7 @@ def client_fixture(session: Session) -> Generator[TestClient, None, None]:
 
 
 @pytest.fixture()
-def device_id(client: TestClient) -> Generator[int, None, None]:
+def device_id(client: TestClient) -> Generator[UUID, None, None]:
     """Create a Device for testing purposes."""
     device_payload = {"friendly_name": "Glaze I"}
     response = client.post(

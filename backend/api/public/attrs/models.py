@@ -7,6 +7,7 @@ from collections.abc import Sequence
 from datetime import datetime  # noqa: TCH003
 from enum import Enum
 from typing import Self, TypeAlias
+from uuid import UUID, uuid4
 
 from pydantic.types import StrictFloat, StrictInt, StrictStr
 from sqlmodel import Field, SQLModel
@@ -51,9 +52,9 @@ class PulseAttrsStr(PulseAttrsBase, table=True):
     __tablename__ = "pulse_str_attrs"
 
     value: StrictStr
-    pulse_id: int = Field(foreign_key="pulses.pulse_id", index=True)
+    pulse_id: UUID = Field(foreign_key="pulses.pulse_id", index=True)
 
-    index: int | None = Field(default=None, primary_key=True)
+    index: UUID = Field(default_factory=uuid4, primary_key=True)
 
 
 class PulseAttrsStrRead(PulseAttrsReadBase):
@@ -86,9 +87,9 @@ class PulseAttrsFloat(PulseAttrsBase, table=True):
     __tablename__ = "pulse_float_attrs"
 
     value: StrictFloat
-    pulse_id: int = Field(foreign_key="pulses.pulse_id", index=True)
+    pulse_id: UUID = Field(foreign_key="pulses.pulse_id", index=True)
 
-    index: int | None = Field(default=None, primary_key=True)
+    index: UUID = Field(default_factory=uuid4, primary_key=True)
 
 
 class PulseAttrsFloatRead(PulseAttrsReadBase):
@@ -158,4 +159,4 @@ class PulseKeyRegistry(SQLModel, table=True):
     key: str
     data_type: str
 
-    index: int | None = Field(default=None, primary_key=True)
+    index: UUID = Field(default_factory=uuid4, primary_key=True)

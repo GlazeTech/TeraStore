@@ -1,5 +1,6 @@
 from collections.abc import Callable, Sequence
 from typing import TypeAlias, cast
+from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy import intersect
@@ -35,7 +36,7 @@ TFilterFunctionType: TypeAlias = Callable[..., SelectOfScalar[int]]
 
 
 def add_attr(
-    pulse_id: int,
+    pulse_id: UUID,
     kv_pair: PulseAttrsCreateBase,
     db: Session = Depends(get_session),
 ) -> PulseRead:
@@ -70,7 +71,7 @@ def add_attr(
 
 
 def read_pulse_attrs(
-    pulse_id: int,
+    pulse_id: UUID,
     db: Session = Depends(get_session),
 ) -> list[TAttrReadDataType]:
     """Get all the keys for a pulse with id pulse_id."""
@@ -122,17 +123,17 @@ def read_all_values_on_key(
 def filter_on_key_value_pairs(
     kv_pairs: Sequence[TAttrFilterDataType],
     db: Session = Depends(get_session),
-) -> list[int]:
+) -> list[UUID]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
-    select_statements: list[SelectOfScalar[int] | SelectOfScalar[None]] = []
+    select_statements: list[SelectOfScalar[UUID]] = []
 
     # If no filters applied, select all pulses
     if len(kv_pairs) == 0:
         pulses = db.exec(select(Pulse.pulse_id)).all()
         if not pulses:
             return []
-        return cast(list[int], pulses)
+        return cast(list[UUID], pulses)
 
     for kv in kv_pairs:
         # Because creation_time is in the pulses table, we need to handle it separately
@@ -161,7 +162,7 @@ def filter_on_key_value_pairs(
 def create_filter_query(
     kv_pair: PulseAttrsFilterBase,
     kv_data_type: str,
-) -> SelectOfScalar[int]:
+) -> SelectOfScalar[UUID]:
     if kv_data_type == AttrDataType.STRING.value:
         return create_attr_str_filter_query(PulseAttrsStrFilter(**kv_pair.dict()))
     if kv_data_type == AttrDataType.FLOAT.value:
@@ -173,7 +174,7 @@ def create_filter_query(
 
 def create_attr_creation_time_filter_query(
     kv_pair: PulseAttrsDatetimeFilter,
-) -> SelectOfScalar[int] | SelectOfScalar[None]:
+) -> SelectOfScalar[UUID]:
     return (
         select(Pulse.pulse_id)
         .where(Pulse.creation_time >= kv_pair.min_value)
@@ -181,7 +182,7 @@ def create_attr_creation_time_filter_query(
     )
 
 
-def create_attr_str_filter_query(kv_pair: PulseAttrsStrFilter) -> SelectOfScalar[int]:
+def create_attr_str_filter_query(kv_pair: PulseAttrsStrFilter) -> SelectOfScalar[UUID]:
     return (
         select(PulseAttrsStr.pulse_id)
         .where(PulseAttrsStr.key == kv_pair.key)
@@ -191,7 +192,7 @@ def create_attr_str_filter_query(kv_pair: PulseAttrsStrFilter) -> SelectOfScalar
 
 def create_attr_float_filter_query(
     kv_pair: PulseAttrsFloatFilter,
-) -> SelectOfScalar[int]:
+) -> SelectOfScalar[UUID]:
     return (
         select(PulseAttrsFloat.pulse_id)
         .where(PulseAttrsFloat.key == kv_pair.key)

@@ -1,4 +1,5 @@
 from datetime import timedelta
+from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
@@ -42,7 +43,7 @@ def test_get_all_values_on_non_existing_key(client: TestClient) -> None:
     assert response_data["detail"] == "Key non-existing-key does not exist."
 
 
-def test_get_attrs_on_pulse(client: TestClient, device_id: int) -> None:
+def test_get_attrs_on_pulse(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -85,7 +86,7 @@ def test_get_attrs_on_pulse(client: TestClient, device_id: int) -> None:
 
 
 def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
-    pulse_id = 1000
+    pulse_id = uuid4()
 
     response = client.get(f"/pulses/{pulse_id}/attrs/")
 
@@ -95,7 +96,7 @@ def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
     assert response_data["detail"] == f"Pulse not found with id: {pulse_id}"
 
 
-def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: int) -> None:
+def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -128,7 +129,7 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: int) -> None:
 
 
 def test_add_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
-    pulse_id = 1000
+    pulse_id = uuid4()
 
     attrs_payload = PulseAttrsStrCreate.create_mock().as_dict()
 
@@ -143,7 +144,7 @@ def test_add_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
     assert response_data["detail"] == f"Pulse not found with id: {pulse_id}"
 
 
-def test_add_existing_attr_wrong_type(client: TestClient, device_id: int) -> None:
+def test_add_existing_attr_wrong_type(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -179,7 +180,7 @@ def test_add_existing_attr_wrong_type(client: TestClient, device_id: int) -> Non
     )
 
 
-def test_filtering_pulses_float(client: TestClient, device_id: int) -> None:
+def test_filtering_pulses_float(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -217,7 +218,7 @@ def test_filtering_pulses_float(client: TestClient, device_id: int) -> None:
 
 def test_filtering_pulses_string(
     client: TestClient,
-    device_id: int,
+    device_id: UUID,
 ) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
@@ -253,7 +254,7 @@ def test_filtering_pulses_string(
     assert pulse_id in response_data
 
 
-def test_filter_all_datatypes(client: TestClient, device_id: int) -> None:
+def test_filter_all_datatypes(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -302,7 +303,7 @@ def test_filter_all_datatypes(client: TestClient, device_id: int) -> None:
     assert pulse_id in response_data
 
 
-def test_filter_no_kv_given(client: TestClient, device_id: str) -> None:
+def test_filter_no_kv_given(client: TestClient) -> None:
     response = client.post("/attrs/filter/", json=[])
 
     response_data = response.json()
@@ -311,7 +312,7 @@ def test_filter_no_kv_given(client: TestClient, device_id: str) -> None:
     assert response_data == []
 
 
-def test_filter_no_kv_one_pulse(client: TestClient, device_id: int) -> None:
+def test_filter_no_kv_one_pulse(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -329,7 +330,7 @@ def test_filter_no_kv_one_pulse(client: TestClient, device_id: int) -> None:
     assert response_data == [pulse_id]
 
 
-def test_filter_non_existent_key(client: TestClient, device_id: str) -> None:
+def test_filter_non_existent_key(client: TestClient) -> None:
     filtering_json = [
         {
             "key": "non-existent-key",
@@ -345,7 +346,7 @@ def test_filter_non_existent_key(client: TestClient, device_id: str) -> None:
     assert response_data["detail"] == "Key non-existent-key does not exist."
 
 
-def test_filter_one_wrong(client: TestClient, device_id: int) -> None:
+def test_filter_one_wrong(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -394,7 +395,7 @@ def test_filter_one_wrong(client: TestClient, device_id: int) -> None:
     assert len(response_data) == 0
 
 
-def test_filter_valid_creation_time(client: TestClient, device_id: int) -> None:
+def test_filter_valid_creation_time(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -426,7 +427,7 @@ def test_filter_valid_creation_time(client: TestClient, device_id: int) -> None:
     assert pulse_id in response_data
 
 
-def test_filter_invalid_creation_time(client: TestClient, device_id: int) -> None:
+def test_filter_invalid_creation_time(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(
@@ -448,7 +449,10 @@ def test_filter_invalid_creation_time(client: TestClient, device_id: int) -> Non
     assert response.status_code == 422
 
 
-def test_filter_valid_creation_time_no_hits(client: TestClient, device_id: int) -> None:
+def test_filter_valid_creation_time_no_hits(
+    client: TestClient,
+    device_id: UUID,
+) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
 
     pulse_response = client.post(

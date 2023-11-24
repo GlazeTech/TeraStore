@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 from typing import Self
+from uuid import UUID, uuid4
 
 from sqlmodel import Field, SQLModel
 
@@ -24,7 +25,7 @@ class Device(DeviceBase, table=True):
 
     __tablename__ = "devices"
 
-    device_id: int | None = Field(default=None, primary_key=True)
+    device_id: UUID = Field(default_factory=uuid4, primary_key=True)
 
 
 class DeviceCreate(DeviceBase):
@@ -52,4 +53,4 @@ class DeviceRead(DeviceBase):
     from the db, as this requires the device_id.
     """
 
-    device_id: int
+    device_id: UUID

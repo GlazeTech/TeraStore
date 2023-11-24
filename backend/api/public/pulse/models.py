@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from datetime import datetime  # noqa: TCH003
 from typing import Self, TypedDict
+from uuid import UUID, uuid4
 
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
@@ -42,7 +43,7 @@ class PulseBase(SQLModel):
     signal: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
     integration_time: int
     creation_time: datetime
-    device_id: int = Field(foreign_key="devices.device_id")
+    device_id: UUID = Field(foreign_key="devices.device_id")
 
 
 class Pulse(PulseBase, table=True):
@@ -53,7 +54,7 @@ class Pulse(PulseBase, table=True):
 
     __tablename__ = "pulses"
 
-    pulse_id: int | None = Field(default=None, primary_key=True)
+    pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)
 
 
 class PulseCreate(PulseBase):
@@ -66,7 +67,7 @@ class PulseCreate(PulseBase):
     @classmethod
     def create_mock(
         cls: type[PulseCreate],
-        device_id: int,
+        device_id: UUID,
         length: int = 600,
         timescale: float = 1e-10,
         amplitude: float = 100.0,
@@ -96,7 +97,7 @@ class PulseRead(PulseBase):
     from the db, as this requires the pulse_id.
     """
 
-    pulse_id: int
+    pulse_id: UUID
 
 
 class TemporaryPulseIdTable(SQLModel, table=True):
@@ -110,4 +111,4 @@ class TemporaryPulseIdTable(SQLModel, table=True):
 
     __tablename__ = "temporary_pulse_id_table"
 
-    pulse_id: int | None = Field(default=None, primary_key=True)
+    pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)
