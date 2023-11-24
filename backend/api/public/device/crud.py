@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends
 from sqlmodel import Session, select
 
@@ -26,7 +28,7 @@ def read_devices(
     return [DeviceRead.from_orm(device) for device in devices]
 
 
-def read_device(device_id: int, db: Session = Depends(get_session)) -> DeviceRead:
+def read_device(device_id: UUID, db: Session = Depends(get_session)) -> DeviceRead:
     device = db.get(Device, device_id)
     if not device:
         raise DeviceNotFoundError(device_id=device_id)

@@ -1,3 +1,5 @@
+from uuid import uuid4
+
 from fastapi.testclient import TestClient
 
 from api.public.device.models import DeviceCreate
@@ -97,16 +99,17 @@ def test_get_device_with_invalid_device_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid integer"
-    assert data["detail"][0]["type"] == "type_error.integer"
+    assert data["detail"][0]["msg"] == "value is not a valid uuid"
+    assert data["detail"][0]["type"] == "type_error.uuid"
 
 
 def test_get_device_with_nonexistent_device_id(client: TestClient) -> None:
-    response = client.get("/devices/1000")
+    device_id = uuid4()
+    response = client.get(f"/devices/{device_id}")
     data = response.json()
 
     assert response.status_code == 404
-    assert data["detail"] == "Device not found with id: 1000"
+    assert data["detail"] == f"Device not found with id: {device_id}"
 
 
 def test_get_all_devices(client: TestClient) -> None:

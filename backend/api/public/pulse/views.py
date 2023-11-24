@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from psycopg2.errors import ForeignKeyViolation
 from sqlalchemy.exc import DBAPIError
@@ -47,20 +49,20 @@ def get_pulses(
 
 @router.post("/get")
 def get_pulses_from_ids(
-    ids: list[int],
+    ids: list[UUID],
     db: Session = Depends(get_session),
 ) -> list[PulseRead]:
     return read_pulses_with_ids(ids, db=db)
 
 
 @router.get("/{pulse_id}")
-def get_pulse(pulse_id: int, db: Session = Depends(get_session)) -> PulseRead:
+def get_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> PulseRead:
     return read_pulse(pulse_id=pulse_id, db=db)
 
 
 @router.put("/{pulse_id}/attrs")
 def add_kv_pair(
-    pulse_id: int,
+    pulse_id: UUID,
     kv_pair: PulseAttrsCreateBase,
     db: Session = Depends(get_session),
 ) -> PulseRead:
@@ -69,7 +71,7 @@ def add_kv_pair(
 
 @router.get("/{pulse_id}/attrs")
 def get_pulse_keys(
-    pulse_id: int,
+    pulse_id: UUID,
     db: Session = Depends(get_session),
 ) -> list[TAttrReadDataType]:
     return read_pulse_attrs(pulse_id=pulse_id, db=db)

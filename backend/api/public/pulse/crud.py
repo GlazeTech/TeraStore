@@ -1,3 +1,5 @@
+from uuid import UUID
+
 from fastapi import Depends
 from sqlmodel import Session, select
 
@@ -26,7 +28,7 @@ def read_pulses(
 
 
 def read_pulses_with_ids(
-    ids: list[int],
+    ids: list[UUID],
     db: Session = Depends(get_session),
 ) -> list[PulseRead]:
     # Save wanted ID's in a temporary table
@@ -48,7 +50,7 @@ def read_pulses_with_ids(
     return [PulseRead.from_orm(pulse) for pulse in pulses]
 
 
-def read_pulse(pulse_id: int, db: Session = Depends(get_session)) -> PulseRead:
+def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> PulseRead:
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         raise PulseNotFoundError(pulse_id=pulse_id)
