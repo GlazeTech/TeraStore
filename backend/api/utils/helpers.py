@@ -1,6 +1,6 @@
-import re
 import secrets
 from datetime import datetime
+from uuid import UUID
 from zoneinfo import ZoneInfo
 
 
@@ -41,11 +41,11 @@ def create_mock_pulse(
     }
 
 
-def extract_device_id_from_pgerror(pgerror: str) -> int:
+def extract_device_id_from_pgerror(pgerror: str) -> UUID:
     """Find a device_id in a PostgreSQL error message."""
-    pattern = r"Key \(device_id\)=\((\d+)\)"
-    match = re.search(pattern, pgerror)
-    if match:
-        return int(match.group(1))
+    detail = pgerror.split("Key (device_id)=(")[1]
+    uuid = detail.split(")")[0]
+    if uuid:
+        return UUID(uuid)
     error_str = "No device_id found in error message."
     raise ValueError(error_str)

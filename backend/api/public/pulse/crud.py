@@ -17,8 +17,11 @@ from api.utils.helpers import extract_device_id_from_pgerror
 def create_pulses(
     pulses: list[PulseCreate],
     db: Session = Depends(get_session),
-) -> list[int]:
+) -> list[UUID]:
     pulses_to_db = [Pulse.from_orm(pulse) for pulse in pulses]
+    # We get the IDs here, because if we do it later,
+    # SQLModel will verify the ID with a call to the database,
+    ids = [pulse.pulse_id for pulse in pulses_to_db]
     for pulse_to_db in pulses_to_db:
         db.add(pulse_to_db)
     try:
@@ -29,9 +32,7 @@ def create_pulses(
                 raise
             device_id = extract_device_id_from_pgerror(e.orig.pgerror)
             raise DeviceNotFoundError(device_id=device_id) from e
-    for pulse_to_db in pulses_to_db:
-        db.refresh(pulse_to_db)
-    return [PulseRead.from_orm(pulse_to_db).pulse_id for pulse_to_db in pulses_to_db]
+    return ids
 
 
 def read_pulses(

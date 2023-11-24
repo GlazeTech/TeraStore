@@ -56,6 +56,18 @@ class Pulse(PulseBase, table=True):
 
     pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)
 
+    @staticmethod
+    def create(
+        pulse: PulseCreate,
+    ) -> Pulse:
+        return Pulse(
+            delays=pulse.delays,
+            signal=pulse.signal,
+            integration_time=pulse.integration_time,
+            creation_time=pulse.creation_time,
+            device_id=pulse.device_id,
+        )
+
 
 class PulseCreate(PulseBase):
     """Model for creating a new Pulse.

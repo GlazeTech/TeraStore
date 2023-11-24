@@ -24,7 +24,7 @@ router = APIRouter()
 def add_pulses(
     pulses: list[PulseCreate],
     db: Session = Depends(get_session),
-) -> list[int]:
+) -> list[UUID]:
     return create_pulses(pulses=pulses, db=db)
 
 
