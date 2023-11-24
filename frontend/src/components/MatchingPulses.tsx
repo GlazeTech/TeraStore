@@ -4,24 +4,24 @@ import { notifications } from "@mantine/notifications";
 import { getFilteredPulses, getPulse, getPulses } from "api";
 import { Pulse } from "classes";
 import { downloadJson } from "helpers";
-import { PulseID } from "interfaces";
+import { PulseMetadata } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
 
 function PulseCard({
-	pulseID,
+	pulseMetadata,
 	isSelected,
 	setSelected,
 }: {
-	pulseID: number;
+	pulseMetadata: PulseMetadata;
 	isSelected: boolean;
-	setSelected: (value: React.SetStateAction<PulseID | null>) => void;
+	setSelected: (value: React.SetStateAction<PulseMetadata | null>) => void;
 }) {
 	const [pulse, setPulse] = useState<Pulse | null>(null);
 
 	useEffect(() => {
 		if (isSelected) {
-			getPulse(pulseID).then((p) => setPulse(p));
+			getPulse(pulseMetadata.pulseID).then((p) => setPulse(p));
 		}
 	}, [isSelected]);
 
@@ -40,7 +40,7 @@ function PulseCard({
 					p={5}
 					m={5}
 					onClick={() =>
-						isSelected ? setSelected(null) : setSelected(pulseID)
+						isSelected ? setSelected(null) : setSelected(pulseMetadata)
 					}
 					style={{
 						backgroundColor: isSelected
@@ -48,7 +48,9 @@ function PulseCard({
 							: undefined,
 					}}
 				>
-					<M.Text lineClamp={1}>{pulseID}</M.Text>
+					<M.Text lineClamp={1}>
+						{pulseMetadata.creationTime.toISOString()}
+					</M.Text>
 				</M.Card>
 			</M.Popover.Target>
 			<M.Popover.Dropdown>
@@ -62,11 +64,13 @@ function PulseCard({
 	);
 }
 
-function DownloadModalContent({ pulseIds }: { pulseIds: PulseID[] }) {
+function DownloadModalContent({
+	pulsesMetadata,
+}: { pulsesMetadata: PulseMetadata[] }) {
 	const [allSelected, allSelectedHandler] = useDisclosure(true);
 	const [pulses, pulsesHandlers] = useListState(
-		pulseIds.map((pulseId) => {
-			return { id: pulseId, isSelected: true };
+		pulsesMetadata.map((pulseMetadata) => {
+			return { id: pulseMetadata.pulseID, isSelected: true };
 		}),
 	);
 
@@ -135,14 +139,20 @@ function DownloadModalContent({ pulseIds }: { pulseIds: PulseID[] }) {
 }
 
 function MatchingPulses() {
-	const [filteredPulses, setFilteredPulses] = useState<PulseID[] | null>(null);
-	const [selectedItem, setSelectedItem] = useState<PulseID | null>(null);
+	const [filteredPulses, setFilteredPulses] = useState<PulseMetadata[] | null>(
+		null,
+	);
+	const [selectedItem, setSelectedItem] = useState<PulseMetadata | null>(null);
 	const [pulseFilters] = useFiltersStore((state) => [state.pulseFilters]);
 	const [modalIsOpen, modalHandler] = useDisclosure(false);
 
 	useEffect(() => {
 		getFilteredPulses(pulseFilters).then((res) =>
-			setFilteredPulses([...res.pulseIDs].sort((a, b) => a - b)),
+			setFilteredPulses(
+				[...res.pulsesMetadata].sort(
+					(a, b) => a.creationTime.getTime() - b.creationTime.getTime(),
+				),
+			),
 		);
 	}, [pulseFilters]);
 
@@ -153,7 +163,9 @@ function MatchingPulses() {
 				onClose={modalHandler.close}
 				title="Download pulses"
 			>
-				{filteredPulses && <DownloadModalContent pulseIds={filteredPulses} />}
+				{filteredPulses && (
+					<DownloadModalContent pulsesMetadata={filteredPulses} />
+				)}
 			</M.Modal>
 			<M.Stack p={10}>
 				<M.Text fw={700} size="lg">
@@ -164,12 +176,12 @@ function MatchingPulses() {
 
 			<M.Divider ml={10} mr={10} />
 			<M.ScrollArea type="hover">
-				{filteredPulses?.map((pulseID) => (
+				{filteredPulses?.map((pulseMetadata) => (
 					<PulseCard
-						pulseID={pulseID}
-						isSelected={pulseID === selectedItem}
+						pulseMetadata={pulseMetadata}
+						isSelected={pulseMetadata === selectedItem}
 						setSelected={setSelectedItem}
-						key={pulseID}
+						key={pulseMetadata.pulseID}
 					/>
 				))}
 			</M.ScrollArea>

@@ -3,6 +3,11 @@ from datetime import datetime
 from uuid import UUID
 from zoneinfo import ZoneInfo
 
+from pydantic import BaseModel
+
+from api.utils.exceptions import PulseColumnNonexistentError
+from api.utils.types import TPulseCols
+
 
 def generate_random_numbers(
     n: int,
@@ -49,3 +54,22 @@ def extract_device_id_from_pgerror(pgerror: str) -> UUID:
         return UUID(uuid)
     error_str = "No device_id found in error message."
     raise ValueError(error_str)
+
+
+def get_model_columns_from_names(
+    wanted_columns: list[str],
+    model: type[BaseModel],
+) -> tuple[TPulseCols, ...]:
+    # Maps a list of row names to the corresponding SQLModel attributes.
+    try:
+        fields: tuple[TPulseCols, ...] = tuple(
+            [getattr(model, attr) for attr in wanted_columns],
+        )
+
+    # If the column doesn't exist, raise an error
+    except AttributeError as e:
+        raise PulseColumnNonexistentError(
+            wanted=str(e),
+            columns=list(model.schema()["properties"]),
+        ) from e
+    return fields

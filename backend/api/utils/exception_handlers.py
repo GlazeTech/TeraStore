@@ -7,6 +7,7 @@ from api.utils.exceptions import (
     AttrDataTypeExistsError,
     AttrKeyDoesNotExistError,
     DeviceNotFoundError,
+    PulseColumnNonexistentError,
     PulseNotFoundError,
 )
 
@@ -14,6 +15,16 @@ from api.utils.exceptions import (
 async def pulse_not_found_exception_handler(
     _request: Request,
     exc: PulseNotFoundError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_404_NOT_FOUND,
+        content={"detail": str(exc)},
+    )
+
+
+async def pulse_column_nonexistent_exception_handler(
+    _request: Request,
+    exc: PulseColumnNonexistentError,
 ) -> JSONResponse:
     return JSONResponse(
         status_code=status.HTTP_404_NOT_FOUND,

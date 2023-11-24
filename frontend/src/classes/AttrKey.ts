@@ -1,7 +1,7 @@
 import { getFilteredPulses, getKeyValues } from "api";
 import { getFilterResultsForEachStringValue } from "helpers";
 import { IAttrKey, KVType, PulseFilter } from "interfaces";
-import { PulseNumberFilter } from "./PulseFilter";
+import { PulseDateFilter, PulseNumberFilter } from "./PulseFilter";
 
 export function attrKeyFactory(name: string, type: KVType) {
 	if (type === KVType.NUMBER) {
@@ -47,6 +47,26 @@ export class NumberAttrKey extends BaseAttrKey implements IAttrKey {
 				this,
 				Math.min(...keyValues),
 				Math.max(...keyValues),
+			),
+		]);
+		return filterResult.nPulses;
+	}
+}
+
+export class DateAttrKey extends BaseAttrKey implements IAttrKey {
+	constructor(readonly name: string) {
+		super(name, KVType.DATE);
+	}
+
+	async getNPulsesWithKey(additionalFilters: PulseFilter[]): Promise<number> {
+		const filterResult = await getFilteredPulses([
+			...additionalFilters,
+
+			// Make a date filter that covers all dates
+			new PulseDateFilter(
+				this,
+				new Date("2000-01-01T00:00:00"),
+				new Date("2100-01-01T00:00:00"),
 			),
 		]);
 		return filterResult.nPulses;

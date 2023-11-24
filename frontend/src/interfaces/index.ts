@@ -4,6 +4,7 @@ export * from "./mantine";
 export enum KVType {
 	NUMBER = "float",
 	STRING = "string",
+	DATE = "date",
 }
 export interface IAttrKey {
 	name: string;
@@ -29,6 +30,19 @@ export interface IPulseFilterNumber extends PulseFilterBase {
 	upper: number;
 }
 
-export type PulseFilter = IPulseFilterString | IPulseFilterNumber;
+export interface IPulseFilterDate extends PulseFilterBase {
+	lower: Date;
+	upper: Date;
+}
+
+export interface PulseMetadata {
+	pulseID: PulseID;
+	creationTime: Date;
+}
+
+export type PulseFilter =
+	| IPulseFilterString
+	| IPulseFilterNumber
+	| IPulseFilterDate;
 
 export type PulseID = number;

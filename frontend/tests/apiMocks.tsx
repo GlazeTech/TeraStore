@@ -20,7 +20,7 @@ export const mockApi = async () => {
 			),
 			getFilteredPulses: vi.fn(
 				async (filters: PulseFilter[]): Promise<FilterResult> =>
-					new FilterResult(filters, [1, 2]),
+					new FilterResult(filters, []),
 			),
 			getDevices: vi.fn(async (): Promise<BackendTHzDevice[]> => []),
 		};

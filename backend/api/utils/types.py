@@ -1,4 +1,6 @@
+from datetime import datetime
 from enum import Enum, auto
+from typing import TypeVar
 
 
 class Lifespan(Enum):
@@ -7,3 +9,6 @@ class Lifespan(Enum):
     PROD = auto()
     DEV = auto()
     TEST = auto()
+
+
+TPulseCols = TypeVar("TPulseCols", int, None, str, float, datetime)

@@ -1,4 +1,9 @@
-import { IAttrKey, IPulseFilterNumber, IPulseFilterString } from "interfaces";
+import {
+	IAttrKey,
+	IPulseFilterDate,
+	IPulseFilterNumber,
+	IPulseFilterString,
+} from "interfaces";
 
 export class PulseNumberFilter implements IPulseFilterNumber {
 	constructor(
@@ -47,5 +52,41 @@ export class PulseStringFilter implements IPulseFilterString {
 			key: this.key.name,
 			value: this.value,
 		};
+	}
+}
+
+export class PulseDateFilter implements IPulseFilterDate {
+	constructor(public key: IAttrKey, public lower: Date, public upper: Date) {}
+
+	hash(): string {
+		return `${
+			this.key.name
+		}:${this.lower.toISOString()}-${this.upper.toISOString()}`;
+	}
+
+	displayFilter(): string {
+		return `${this.key.name}: ${this.formattedDates()}`;
+	}
+
+	displayValue(): string {
+		return this.formattedDates();
+	}
+
+	asBackendFilter(): object {
+		return {
+			key: this.key.name,
+			min_value: this.lower.toISOString(),
+			max_value: this.upper.toISOString(),
+		};
+	}
+
+	private formattedDates(): string {
+		const lowerFormatted = `${this.lower.getFullYear()}/${
+			this.lower.getMonth() + 1
+		}/${this.lower.getDate()}`;
+		const upperFormatted = `${this.upper.getFullYear()}/${
+			this.upper.getMonth() + 1
+		}/${this.upper.getDate()}`;
+		return `${lowerFormatted} - ${upperFormatted}`;
 	}
 }
