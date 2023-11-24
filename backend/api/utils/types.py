@@ -1,6 +1,7 @@
 from datetime import datetime
 from enum import Enum, auto
 from typing import TypeVar
+from uuid import UUID
 
 
 class Lifespan(Enum):
@@ -11,4 +12,4 @@ class Lifespan(Enum):
     TEST = auto()
 
 
-TPulseCols = TypeVar("TPulseCols", int, None, str, float, datetime)
+TPulseCols = TypeVar("TPulseCols", UUID, datetime, int, float, str)

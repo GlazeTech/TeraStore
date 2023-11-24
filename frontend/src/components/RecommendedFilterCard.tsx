@@ -255,7 +255,7 @@ export function DateFilterCard({ attrKey }: { attrKey: DateAttrKey }) {
 		}
 	}, [selectedDates, pulseFilters]);
 
-	// Set selected dates to min and max date
+	// Set selected dates to min and max date, when dates have been fetched
 	useEffect(() => {
 		if (allDates) {
 			setSelectedDates([
@@ -265,13 +265,13 @@ export function DateFilterCard({ attrKey }: { attrKey: DateAttrKey }) {
 		}
 	}, [allDates]);
 
-	const handleLowerChange = (value: DateValue) => {
+	const handeLowerDateChange = (value: DateValue) => {
 		if (value) {
 			setSelectedDates([dateToEarliestTimeOfDay(value), selectedDates[1]]);
 		}
 	};
 
-	const handleUpperChange = (value: DateValue) => {
+	const handleUpperDateChange = (value: DateValue) => {
 		if (value) {
 			setSelectedDates([selectedDates[0], dateToLatestTimeOfDay(value)]);
 		}
@@ -294,7 +294,7 @@ export function DateFilterCard({ attrKey }: { attrKey: DateAttrKey }) {
 			</M.Group>
 			<DateInput
 				value={selectedDates[1]}
-				onChange={handleUpperChange}
+				onChange={handleUpperDateChange}
 				minDate={selectedDates[0] ? selectedDates[0] : undefined}
 				maxDate={allDates ? allDates[allDates.length - 1] : undefined}
 				label="Upper bound"
@@ -307,7 +307,7 @@ export function DateFilterCard({ attrKey }: { attrKey: DateAttrKey }) {
 
 			<DateInput
 				value={selectedDates[0]}
-				onChange={handleLowerChange}
+				onChange={handeLowerDateChange}
 				minDate={allDates ? allDates[0] : undefined}
 				maxDate={selectedDates[1] ? selectedDates[1] : undefined}
 				label="Lower bound"

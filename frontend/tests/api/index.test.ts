@@ -15,7 +15,7 @@ describe("getFilteredPulses", async () => {
 	test("no filters should return all pulses", async () => {
 		const filters: PulseFilter[] = [];
 		const result = await getFilteredPulses(filters);
-		expect(result).toBeInstanceOf(FilterResult);
+		expect(result.nPulses).toBeGreaterThan(0);
 	});
 
 	test("should work with a number filter", async () => {

@@ -84,7 +84,7 @@ def read_pulses_with_ids(
     pulses = db.exec(
         select(Pulse).join(
             TemporaryPulseIdTable,
-            TemporaryPulseIdTable.pulse_id == Pulse.pulse_id,
+            TemporaryPulseIdTable.pulse_id == Pulse.pulse_id,  # type: ignore[arg-type]
             isouter=False,
         ),
     ).all()

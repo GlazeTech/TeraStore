@@ -45,4 +45,4 @@ export type PulseFilter =
 	| IPulseFilterNumber
 	| IPulseFilterDate;
 
-export type PulseID = number;
+export type PulseID = string;

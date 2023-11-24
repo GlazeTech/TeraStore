@@ -3,7 +3,6 @@ from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy import intersect
-from sqlalchemy import select as sqla_select
 from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session, col, select
@@ -177,8 +176,7 @@ def filter_on_key_value_pairs(
         # Using exec(..), if pulse_fields is a tuple with a single attribute,
         # a list of integers is returned.
         # If it contains more than one attribute, a list of Row objects is returned,
-        # and the type annotation
-        # is not correct. Hence, use SQLAlchemy method.
+        # and the type annotation is not correct. Hence, use SQLAlchemy method.
         pulses = db.execute(
             select(*get_model_columns_from_names(wanted_columns, Pulse)),
         ).all()
@@ -213,11 +211,13 @@ def filter_on_key_value_pairs(
         r = db.execute(combined_select).unique().all()
     else:
         sub_query = combined_select.subquery("sub_query")
+        # Use SQLAlchemy's execute method, because SQLModel has wrong types and doesn't
+        # know .unique() and .all()
         r = (
             db.execute(
-                sqla_select(*get_model_columns_from_names(wanted_columns, Pulse)).join(
+                select(*get_model_columns_from_names(wanted_columns, Pulse)).join(
                     sub_query,
-                    Pulse.pulse_id == sub_query.c.pulse_id,
+                    Pulse.pulse_id == sub_query.c.pulse_id,  # type: ignore[arg-type]
                 ),
             )
             .unique()
