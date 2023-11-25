@@ -16,5 +16,5 @@ export interface BackendAttrKey {
 
 export interface BackendTHzDevice {
 	friendly_name: string;
-	device_id: number;
+	device_id: string;
 }

@@ -20,7 +20,7 @@ export class AnnotatedPulse {
 		},
 		public integration_time_ms: number,
 		public creation_time: Date,
-		public device_id: number,
+		public device_id: string,
 		public pulse_attributes: { key: string; value: string | number }[],
 	) {}
 
@@ -73,7 +73,7 @@ const annotatedPulseSchema = z.object({
 	}),
 	integration_time_ms: z.number(),
 	creation_time: z.string(),
-	device_id: z.number(),
+	device_id: z.string(),
 	pulse_attributes: z.array(
 		z.object({
 			key: z.string(),

@@ -6,7 +6,7 @@
 	},
 	"integration_time_ms": 30,
 	"creation_time": "somestring",
-	"device_id": 1,
+	"device_id": "5042dbda-e9bc-4216-a614-ac56d0a32023",
 	"pulse_attributes": [
 		{
 			"key": "project",

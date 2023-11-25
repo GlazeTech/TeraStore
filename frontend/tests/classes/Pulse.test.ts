@@ -15,13 +15,15 @@ describe("AnnotatedPulse", () => {
 		},
 		integration_time_ms: 100,
 		creation_time: "2023-11-19T01:30:10.175Z",
-		device_id: 1,
+		device_id: "someID",
 		pulse_attributes: [
 			{ key: "key1", value: "value1" },
 			{ key: "key2", value: 2 },
 		],
 	};
-	const devices = [{ device_id: 1, friendly_name: "someName" }];
+	const devices = [
+		{ device_id: "someID", friendly_name: "someName" } as BackendTHzDevice,
+	];
 
 	test("should create an instance of AnnotatedPulse", () => {
 		const annotatedPulse = AnnotatedPulse.validateAndParse(
@@ -64,7 +66,7 @@ describe("AnnotatedPulse", () => {
 	});
 
 	test("should fail when using wrong device ID", () => {
-		const wrongDeviceId = -1; // Wrong device ID
+		const wrongDeviceId = "nonexistent device"; // Wrong device ID
 		expect(() => {
 			AnnotatedPulse.validateAndParse(
 				validAnnotatedPulse,
@@ -87,7 +89,7 @@ describe("AnnotatedPulse", () => {
 			},
 			integration_time_ms: 100,
 			creation_time: "wrong datetime", // Invalid creation_time
-			device_id: 1,
+			device_id: devices[0].device_id,
 			pulse_attributes: [
 				{ key: "key1", value: "value1" },
 				{ key: "key2", value: 2 },
@@ -105,7 +107,7 @@ describe("AnnotatedPulse", () => {
 			},
 			integration_time_ms: 100,
 			creation_time: "wrong datetime", // Invalid creation_time
-			device_id: 1,
+			device_id: devices[0].device_id,
 			pulse_attributes: [
 				{ key: "key1", value: "value1" },
 				{ key: "key2", value: 2 },

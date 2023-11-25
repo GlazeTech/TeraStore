@@ -12,8 +12,14 @@ import { describe, expect, test } from "vitest";
 
 describe("extractPulses", () => {
 	const devices: BackendTHzDevice[] = [
-		{ device_id: 1, friendly_name: "Device 1" },
-		{ device_id: 2, friendly_name: "Device 2" },
+		{
+			device_id: "5042dbda-e9bc-4216-a614-ac56d0a32023",
+			friendly_name: "Device 1",
+		},
+		{
+			device_id: "5042dbda-e9bc-4216-a614-ac56d0a32023",
+			friendly_name: "Device 2",
+		},
 	];
 
 	const root = path.resolve(__dirname, "../../");
