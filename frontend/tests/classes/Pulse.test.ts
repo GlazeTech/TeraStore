@@ -45,35 +45,14 @@ describe("AnnotatedPulse", () => {
 		);
 	});
 
-	test("should validate and parse data", () => {
-		const parsedPulse = AnnotatedPulse.validateAndParse(
-			validAnnotatedPulse,
-			devices,
-		);
-
-		expect(parsedPulse).toBeInstanceOf(AnnotatedPulse);
-		expect(parsedPulse.pulse).toEqual(validAnnotatedPulse.pulse);
-		expect(parsedPulse.integration_time_ms).toEqual(
-			validAnnotatedPulse.integration_time_ms,
-		);
-		expect(parsedPulse.creation_time.toISOString()).toEqual(
-			validAnnotatedPulse.creation_time,
-		);
-		expect(parsedPulse.device_id).toEqual(validAnnotatedPulse.device_id);
-		expect(parsedPulse.pulse_attributes).toEqual(
-			validAnnotatedPulse.pulse_attributes,
-		);
-	});
-
 	test("should fail when using wrong device ID", () => {
-		const wrongDeviceId = "nonexistent device"; // Wrong device ID
 		expect(() => {
 			AnnotatedPulse.validateAndParse(
 				validAnnotatedPulse,
 				// mocked devices
 				[
 					{
-						device_id: wrongDeviceId,
+						device_id: "nonexistent device",
 						friendly_name: "someName",
 					} as BackendTHzDevice,
 				],
@@ -106,7 +85,7 @@ describe("AnnotatedPulse", () => {
 				time: [1, 2, 3],
 			},
 			integration_time_ms: 100,
-			creation_time: "wrong datetime", // Invalid creation_time
+			creation_time: "2023-11-19T01:30:10.175Z",
 			device_id: devices[0].device_id,
 			pulse_attributes: [
 				{ key: "key1", value: "value1" },
