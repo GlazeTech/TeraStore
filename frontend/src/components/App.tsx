@@ -1,12 +1,14 @@
 import "@mantine/core/styles.css";
+import "@mantine/dropzone/styles.css";
 import "@mantine/notifications/styles.css";
 
-import { AppShell, MantineProvider } from "@mantine/core";
+import { AppShell, Divider, MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { useEffect } from "react";
 import { useFiltersStore } from "store";
 import FilterMenu from "./FilterMenu";
 import MatchingPulses from "./MatchingPulses";
+import PulseUploader from "./PulseUploader";
 import RecommendedFilters from "./RecommendedFilters";
 
 function App() {
@@ -25,6 +27,8 @@ function App() {
 			>
 				<AppShell.Header> </AppShell.Header>
 				<AppShell.Navbar>
+					<PulseUploader />
+					<Divider m={5} />
 					<FilterMenu />
 				</AppShell.Navbar>
 				<AppShell.Main>

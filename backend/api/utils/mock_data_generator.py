@@ -1,10 +1,12 @@
+from uuid import UUID
+
 from sqlmodel import Session
 
 from api.database import app_engine
 from api.public.attrs.crud import add_attr
 from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
 from api.public.device.crud import create_device
-from api.public.device.models import DeviceCreate
+from api.public.device.models import Device, DeviceCreate
 from api.public.pulse.crud import create_pulses
 from api.public.pulse.models import PulseCreate
 
@@ -59,9 +61,30 @@ def create_devices_and_pulses() -> None:
 def create_frontend_dev_data() -> None:
     """Create devices and pulses for testing purposes."""
     with Session(app_engine) as sess:
-        device_g_1 = create_device(DeviceCreate.create_mock("Glaze I"), sess)
-        device_g_2 = create_device(DeviceCreate.create_mock("Glaze II"), sess)
-        device_carmen = create_device(DeviceCreate.create_mock("Carmen"), sess)
+        device_g_1 = create_device(
+            Device(
+                friendly_name="Glaze I",
+                # Device ID from glaze API
+                device_id=UUID("5042dbda-e9bc-4216-a614-ac56d0a32023"),
+            ),
+            sess,
+        )
+        device_g_2 = create_device(
+            Device(
+                friendly_name="Glaze II",
+                # Device ID from glaze API
+                device_id=UUID("66fa482a-1ef4-4076-a883-72d7bf43e151"),
+            ),
+            sess,
+        )
+        device_carmen = create_device(
+            Device(
+                friendly_name="Carmen",
+                # Device ID from glaze API
+                device_id=UUID("6a54db26-fa88-4146-b04f-b84b945bfea8"),
+            ),
+            sess,
+        )
 
         projects = {
             "CGM": 5,
