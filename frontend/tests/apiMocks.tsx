@@ -1,5 +1,5 @@
 import { FilterResult, attrKeyFactory } from "classes";
-import { IAttrKey, KVType, PulseFilter } from "interfaces";
+import { BackendTHzDevice, IAttrKey, KVType, PulseFilter } from "interfaces";
 import { vi } from "vitest";
 
 export const mockApi = async () => {
@@ -22,6 +22,7 @@ export const mockApi = async () => {
 				async (filters: PulseFilter[]): Promise<FilterResult> =>
 					new FilterResult(filters, [1, 2]),
 			),
+			getDevices: vi.fn(async (): Promise<BackendTHzDevice[]> => []),
 		};
 	});
 };

@@ -9,7 +9,7 @@ from api.utils.exceptions import DeviceNotFoundError
 
 
 def create_device(
-    device: DeviceCreate,
+    device: DeviceCreate | Device,
     db: Session = Depends(get_session),
 ) -> DeviceRead:
     device_to_db = Device.from_orm(device)

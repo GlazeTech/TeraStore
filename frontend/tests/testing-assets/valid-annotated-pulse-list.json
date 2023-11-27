@@ -1,0 +1,42 @@
+[
+	{
+		"pulse": {
+			"time": [1, 2, 3],
+			"signal": [1, 2, 3],
+			"signal_err": null
+		},
+		"integration_time_ms": 30,
+		"creation_time": "2023-11-19T01:30:10.175500",
+		"device_id": "5042dbda-e9bc-4216-a614-ac56d0a32023",
+		"pulse_attributes": [
+			{
+				"key": "project",
+				"value": "ACME"
+			},
+			{
+				"key": "angle",
+				"value": 17
+			}
+		]
+	},
+	{
+		"pulse": {
+			"time": [1, 2, 3],
+			"signal": [1, 2, 3],
+			"signal_err": null
+		},
+		"integration_time_ms": 30,
+		"creation_time": "2023-11-19T01:30:10.175500",
+		"device_id": "5042dbda-e9bc-4216-a614-ac56d0a32023",
+		"pulse_attributes": [
+			{
+				"key": "project",
+				"value": "ACME"
+			},
+			{
+				"key": "angle",
+				"value": 17
+			}
+		]
+	}
+]

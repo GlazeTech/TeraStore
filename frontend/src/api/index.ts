@@ -1,6 +1,6 @@
 import axios from "axios";
 import { setupCache } from "axios-cache-interceptor";
-import { FilterResult, Pulse, attrKeyFactory } from "classes";
+import { AnnotatedPulse, FilterResult, Pulse, attrKeyFactory } from "classes";
 import { sortPulseFilters } from "helpers";
 import {
 	BackendAttrKey,
@@ -9,6 +9,7 @@ import {
 	PulseFilter,
 	PulseID,
 } from "interfaces";
+import { BackendTHzDevice } from "interfaces/backend";
 
 const api = setupCache(
 	axios.create({
@@ -77,4 +78,21 @@ export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
 				);
 			})
 	);
+}
+
+// TODO: Implement uploadPulses
+// export async function uploadPulses(pulses: AnnotatedPulse[]) {
+// 	return api.post<boolean>("/pulses/upload", pulses).then((resp) => resp.data);
+// }
+
+export async function uploadPulses(_: AnnotatedPulse[]) {
+	return new Promise<void>((resolve) => {
+		setTimeout(() => {
+			resolve();
+		}, 1000);
+	});
+}
+
+export async function getDevices() {
+	return api.get<BackendTHzDevice[]>("/devices").then((resp) => resp.data);
 }
