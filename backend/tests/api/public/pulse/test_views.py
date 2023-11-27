@@ -4,6 +4,7 @@ from zoneinfo import ZoneInfo
 
 from fastapi.testclient import TestClient
 
+from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
 from api.public.pulse.models import PulseCreate
 from api.utils.mock_data_generator import create_devices_and_pulses
 
@@ -213,3 +214,46 @@ def test_read_pulses_with_ids(client: TestClient) -> None:
     selected_pulses = client.post("/pulses/get", json=wanted_pulse_ids).json()
     selected_pulse_ids = [pulse["pulse_id"] for pulse in selected_pulses]
     assert wanted_pulse_ids == selected_pulse_ids
+
+
+def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+
+    pulse_str_attr_payload = PulseAttrsStrCreate.create_mock().as_dict()
+    pulse_float_attr_payload = PulseAttrsFloatCreate.create_mock().as_dict()
+
+    pulse_payload[0]["pulse_attributes"] = [
+        pulse_str_attr_payload,
+        pulse_float_attr_payload,
+    ]
+
+    # The creation_time is stored as UTC in the database.
+    # We thus need to read in the ISO time, convert to UTC, and back to a string,
+    # so we can compare with what comes out of the database.
+    pulse_create_datetime = (
+        datetime.fromisoformat(
+            pulse_payload[0]["creation_time"],
+        )
+        .astimezone(ZoneInfo("UTC"))
+        .strftime("%Y-%m-%dT%H:%M:%S.%f")
+    )
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data[0]
+
+    response = client.get(f"/pulses/{pulse_id}")
+
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert response_data["device_id"] == device_id
+    assert response_data["delays"] == pulse_payload[0]["delays"]
+    assert response_data["signal"] == pulse_payload[0]["signal"]
+    assert response_data["integration_time"] == pulse_payload[0]["integration_time"]
+    assert response_data["creation_time"] == pulse_create_datetime
+    assert response_data["pulse_id"] == pulse_id

@@ -55,8 +55,9 @@ def add_kv_pair(
     pulse_id: UUID,
     kv_pair: PulseAttrsCreateBase,
     db: Session = Depends(get_session),
-) -> PulseRead:
-    return add_attr(kv_pair=kv_pair, pulse_id=pulse_id, db=db)
+) -> str:
+    add_attr(kv_pair=kv_pair, pulse_id=pulse_id, db=db)
+    return f"Key {kv_pair.key} added to pulse {pulse_id}"
 
 
 @router.get("/{pulse_id}/attrs")

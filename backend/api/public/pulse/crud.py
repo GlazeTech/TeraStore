@@ -1,3 +1,4 @@
+from typing import Any
 from uuid import UUID
 
 from fastapi import Depends
@@ -6,6 +7,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from api.database import get_session
+from api.public.attrs.crud import add_attrs
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead, TemporaryPulseIdTable
 from api.utils.exceptions import (
     DeviceNotFoundError,
@@ -18,13 +20,21 @@ def create_pulses(
     pulses: list[PulseCreate],
     db: Session = Depends(get_session),
 ) -> list[UUID]:
-    pulses_to_db = [Pulse.from_orm(pulse) for pulse in pulses]
+    pulses_to_db: list[Pulse] = []
+    pulses_attrs_to_db: list[dict[str, Any]] = []
+    for pulse in pulses:
+        pulse_to_db, pulse_attrs_to_db = pulse.create_pulse()
+        pulses_to_db.append(pulse_to_db)
+        pulses_attrs_to_db.append(pulse_attrs_to_db)
+
     # We get the IDs here, because if we do it later,
-    # SQLModel will verify the ID with a call to the database,
+    # SQLModel will verify the ID with a call to the database.
     ids = [pulse.pulse_id for pulse in pulses_to_db]
+
     for pulse_to_db in pulses_to_db:
         db.add(pulse_to_db)
     try:
+        # SQLModel does a bulk insert here
         db.commit()
     except IntegrityError as e:
         if isinstance(e.orig, ForeignKeyViolation):
@@ -32,6 +42,9 @@ def create_pulses(
                 raise
             device_id = extract_device_id_from_pgerror(e.orig.pgerror)
             raise DeviceNotFoundError(device_id=device_id) from e
+
+    for pulse_attrs in pulses_attrs_to_db:
+        add_attrs(pulse_attrs["pulse_id"], pulse_attrs["pulse_attributes"], db=db)
     return ids
 
 

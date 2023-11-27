@@ -123,6 +123,7 @@ class PulseAttrsDatetimeFilter(PulseAttrsFilterBase):
 
 
 # Has to be defined after definition of both classes
+TAttrCreateDataType: TypeAlias = PulseAttrsStrCreate | PulseAttrsFloatCreate
 TAttrReadDataType: TypeAlias = PulseAttrsStrRead | PulseAttrsFloatRead
 TAttrFilterDataType: TypeAlias = (
     PulseAttrsStrFilter | PulseAttrsFloatFilter | PulseAttrsDatetimeFilter

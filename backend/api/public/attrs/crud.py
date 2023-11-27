@@ -1,5 +1,5 @@
-from collections.abc import Callable, Sequence
-from typing import TypeAlias, cast
+from collections.abc import Sequence
+from typing import cast
 from uuid import UUID
 
 from fastapi import Depends
@@ -25,21 +25,28 @@ from api.public.attrs.models import (
     get_pulse_attrs_class,
     get_pulse_attrs_read_class,
 )
-from api.public.pulse.models import Pulse, PulseRead
+from api.public.pulse.models import Pulse
 from api.utils.exceptions import (
     AttrDataTypeExistsError,
     AttrKeyDoesNotExistError,
     PulseNotFoundError,
 )
 
-TFilterFunctionType: TypeAlias = Callable[..., SelectOfScalar[int]]
+
+def add_attrs(
+    pulse_id: UUID,
+    attrs: list[PulseAttrsCreateBase],
+    db: Session = Depends(get_session),
+) -> None:
+    for attr in attrs:
+        add_attr(pulse_id=pulse_id, kv_pair=attr, db=db)
 
 
 def add_attr(
     pulse_id: UUID,
     kv_pair: PulseAttrsCreateBase,
     db: Session = Depends(get_session),
-) -> PulseRead:
+) -> None:
     """Add a key-value pair to a pulse with id pulse_id."""
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
@@ -66,8 +73,6 @@ def add_attr(
 
     db.add(pulse_attrs_class(**kv_pair.dict(), pulse_id=pulse_id))
     db.commit()
-    db.refresh(pulse)
-    return PulseRead.from_orm(pulse)
 
 
 def read_pulse_attrs(
