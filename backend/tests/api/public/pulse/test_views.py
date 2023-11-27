@@ -247,13 +247,77 @@ def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
     pulse_id = pulse_data[0]
 
     response = client.get(f"/pulses/{pulse_id}")
+    response_attrs = client.get(f"/pulses/{pulse_id}/attrs")
 
     response_data = response.json()
+    response_attrs_data = response_attrs.json()
+
+    expected_str_attr = {**pulse_str_attr_payload}
+    expected_str_attr.pop("data_type")
+    expected_float_attr = {**pulse_float_attr_payload}
+    expected_float_attr.pop("data_type")
 
     assert response.status_code == 200
+    assert response_attrs.status_code == 200
     assert response_data["device_id"] == device_id
     assert response_data["delays"] == pulse_payload[0]["delays"]
     assert response_data["signal"] == pulse_payload[0]["signal"]
     assert response_data["integration_time"] == pulse_payload[0]["integration_time"]
     assert response_data["creation_time"] == pulse_create_datetime
     assert response_data["pulse_id"] == pulse_id
+    assert expected_str_attr in response_attrs_data
+    assert expected_float_attr in response_attrs_data
+
+
+def test_add_pulses_raises_err_on_wrong_datatype(
+    client: TestClient,
+    device_id: UUID,
+) -> None:
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_float_attr_payload = PulseAttrsFloatCreate.create_mock().as_dict()
+
+    pulse_payload[0]["pulse_attributes"] = [pulse_float_attr_payload]
+    created_pulses_ids = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    ).json()
+
+    # Now add a new pulse with the same key, but a different datatype
+    new_pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    new_pulse_attr_payload = {**pulse_float_attr_payload}
+    new_pulse_attr_payload["data_type"] = "string"
+    new_pulse_payload[0]["pulse_attributes"] = [new_pulse_attr_payload]  # type: ignore[list-item]
+
+    wrong_pulse_response = client.post(
+        "/pulses/create/",
+        json=new_pulse_payload,
+    )
+
+    # Check that the response is a 400 error due to the wrong datatype
+    assert wrong_pulse_response.status_code == 400
+    assert (
+        "Key mock_float_key already exists with data type"
+        in wrong_pulse_response.json()["detail"]
+    )
+
+    # Check that no additional pulses were added to the database
+    all_pulses = client.get("/pulses").json()
+    assert len(all_pulses) == 1
+    assert created_pulses_ids[0] == all_pulses[0]["pulse_id"]
+
+
+def test_add_pulses_saves_new_keys(
+    client: TestClient,
+    device_id: UUID,
+) -> None:
+    keys = client.get("/attrs/keys").json()
+    assert len(keys) == 0
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_float_attr_payload = PulseAttrsFloatCreate.create_mock().as_dict()
+    pulse_payload[0]["pulse_attributes"] = [pulse_float_attr_payload]
+    client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+    new_keys = client.get("/attrs/keys").json()
+    assert len(new_keys) == 1

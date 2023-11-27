@@ -5,12 +5,13 @@ from uuid import UUID
 from fastapi import Depends
 from sqlalchemy import intersect
 from sqlalchemy.exc import NoResultFound
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 from sqlmodel.sql.expression import SelectOfScalar
 
 from api.database import get_session
 from api.public.attrs.models import (
     AttrDataType,
+    PulseAttrs,
     PulseAttrsCreateBase,
     PulseAttrsDatetimeFilter,
     PulseAttrsFilterBase,
@@ -34,12 +35,46 @@ from api.utils.exceptions import (
 
 
 def add_attrs(
-    pulse_id: UUID,
-    attrs: list[PulseAttrsCreateBase],
+    pulses_attrs: Sequence[PulseAttrs],
     db: Session = Depends(get_session),
 ) -> None:
-    for attr in attrs:
-        add_attr(pulse_id=pulse_id, kv_pair=attr, db=db)
+    """Bulk inserts all the attributes for a list of pulses."""
+    # Find all unique keys and data types
+    unique_keys_set = set()
+    for pulse_attrs in pulses_attrs:
+        for attrs in pulse_attrs.pulse_attributes:
+            unique_keys_set.add((attrs.key, attrs.data_type))
+
+    unique_keys: list[str] = [e[0] for e in list(unique_keys_set)]
+    unique_keys_datatypes: list[AttrDataType] = [e[1] for e in list(unique_keys_set)]
+
+    # Raise an error if the data type of an existing key is wrong
+    known_keys = db.exec(
+        select(PulseKeyRegistry).where(col(PulseKeyRegistry.key).in_(unique_keys)),
+    ).all()
+    for known_key in known_keys:
+        new_key_type = unique_keys_datatypes[unique_keys.index(known_key.key)]
+        if known_key.data_type != new_key_type:
+            raise AttrDataTypeExistsError(
+                key=known_key.key,
+                existing_data_type=known_key.data_type,
+                incoming_data_type=new_key_type,
+            )
+
+    # If some keys doesn't exist, add them to PulseKeyRegistry
+    new_keys: set[str] = set(unique_keys) - {key.key for key in known_keys}
+    for new_key in new_keys:
+        datatype = unique_keys_datatypes[unique_keys.index(new_key)]
+        db.add(PulseKeyRegistry(key=new_key, data_type=datatype))
+
+    # Add the new EAV attributes
+    for pulse_attrs in pulses_attrs:
+        for attrs in pulse_attrs.pulse_attributes:
+            attr_cls = get_pulse_attrs_class(attrs.data_type)
+            db.add(attr_cls(pulse_id=pulse_attrs.pulse_id, **attrs.dict()))
+
+    # Finally, commit all changes
+    db.commit()
 
 
 def add_attr(

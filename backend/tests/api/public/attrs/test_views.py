@@ -3,7 +3,11 @@ from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
 
-from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
+from api.public.attrs.models import (
+    AttrDataType,
+    PulseAttrsFloatCreate,
+    PulseAttrsStrCreate,
+)
 from api.public.pulse.models import PulseCreate
 from api.utils.helpers import get_now
 from api.utils.mock_data_generator import create_devices_and_pulses
@@ -162,7 +166,7 @@ def test_add_existing_attr_wrong_type(client: TestClient, device_id: UUID) -> No
         json=attrs_payload,
     )
 
-    attrs_payload["data_type"] = "float"
+    attrs_payload["data_type"] = AttrDataType.FLOAT
 
     attrs_2_response = client.put(
         f"/pulses/{pulse_id}/attrs/",
