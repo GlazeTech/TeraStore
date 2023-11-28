@@ -1,5 +1,4 @@
 import { getFilteredPulses, getPulseKeys } from "api";
-import { describe, test, expect } from "vitest";
 import {
 	DateAttrKey,
 	FilterResult,
@@ -8,6 +7,7 @@ import {
 	PulseStringFilter,
 } from "classes";
 import { KVType, PulseFilter } from "interfaces";
+import { describe, expect, test } from "vitest";
 
 describe("getFilteredPulses", async () => {
 	const pulseKeys = await getPulseKeys();

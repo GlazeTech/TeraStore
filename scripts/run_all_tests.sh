@@ -64,6 +64,7 @@ run_test ./scripts/run_black.sh
 run_test ./scripts/run_ruff.sh
 run_test ./scripts/run_mypy.sh
 run_test ./scripts/run_pytest.sh
+run_test ./scripts/run_vitest.sh
 
 # Stop services
 echo "Stopping services..."

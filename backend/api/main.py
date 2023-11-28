@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from sqlalchemy.exc import IntegrityError
 
 from api.database import create_db_and_tables, drop_tables
 from api.public import make_api
@@ -46,10 +47,25 @@ async def lifespan_prod(app: FastAPI) -> AsyncGenerator[None, None]:
     yield
 
 
+@asynccontextmanager
+async def lifespan_integration_test(app: FastAPI) -> AsyncGenerator[None, None]:
+    create_db_and_tables()
+
+    # Populate DB on first test run - pass if already populated
+    try:
+        create_devices_and_pulses()
+        create_frontend_dev_data()
+    except IntegrityError:
+        pass
+    yield
+    drop_tables()
+
+
 LIFESPAN_FUNCTIONS = {
     Lifespan.PROD: lifespan_prod,
     Lifespan.DEV: lifespan_dev,
     Lifespan.TEST: lifespan_dev,
+    Lifespan.INTEGRATION_TEST: lifespan_integration_test,
 }
 
 

@@ -10,6 +10,7 @@ class Lifespan(Enum):
     PROD = auto()
     DEV = auto()
     TEST = auto()
+    INTEGRATION_TEST = auto()
 
 
 TPulseCols = TypeVar("TPulseCols", UUID, datetime, int, float, str)
