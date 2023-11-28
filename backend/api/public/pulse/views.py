@@ -5,10 +5,7 @@ from sqlmodel import Session
 
 from api.database import get_session
 from api.public.attrs.crud import add_attr, read_pulse_attrs
-from api.public.attrs.models import (
-    PulseAttrsCreateBase,
-    TAttrReadDataType,
-)
+from api.public.attrs.models import PulseAttrsCreateBase, TAttrReadDataType
 from api.public.pulse.crud import (
     create_pulses,
     read_pulse,

@@ -1,21 +1,19 @@
 from __future__ import annotations
 
 from datetime import datetime  # noqa: TCH003
-from typing import Any, Self, TypeAlias, TypedDict
+from typing import Any, Self, TypedDict
 from uuid import UUID, uuid4
 
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
 
-from api.public.attrs.models import TAttrCreateDataType
+from api.public.attrs.models import AttrDict, PulseAttrs, TPulseAttrsCreate
 from api.utils.helpers import (
     generate_random_integration_time,
     generate_random_numbers,
     generate_scaled_numbers,
     get_now,
 )
-
-TPulseAttributes: TypeAlias = list[TAttrCreateDataType]
 
 
 class TPulseDict(TypedDict):
@@ -24,7 +22,7 @@ class TPulseDict(TypedDict):
     integration_time: int
     creation_time: str
     device_id: str
-    pulse_attributes: list[dict[str, Any]]
+    pulse_attributes: list[AttrDict]
 
 
 class PulseBase(SQLModel):
@@ -80,7 +78,7 @@ class PulseCreate(PulseBase):
     it is only here for FastAPI documentation purposes.
     """
 
-    pulse_attributes: TPulseAttributes
+    pulse_attributes: list[TPulseAttrsCreate]
 
     @classmethod
     def create_mock(
@@ -112,12 +110,12 @@ class PulseCreate(PulseBase):
             "pulse_attributes": pulse_attributes,
         }
 
-    def create_pulse(self: Self) -> tuple[Pulse, dict[str, Any]]:
+    def create_pulse(self: Self) -> tuple[Pulse, PulseAttrs]:
         pulse = Pulse.create(self.dict(exclude={"pulse_attributes"}))
-        pulse_attributes = {
-            "pulse_id": pulse.pulse_id,
-            "pulse_attributes": self.pulse_attributes,
-        }
+        pulse_attributes = PulseAttrs(
+            pulse_id=pulse.pulse_id,
+            pulse_attributes=self.pulse_attributes,
+        )
         return pulse, pulse_attributes
 
 
