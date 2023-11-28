@@ -92,10 +92,6 @@ def create_app(lifespan: Lifespan) -> FastAPI:
     uvicorn_logger = logging.getLogger("uvicorn.access")
     uvicorn_logger.addFilter(EndpointFilter(path="/health"))
 
-    @app.get("/")
-    async def root() -> dict[str, str]:
-        return {"message": "Hello from FastAPI!"}
-
     app.include_router(make_api())
 
     return app

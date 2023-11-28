@@ -15,7 +15,7 @@ from api.utils.types import Lifespan
 def session_fixture() -> Generator[Session, None, None]:
     """Yield a Session object for interacting with the db during tests."""
     settings = get_settings()
-    engine = create_engine(settings.DATABASE_URL, echo=True)
+    engine = create_engine(settings.DATABASE_URL, echo=False)
 
     drop_tables(engine)
     create_db_and_tables(engine)

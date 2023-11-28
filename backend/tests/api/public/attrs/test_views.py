@@ -537,13 +537,13 @@ def test_filter_valid_creation_time_multiple_columns(
     client: TestClient,
     device_id: UUID,
 ) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     yesterday = get_now() - timedelta(days=1)
     tomorrow = get_now() + timedelta(days=1)
@@ -571,13 +571,13 @@ def test_filter_valid_creation_time_multiple_columns(
 
 
 def test_filter_no_kv_multiple_columns(client: TestClient, device_id: UUID) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
     pulse_data = pulse_response.json()
-    pulse_id = pulse_data["pulse_id"]
+    pulse_id = pulse_data[0]
 
     filtering_json = {
         "kv_pairs": [],
