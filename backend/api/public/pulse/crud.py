@@ -1,20 +1,65 @@
+from typing import TYPE_CHECKING
 from uuid import UUID
 
 from fastapi import Depends
-from sqlmodel import Session, select
+from psycopg2.errors import ForeignKeyViolation
+from sqlalchemy.exc import IntegrityError
+from sqlmodel import Session, col, select
 
 from api.database import get_session
+from api.public.attrs.crud import add_attrs
 from api.public.pulse.models import Pulse, PulseCreate, PulseRead, TemporaryPulseIdTable
-from api.utils.exceptions import PulseNotFoundError
+from api.utils.exceptions import (
+    AttrDataTypeExistsError,
+    DeviceNotFoundError,
+    PulseNotFoundError,
+)
+from api.utils.helpers import extract_device_id_from_pgerror
+
+if TYPE_CHECKING:
+    from api.public.attrs.models import PulseAttrs
 
 
-def create_pulse(pulse: PulseCreate, db: Session = Depends(get_session)) -> PulseRead:
-    pulse_to_db = Pulse.from_orm(pulse)
+def create_pulses(
+    pulses: list[PulseCreate],
+    db: Session = Depends(get_session),
+) -> list[UUID]:
+    pulses_to_db: list[Pulse] = []
+    pulses_attrs_to_db: list[PulseAttrs] = []
+    for pulse in pulses:
+        pulse_to_db, pulse_attrs_to_db = pulse.create_pulse()
+        pulses_to_db.append(pulse_to_db)
+        pulses_attrs_to_db.append(pulse_attrs_to_db)
 
-    db.add(pulse_to_db)
-    db.commit()
-    db.refresh(pulse_to_db)
-    return PulseRead.from_orm(pulse_to_db)
+    # We get the IDs here, because if we do it later,
+    # SQLModel will verify the ID with a call to the database.
+    ids = [pulse.pulse_id for pulse in pulses_to_db]
+
+    for pulse_to_db in pulses_to_db:
+        db.add(pulse_to_db)
+    try:
+        # SQLModel does a bulk insert here
+        db.commit()
+    except IntegrityError as e:
+        if isinstance(e.orig, ForeignKeyViolation):
+            if e.orig.pgerror is None:
+                raise
+            device_id = extract_device_id_from_pgerror(e.orig.pgerror)
+            raise DeviceNotFoundError(device_id=device_id) from e
+
+    try:
+        add_attrs(pulses_attrs=pulses_attrs_to_db, db=db)
+    except AttrDataTypeExistsError:
+        # If we failed to add all pulse attributes, reset the database
+        pulses_to_delete = db.exec(
+            select(Pulse).filter(col(Pulse.pulse_id).in_(ids)),
+        ).all()
+        for p in pulses_to_delete:
+            db.delete(p)
+        db.commit()
+        raise
+
+    return ids
 
 
 def read_pulses(

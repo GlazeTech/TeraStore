@@ -6,9 +6,10 @@ from collections.abc import Sequence
 # THIS WILL BREAK PYDANTIC, DO NO DO IT
 from datetime import datetime  # noqa: TCH003
 from enum import Enum
-from typing import Self, TypeAlias
+from typing import Self, TypeAlias, TypedDict
 from uuid import UUID, uuid4
 
+from pydantic import BaseModel
 from pydantic.types import StrictFloat, StrictInt, StrictStr
 from sqlmodel import Field, SQLModel
 
@@ -19,6 +20,13 @@ from api.utils.exceptions import AttrDataTypeDoesNotExistError
 # See: https://github.com/python/mypy/issues/15238
 TAttrDataType: TypeAlias = StrictStr | StrictFloat
 TAttrDataTypeList: TypeAlias = Sequence[StrictStr] | Sequence[StrictFloat]
+TPulseAttr: TypeAlias = float | str
+
+
+class AttrDict(TypedDict):
+    key: str
+    value: TAttrDataType
+    data_type: AttrDataType
 
 
 class AttrDataType(str, Enum):
@@ -73,7 +81,7 @@ class PulseAttrsStrCreate(PulseAttrsCreateBase):
     ) -> PulseAttrsStrCreate:
         return cls(key=key, value=value)
 
-    def as_dict(self: Self) -> dict[str, str]:
+    def as_dict(self: Self) -> AttrDict:
         return {"key": self.key, "value": self.value, "data_type": self.data_type}
 
 
@@ -108,7 +116,7 @@ class PulseAttrsFloatCreate(PulseAttrsCreateBase):
     ) -> PulseAttrsFloatCreate:
         return cls(key=key, value=value)
 
-    def as_dict(self: Self) -> dict[str, str | float]:
+    def as_dict(self: Self) -> AttrDict:
         return {"key": self.key, "value": self.value, "data_type": self.data_type}
 
 
@@ -123,10 +131,16 @@ class PulseAttrsDatetimeFilter(PulseAttrsFilterBase):
 
 
 # Has to be defined after definition of both classes
+TPulseAttrsCreate: TypeAlias = PulseAttrsStrCreate | PulseAttrsFloatCreate
 TAttrReadDataType: TypeAlias = PulseAttrsStrRead | PulseAttrsFloatRead
 TAttrFilterDataType: TypeAlias = (
     PulseAttrsStrFilter | PulseAttrsFloatFilter | PulseAttrsDatetimeFilter
 )
+
+
+class PulseAttrs(BaseModel):
+    pulse_id: UUID
+    pulse_attributes: list[TPulseAttrsCreate]
 
 
 # Factory function for finding the correct PulseAttrs class

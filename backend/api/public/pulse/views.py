@@ -1,18 +1,13 @@
 from uuid import UUID
 
-from fastapi import APIRouter, Depends, HTTPException, Query, status
-from psycopg2.errors import ForeignKeyViolation
-from sqlalchemy.exc import DBAPIError
+from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
 from api.database import get_session
 from api.public.attrs.crud import add_attr, read_pulse_attrs
-from api.public.attrs.models import (
-    PulseAttrsCreateBase,
-    TAttrReadDataType,
-)
+from api.public.attrs.models import PulseAttrsCreateBase, TAttrReadDataType
 from api.public.pulse.crud import (
-    create_pulse,
+    create_pulses,
     read_pulse,
     read_pulses,
     read_pulses_with_ids,
@@ -23,19 +18,11 @@ router = APIRouter()
 
 
 @router.post("/create")
-def create_a_pulse(
-    pulse: PulseCreate,
+def add_pulses(
+    pulses: list[PulseCreate],
     db: Session = Depends(get_session),
-) -> PulseRead:
-    try:
-        return create_pulse(pulse=pulse, db=db)
-    except DBAPIError as e:
-        if isinstance(e.orig, ForeignKeyViolation):
-            raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Device not found with id: {pulse.device_id}",
-            ) from e
-        raise
+) -> list[UUID]:
+    return create_pulses(pulses=pulses, db=db)
 
 
 @router.get("")
@@ -65,8 +52,9 @@ def add_kv_pair(
     pulse_id: UUID,
     kv_pair: PulseAttrsCreateBase,
     db: Session = Depends(get_session),
-) -> PulseRead:
-    return add_attr(kv_pair=kv_pair, pulse_id=pulse_id, db=db)
+) -> str:
+    add_attr(kv_pair=kv_pair, pulse_id=pulse_id, db=db)
+    return f"Key {kv_pair.key} added to pulse {pulse_id}"
 
 
 @router.get("/{pulse_id}/attrs")

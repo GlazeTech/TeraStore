@@ -1,18 +1,28 @@
 from __future__ import annotations
 
 from datetime import datetime  # noqa: TCH003
-from typing import Self
+from typing import Any, Self, TypedDict
 from uuid import UUID, uuid4
 
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
 
+from api.public.attrs.models import AttrDict, PulseAttrs, TPulseAttrsCreate
 from api.utils.helpers import (
     generate_random_integration_time,
     generate_random_numbers,
     generate_scaled_numbers,
     get_now,
 )
+
+
+class TPulseDict(TypedDict):
+    delays: list[float]
+    signal: list[float]
+    integration_time: int
+    creation_time: str
+    device_id: str
+    pulse_attributes: list[AttrDict]
 
 
 class PulseBase(SQLModel):
@@ -48,6 +58,18 @@ class Pulse(PulseBase, table=True):
 
     pulse_id: UUID = Field(default_factory=uuid4, primary_key=True)
 
+    @staticmethod
+    def create(
+        pulse: dict[str, Any],
+    ) -> Pulse:
+        return Pulse(
+            delays=pulse["delays"],
+            signal=pulse["signal"],
+            integration_time=pulse["integration_time"],
+            creation_time=pulse["creation_time"],
+            device_id=pulse["device_id"],
+        )
+
 
 class PulseCreate(PulseBase):
     """Model for creating a new Pulse.
@@ -55,6 +77,8 @@ class PulseCreate(PulseBase):
     As it does not take any other arguments than PulseBase,
     it is only here for FastAPI documentation purposes.
     """
+
+    pulse_attributes: list[TPulseAttrsCreate]
 
     @classmethod
     def create_mock(
@@ -70,16 +94,29 @@ class PulseCreate(PulseBase):
             integration_time=generate_random_integration_time(),
             creation_time=get_now(),
             device_id=device_id,
+            pulse_attributes=[],
         )
 
-    def as_dict(self: Self) -> dict[str, list[float] | int | str]:
+    def as_dict(self: Self) -> TPulseDict:
+        pulse_attributes = [
+            pulse_attr.as_dict() for pulse_attr in self.pulse_attributes
+        ]
         return {
             "delays": self.delays,
             "signal": self.signal,
             "integration_time": self.integration_time,
             "creation_time": self.creation_time.isoformat(),
             "device_id": str(self.device_id),
+            "pulse_attributes": pulse_attributes,
         }
+
+    def create_pulse(self: Self) -> tuple[Pulse, PulseAttrs]:
+        pulse = Pulse.create(self.dict(exclude={"pulse_attributes"}))
+        pulse_attributes = PulseAttrs(
+            pulse_id=pulse.pulse_id,
+            pulse_attributes=self.pulse_attributes,
+        )
+        return pulse, pulse_attributes
 
 
 class PulseRead(PulseBase):
