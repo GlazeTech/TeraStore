@@ -1,7 +1,6 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
-from dataclasses import dataclass
 
 # Ruff wants this import to be in a TYPE_CHECKING block
 # THIS WILL BREAK PYDANTIC, DO NO DO IT
