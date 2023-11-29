@@ -1,10 +1,13 @@
-import { PulseFilter, PulseID } from "interfaces";
+import { PulseFilter, PulseMetadata } from "interfaces";
 
 export class FilterResult {
-	constructor(public filters: PulseFilter[], public pulseIDs: PulseID[]) {}
+	constructor(
+		public filters: PulseFilter[],
+		public pulsesMetadata: PulseMetadata[],
+	) {}
 
 	get nPulses() {
-		return this.pulseIDs.length;
+		return this.pulsesMetadata.length;
 	}
 
 	get lastFilter() {

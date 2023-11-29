@@ -1,4 +1,4 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from uuid import UUID, uuid4
 
 from fastapi.testclient import TestClient
@@ -202,13 +202,16 @@ def test_filtering_pulses_float(client: TestClient, device_id: UUID) -> None:
         json=pulse_attrs_payload,
     )
 
-    filtering_json = [
-        {
-            "key": "mock_float_key",
-            "min_value": 42.0,
-            "max_value": 42.0,
-        },
-    ]
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "mock_float_key",
+                "min_value": 42.0,
+                "max_value": 42.0,
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
     response_data = response.json()
@@ -217,7 +220,7 @@ def test_filtering_pulses_float(client: TestClient, device_id: UUID) -> None:
     assert pulse_attrs_data.status_code == 200
     assert response.status_code == 200
     assert len(response_data) == 1
-    assert pulse_id in response_data
+    assert pulse_id in response_data[0]
 
 
 def test_filtering_pulses_string(
@@ -241,12 +244,15 @@ def test_filtering_pulses_string(
         json=pulse_attrs_payload,
     )
 
-    filtering_json = [
-        {
-            "key": "mock_string_key",
-            "value": "mock_string_value",
-        },
-    ]
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "mock_string_key",
+                "value": "mock_string_value",
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
     response_data = response.json()
@@ -255,7 +261,7 @@ def test_filtering_pulses_string(
     assert pulse_attrs_data.status_code == 200
     assert response.status_code == 200
     assert len(response_data) == 1
-    assert pulse_id in response_data
+    assert pulse_id in response_data[0]
 
 
 def test_filter_all_datatypes(client: TestClient, device_id: UUID) -> None:
@@ -283,17 +289,20 @@ def test_filter_all_datatypes(client: TestClient, device_id: UUID) -> None:
         json=pulse_attrs_2_payload,
     )
 
-    filtering_json = [
-        {
-            "key": "mock_float_key",
-            "min_value": 42.0,
-            "max_value": 42.0,
-        },
-        {
-            "key": "mock_string_key",
-            "value": "mock_string_value",
-        },
-    ]
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "mock_float_key",
+                "min_value": 42.0,
+                "max_value": 42.0,
+            },
+            {
+                "key": "mock_string_key",
+                "value": "mock_string_value",
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
 
@@ -304,11 +313,16 @@ def test_filter_all_datatypes(client: TestClient, device_id: UUID) -> None:
     assert pulse_2_attrs_response.status_code == 200
     assert response.status_code == 200
     assert len(response_data) == 1
-    assert pulse_id in response_data
+    assert pulse_id in response_data[0]
 
 
-def test_filter_no_kv_given(client: TestClient) -> None:
-    response = client.post("/attrs/filter/", json=[])
+def test_filter_no_kv_given(client: TestClient, device_id: str) -> None:
+    filtering_json = {
+        "kv_pairs": [],
+        "columns": ["pulse_id"],
+    }
+
+    response = client.post("/attrs/filter/", json=filtering_json)
 
     response_data = response.json()
 
@@ -325,22 +339,29 @@ def test_filter_no_kv_one_pulse(client: TestClient, device_id: UUID) -> None:
     )
     pulse_data = pulse_response.json()
     pulse_id = pulse_data[0]
+    filtering_json = {
+        "kv_pairs": [],
+        "columns": ["pulse_id"],
+    }
 
-    response = client.post("/attrs/filter/", json=[])
+    response = client.post("/attrs/filter/", json=filtering_json)
 
     response_data = response.json()
 
     assert response.status_code == 200
-    assert response_data == [pulse_id]
+    assert response_data == [[pulse_id]]
 
 
-def test_filter_non_existent_key(client: TestClient) -> None:
-    filtering_json = [
-        {
-            "key": "non-existent-key",
-            "value": "test",
-        },
-    ]
+def test_filter_non_existent_key(client: TestClient, device_id: str) -> None:
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "non-existent-key",
+                "value": "test",
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
 
@@ -375,18 +396,21 @@ def test_filter_one_wrong(client: TestClient, device_id: UUID) -> None:
         json=pulse_attrs_2_payload,
     )
 
-    filtering_json = [
-        {
-            # Value is incorrect, so zero results should be returned.
-            "key": "mock_float_key",
-            "min_value": 40.0,
-            "max_value": 41.0,
-        },
-        {
-            "key": "mock_string_key",
-            "value": "mock_string_value",
-        },
-    ]
+    filtering_json = {
+        "kv_pairs": [
+            {
+                # Value is incorrect, so zero results should be returned.
+                "key": "mock_float_key",
+                "min_value": 40.0,
+                "max_value": 41.0,
+            },
+            {
+                "key": "mock_string_key",
+                "value": "mock_string_value",
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
 
@@ -414,13 +438,16 @@ def test_filter_valid_creation_time(client: TestClient, device_id: UUID) -> None
     yesterday = today - timedelta(days=1)
     tomorrow = today + timedelta(days=1)
 
-    filtering_json = [
-        {
-            "key": "creation_time",
-            "min_value": yesterday.isoformat(),
-            "max_value": tomorrow.isoformat(),
-        },
-    ]
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "creation_time",
+                "min_value": yesterday.isoformat(),
+                "max_value": tomorrow.isoformat(),
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
     response_data = response.json()
@@ -428,7 +455,7 @@ def test_filter_valid_creation_time(client: TestClient, device_id: UUID) -> None
     assert pulse_response.status_code == 200
     assert response.status_code == 200
     assert len(response_data) == 1
-    assert pulse_id in response_data
+    assert pulse_id in response_data[0]
 
 
 def test_filter_invalid_creation_time(client: TestClient, device_id: UUID) -> None:
@@ -439,13 +466,16 @@ def test_filter_invalid_creation_time(client: TestClient, device_id: UUID) -> No
         json=pulse_payload,
     )
 
-    filtering_json = [
-        {
-            "key": "creation_time",
-            "min_value": "invalid",
-            "max_value": "invalid",
-        },
-    ]
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "creation_time",
+                "min_value": "invalid",
+                "max_value": "invalid",
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
 
@@ -470,13 +500,16 @@ def test_filter_valid_creation_time_no_hits(
     today = get_now()
     tomorrow = today + timedelta(days=1)
 
-    filtering_json = [
-        {
-            "key": "creation_time",
-            "min_value": tomorrow.isoformat(),
-            "max_value": tomorrow.isoformat(),
-        },
-    ]
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "creation_time",
+                "min_value": tomorrow.isoformat(),
+                "max_value": tomorrow.isoformat(),
+            },
+        ],
+        "columns": ["pulse_id"],
+    }
 
     response = client.post("/attrs/filter/", json=filtering_json)
     response_data = response.json()
@@ -485,3 +518,76 @@ def test_filter_valid_creation_time_no_hits(
     assert response.status_code == 200
     assert len(response_data) == 0
     assert pulse_id not in response_data
+
+
+def test_filter_wrong_column_name(client: TestClient, device_id: int) -> None:
+    filtering_json = {
+        "kv_pairs": [],
+        "columns": ["nonexistent_column"],
+    }
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+    response_data = response.json()
+
+    assert response.status_code == 404
+    assert "Pulse column not found" in response_data["detail"]
+
+
+def test_filter_valid_creation_time_multiple_columns(
+    client: TestClient,
+    device_id: UUID,
+) -> None:
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data[0]
+
+    yesterday = get_now() - timedelta(days=1)
+    tomorrow = get_now() + timedelta(days=1)
+
+    filtering_json = {
+        "kv_pairs": [
+            {
+                "key": "creation_time",
+                "min_value": yesterday.isoformat(),
+                "max_value": tomorrow.isoformat(),
+            },
+        ],
+        "columns": ["pulse_id", "device_id", "creation_time"],
+    }
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+    response_data = response.json()
+
+    assert pulse_response.status_code == 200
+    assert response.status_code == 200
+    assert len(response_data) == 1
+    assert response_data[0][0] == pulse_id
+    assert response_data[0][1] == device_id
+    assert isinstance(datetime.fromisoformat(response_data[0][2]), datetime)
+
+
+def test_filter_no_kv_multiple_columns(client: TestClient, device_id: UUID) -> None:
+    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data[0]
+
+    filtering_json = {
+        "kv_pairs": [],
+        "columns": ["pulse_id", "device_id"],
+    }
+
+    response = client.post("/attrs/filter/", json=filtering_json)
+    response_data = response.json()
+
+    assert response.status_code == 200
+    assert len(response_data) == 1
+    assert response_data[0][0] == pulse_id
+    assert response_data[0][1] == device_id

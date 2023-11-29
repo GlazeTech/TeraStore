@@ -44,6 +44,17 @@ def test_create_pulse(client: TestClient, device_id: UUID) -> None:
     assert response_data["pulse_id"] == pulse_id
 
 
+def test_create_pulse_with_invalid_json(client: TestClient, device_id: UUID) -> None:
+    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    assert pulse_response.status_code == 422
+
+
 def test_create_pulse_with_invalid_delays(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
     pulse_payload[0]["delays"] = [1, "a", 3]  # type: ignore[list-item]

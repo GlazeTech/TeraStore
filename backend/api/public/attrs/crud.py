@@ -1,9 +1,9 @@
 from collections.abc import Sequence
-from typing import cast
 from uuid import UUID
 
 from fastapi import Depends
 from sqlalchemy import intersect
+from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import NoResultFound
 from sqlmodel import Session, col, select
 from sqlmodel.sql.expression import SelectOfScalar
@@ -32,6 +32,8 @@ from api.utils.exceptions import (
     AttrKeyDoesNotExistError,
     PulseNotFoundError,
 )
+from api.utils.helpers import get_model_columns_from_names
+from api.utils.types import TPulseCols
 
 
 def add_attrs(
@@ -162,18 +164,27 @@ def read_all_values_on_key(
 
 def filter_on_key_value_pairs(
     kv_pairs: Sequence[TAttrFilterDataType],
+    wanted_columns: list[str],
     db: Session = Depends(get_session),
-) -> list[UUID]:
+) -> Sequence[tuple[TPulseCols, ...]]:
     """Get all pulses that match the key-value pairs."""
     # Initialize a list to hold pulse_ids for each condition
     select_statements: list[SelectOfScalar[UUID]] = []
 
     # If no filters applied, select all pulses
     if len(kv_pairs) == 0:
-        pulses = db.exec(select(Pulse.pulse_id)).all()
+        # Using exec(..), if pulse_fields is a tuple with a single attribute,
+        # a list of integers is returned.
+        # If it contains more than one attribute, a list of Row objects is returned,
+        # and the type annotation is not correct. Hence, use SQLAlchemy method.
+        pulses = db.execute(
+            select(*get_model_columns_from_names(wanted_columns, Pulse)),
+        ).all()
         if not pulses:
             return []
-        return cast(list[UUID], pulses)
+        if isinstance(pulses[0], Row):
+            return [tuple(e) for e in pulses]
+        raise TypeError
 
     for kv in kv_pairs:
         # Because creation_time is in the pulses table, we need to handle it separately
@@ -194,9 +205,26 @@ def filter_on_key_value_pairs(
     combined_select = intersect(*select_statements)
 
     # We need to use SQLAlchemy's execute method here because we need to
-    # run a compound select statement
-    result = db.execute(combined_select).all()
-    return list({pulse_id[0] for pulse_id in result})
+    # run a compound select statement.
+    # Additionally, if only the pulse_id is requested, we don't need to join
+    if wanted_columns == ["pulse_id"]:
+        r = db.execute(combined_select).unique().all()
+    else:
+        sub_query = combined_select.subquery("sub_query")
+        # Use SQLAlchemy's execute method, because SQLModel has wrong types and doesn't
+        # know .unique() and .all()
+        r = (
+            db.execute(
+                select(*get_model_columns_from_names(wanted_columns, Pulse)).join(
+                    sub_query,
+                    Pulse.pulse_id == sub_query.c.pulse_id,  # type: ignore[arg-type]
+                ),
+            )
+            .unique()
+            .all()
+        )
+
+    return [tuple(e) for e in r]
 
 
 def create_filter_query(

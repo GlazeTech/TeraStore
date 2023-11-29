@@ -53,3 +53,20 @@ export function uniqueElements<T>(list: T[]): T[] {
 	const uniqueSet = new Set(list);
 	return [...uniqueSet];
 }
+
+export function getBackendUrl(): string {
+	// import.meta.env.* is only available in production
+	if (import.meta.env.PROD) {
+		return import.meta.env.VITE_BACKEND_URL;
+	}
+
+	// for test runs, URL is injected via environment variables - this won't be available in a browser
+	try {
+		if (process.env.BACKEND_URL) {
+			return `http://${process.env.BACKEND_URL}`;
+		}
+	} catch (e) {}
+
+	// Default to localhost:8000, when running in dev mode
+	return "http://0.0.0.0:8000";
+}

@@ -1,5 +1,6 @@
 import * as M from "@mantine/core";
 import {
+	DateAttrKey,
 	FilterResult,
 	NumberAttrKey,
 	PulseStringFilter,
@@ -9,13 +10,15 @@ import { getFilterResultsForEachStringValue } from "helpers";
 import { IAttrKey, Option } from "interfaces";
 import { useEffect, useState } from "react";
 import { useFiltersStore } from "store";
-import { NumberFilterCard } from "./RecommendedFilterCard";
+import { DateFilterCard, NumberFilterCard } from "./RecommendedFilterCard";
 
 function selectValueFactory(pulseKey: IAttrKey) {
 	if (pulseKey instanceof NumberAttrKey) {
 		return <NumberFilterCard attrKey={pulseKey} />;
 	} else if (pulseKey instanceof StringAttrKey) {
 		return <SelectStringFilter selectedPulseKey={pulseKey} />;
+	} else if (pulseKey instanceof DateAttrKey) {
+		return <DateFilterCard attrKey={pulseKey} />;
 	} else {
 		throw new Error("Unhandled type of attr key");
 	}

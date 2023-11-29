@@ -11,6 +11,3 @@ RUN npm install --no-cache
 
 # Copy the rest of the frontend code.
 COPY ./frontend ./
-
-# Start the development server.
-CMD ["npm", "run", "dev"]

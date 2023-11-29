@@ -1,4 +1,4 @@
-import { KVType } from "interfaces";
+import { KVType, PulseID } from "interfaces";
 
 export type BackendPulseAttrValues = string[] | number[];
 
@@ -7,7 +7,7 @@ export interface BackendPulse {
 	signal: number[];
 	integration_time: number;
 	creation_time: string;
-	pulse_id: number;
+	pulse_id: PulseID;
 }
 export interface BackendAttrKey {
 	name: string;

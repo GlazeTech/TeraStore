@@ -1,4 +1,5 @@
 import { getPulseKeys } from "api";
+import { DateAttrKey } from "classes";
 import { produce } from "immer";
 import { IAttrKey, PulseFilter } from "interfaces";
 import { create } from "zustand";
@@ -49,7 +50,7 @@ export const useFiltersStore = create<filtersStore>()((set, get) => ({
 
 	fetchInitialState: async () => {
 		getPulseKeys().then((keys) => {
-			set({ notAppliedPulseKeys: keys });
+			set({ notAppliedPulseKeys: [...keys, new DateAttrKey("date")] });
 		});
 	},
 }));

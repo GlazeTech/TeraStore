@@ -1,7 +1,7 @@
 import axios from "axios";
 import { setupCache } from "axios-cache-interceptor";
 import { AnnotatedPulse, FilterResult, Pulse, attrKeyFactory } from "classes";
-import { sortPulseFilters } from "helpers";
+import { getBackendUrl, sortPulseFilters } from "helpers";
 import {
 	BackendAttrKey,
 	BackendPulse,
@@ -13,9 +13,7 @@ import { BackendTHzDevice } from "interfaces/backend";
 
 const api = setupCache(
 	axios.create({
-		baseURL: import.meta.env.PROD
-			? import.meta.env.VITE_BACKEND_URL
-			: "http://0.0.0.0:8000",
+		baseURL: getBackendUrl(),
 	}),
 	{ methods: ["get", "post"] },
 );
@@ -38,13 +36,23 @@ export async function getFilteredPulses(
 	filters: PulseFilter[],
 ): Promise<FilterResult> {
 	return api
-		.post<PulseID[]>(
-			"/attrs/filter",
+		.post<[PulseID, Date][]>("/attrs/filter", {
 			// Sort pulsefilters for improved caching
-			sortPulseFilters(filters).map((filter) => filter.asBackendFilter()),
-		)
+			kv_pairs: sortPulseFilters(filters).map((filter) =>
+				filter.asBackendFilter(),
+			),
+			columns: ["pulse_id", "creation_time"],
+		})
 		.then((resp) => {
-			return new FilterResult(filters, resp.data);
+			return new FilterResult(
+				filters,
+				resp.data.map((el) => {
+					return {
+						pulseID: el[0],
+						creationTime: new Date(el[1]),
+					};
+				}),
+			);
 		});
 }
 

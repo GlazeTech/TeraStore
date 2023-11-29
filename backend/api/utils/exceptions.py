@@ -14,6 +14,17 @@ class PulseNotFoundError(Exception):
         super().__init__(f"Pulse not found with id: {pulse_id}")
 
 
+class PulseColumnNonexistentError(Exception):
+    """Exception raised when a user requests a nonexistent pulse column."""
+
+    def __init__(self: Self, wanted: str, columns: list[str]) -> None:
+        self.wanted = wanted
+        self.available_columns = columns
+        super().__init__(
+            f"Pulse column not found: {wanted}. Available columns are: {columns}",
+        )
+
+
 class DeviceNotFoundError(Exception):
     """Exception raised when the data type of an attribute is not supported."""
 

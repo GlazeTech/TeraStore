@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from uuid import UUID
 
 from fastapi import APIRouter, Depends
 from sqlmodel import Session
@@ -11,6 +10,7 @@ from api.public.attrs.crud import (
     read_all_values_on_key,
 )
 from api.public.attrs.models import TAttrDataTypeList, TAttrFilterDataType
+from api.utils.types import TPulseCols
 
 router = APIRouter()
 
@@ -34,6 +34,7 @@ def get_all_values_on_key(
 @router.post("/filter")
 def filter_attrs(
     kv_pairs: Sequence[TAttrFilterDataType],
+    columns: list[str],
     db: Session = Depends(get_session),
-) -> list[UUID]:
-    return filter_on_key_value_pairs(kv_pairs, db)
+) -> Sequence[tuple[TPulseCols, ...]]:
+    return filter_on_key_value_pairs(kv_pairs, columns, db)
