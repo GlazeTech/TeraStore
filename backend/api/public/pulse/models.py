@@ -19,7 +19,7 @@ from api.utils.helpers import (
 class TPulseDict(TypedDict):
     delays: list[float]
     signal: list[float]
-    integration_time: int
+    integration_time_ms: int
     creation_time: str
     device_id: str
     pulse_attributes: list[AttrDict]
@@ -43,7 +43,7 @@ class PulseBase(SQLModel):
 
     delays: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
     signal: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
-    integration_time: int
+    integration_time_ms: int
     creation_time: datetime
     device_id: UUID = Field(foreign_key="devices.device_id")
 
@@ -65,7 +65,7 @@ class Pulse(PulseBase, table=True):
         return Pulse(
             delays=pulse["delays"],
             signal=pulse["signal"],
-            integration_time=pulse["integration_time"],
+            integration_time_ms=pulse["integration_time_ms"],
             creation_time=pulse["creation_time"],
             device_id=pulse["device_id"],
         )
@@ -91,7 +91,7 @@ class PulseCreate(PulseBase):
         return cls(
             delays=generate_scaled_numbers(length, timescale),
             signal=generate_random_numbers(length, -amplitude, amplitude),
-            integration_time=generate_random_integration_time(),
+            integration_time_ms=generate_random_integration_time(),
             creation_time=get_now(),
             device_id=device_id,
             pulse_attributes=[],
@@ -104,7 +104,7 @@ class PulseCreate(PulseBase):
         return {
             "delays": self.delays,
             "signal": self.signal,
-            "integration_time": self.integration_time,
+            "integration_time_ms": self.integration_time_ms,
             "creation_time": self.creation_time.isoformat(),
             "device_id": str(self.device_id),
             "pulse_attributes": pulse_attributes,

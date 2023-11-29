@@ -1,3 +1,4 @@
+import { readTestingAsset } from "@tests/testing-utils";
 import {
 	AnnotatedPulse,
 	AnnotatedPulseParsingError,
@@ -7,7 +8,6 @@ import {
 import { extractPulses, formatFileSize } from "helpers/data-io";
 import { BackendTHzDevice } from "interfaces";
 import { describe, expect, test } from "vitest";
-import { readTestingAsset } from "@tests/testing-utils";
 
 describe("extractPulses", () => {
 	const devices: BackendTHzDevice[] = [

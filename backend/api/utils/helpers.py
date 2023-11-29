@@ -40,7 +40,7 @@ def create_mock_pulse(
     return {
         "delays": generate_scaled_numbers(length, timescale),
         "signal": generate_random_numbers(length, -amplitude, amplitude),
-        "integration_time": generate_random_integration_time(),
+        "integration_time_ms": generate_random_integration_time(),
         "creation_time": get_now(),
         "device_id": device_id,
     }

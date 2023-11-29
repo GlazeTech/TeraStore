@@ -10,7 +10,6 @@ import {
 	PulseID,
 } from "interfaces";
 import { BackendTHzDevice } from "interfaces/backend";
-import { ap } from "vitest/dist/reporters-5f784f42.js";
 
 const api = setupCache(
 	axios.create({
@@ -91,7 +90,10 @@ export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
 
 export async function uploadPulses(pulses: AnnotatedPulse[]) {
 	return api
-		.post<PulseID[]>("/pulses/create", pulses)
+		.post<PulseID[]>(
+			"/pulses/create",
+			pulses.map((pulse) => pulse.asBackendCompatible()),
+		)
 		.then((resp) => resp.data)
 		.catch((err) => {
 			console.log(err);

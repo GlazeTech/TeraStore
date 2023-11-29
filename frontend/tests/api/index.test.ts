@@ -1,4 +1,6 @@
+import { readTestingAsset } from "@tests/testing-utils";
 import { getFilteredPulses, getPulseKeys } from "api";
+import { uploadPulses } from "api";
 import {
 	DateAttrKey,
 	FilterResult,
@@ -6,12 +8,10 @@ import {
 	PulseNumberFilter,
 	PulseStringFilter,
 } from "classes";
-import { KVType, PulseFilter } from "interfaces";
-import { describe, expect, test } from "vitest";
-import { uploadPulses } from "api";
 import { extractPulses } from "helpers/data-io";
+import { KVType, PulseFilter } from "interfaces";
 import { BackendTHzDevice } from "interfaces";
-import { readTestingAsset } from "@tests/testing-utils";
+import { describe, expect, test } from "vitest";
 
 describe("getFilteredPulses", async () => {
 	const pulseKeys = await getPulseKeys();
@@ -68,14 +68,26 @@ describe("uploadPulses", () => {
 			device_id: "5042dbda-e9bc-4216-a614-ac56d0a32023",
 		},
 	];
-	const pulses = extractPulses(
-		readTestingAsset("valid-annotated-pulse.json"),
-		devices,
-	);
 
-	test("should upload pulses successfully", async () => {
+	test("should upload single pulse successfully", async () => {
+		const pulses = extractPulses(
+			readTestingAsset("valid-annotated-pulse.json"),
+			devices,
+		);
 		const result = await uploadPulses(pulses);
-		console.log(result);
+		expect(Array.isArray(result)).toBe(true);
+		if (result) {
+			expect(result.length).toBe(pulses.length);
+			expect(typeof result[0]).toBe("string");
+		}
+	});
+
+	test("should upload multiple pulses successfully", async () => {
+		const pulses = extractPulses(
+			readTestingAsset("valid-annotated-pulse-list.json"),
+			devices,
+		);
+		const result = await uploadPulses(pulses);
 		expect(Array.isArray(result)).toBe(true);
 		if (result) {
 			expect(result.length).toBe(pulses.length);
