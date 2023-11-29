@@ -1,5 +1,4 @@
-import fs from "fs";
-import path from "path";
+import { readTestingAsset } from "@tests/testing-utils";
 import {
 	AnnotatedPulse,
 	AnnotatedPulseParsingError,
@@ -22,19 +21,15 @@ describe("extractPulses", () => {
 		},
 	];
 
-	const root = path.resolve(__dirname, "../../");
-	const readFile = (name: string) =>
-		fs.readFileSync(path.join(root, "tests", "testing-assets", name), "utf-8");
-
 	test("should extract single pulse from file content succesfully", () => {
-		const fileContent = readFile("valid-annotated-pulse.json");
+		const fileContent = readTestingAsset("valid-annotated-pulse.json");
 		const result = extractPulses(fileContent, devices);
 		expect(result.every((item) => item instanceof AnnotatedPulse)).toBe(true);
 		expect(result.length).toBe(1);
 	});
 
 	test("should extract pulses from array in file content succesfully", () => {
-		const fileContent = readFile("valid-annotated-pulse-list.json");
+		const fileContent = readTestingAsset("valid-annotated-pulse-list.json");
 		const result = extractPulses(fileContent, devices);
 		expect(result.every((item) => item instanceof AnnotatedPulse)).toBe(true);
 		expect(result.length).toBe(2);
@@ -56,19 +51,25 @@ describe("extractPulses", () => {
 
 	test("should throw error if date format is wrong", () => {
 		expect(() => {
-			extractPulses(readFile("annotated-pulse-wrong-date.json"), devices);
+			extractPulses(
+				readTestingAsset("annotated-pulse-wrong-date.json"),
+				devices,
+			);
 		}).toThrowError(InvalidCreationTimeError);
 	});
 
 	test("should throw error if device ID does not exist", () => {
 		expect(() => {
-			extractPulses(readFile("annotated-pulse-wrong-device-id.json"), devices);
+			extractPulses(
+				readTestingAsset("annotated-pulse-wrong-device-id.json"),
+				devices,
+			);
 		}).toThrowError(InvalidDeviceIDError);
 	});
 
 	test("should throw error if file is missing attributes", () => {
 		expect(() => {
-			extractPulses(readFile("invalid-annotated-pulse.json"), devices);
+			extractPulses(readTestingAsset("invalid-annotated-pulse.json"), devices);
 		}).toThrowError(AnnotatedPulseParsingError);
 	});
 });

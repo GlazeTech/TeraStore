@@ -1,27 +1,17 @@
 from datetime import datetime
+from typing import Any
 from uuid import UUID, uuid4
 from zoneinfo import ZoneInfo
 
 from fastapi.testclient import TestClient
 
 from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
-from api.public.pulse.models import PulseCreate
+from api.public.pulse.models import PulseCreate, TPulseDict
 from api.utils.mock_data_generator import create_devices_and_pulses
 
 
 def test_create_pulse(client: TestClient, device_id: UUID) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
-
-    # The creation_time is stored as UTC in the database.
-    # We thus need to read in the ISO time, convert to UTC, and back to a string,
-    # so we can compare with what comes out of the database.
-    pulse_create_datetime = (
-        datetime.fromisoformat(
-            pulse_payload[0]["creation_time"],
-        )
-        .astimezone(ZoneInfo("UTC"))
-        .strftime("%Y-%m-%dT%H:%M:%S.%f")
-    )
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -36,11 +26,7 @@ def test_create_pulse(client: TestClient, device_id: UUID) -> None:
     response_data = response.json()
 
     assert response.status_code == 200
-    assert response_data["device_id"] == device_id
-    assert response_data["delays"] == pulse_payload[0]["delays"]
-    assert response_data["signal"] == pulse_payload[0]["signal"]
-    assert response_data["integration_time"] == pulse_payload[0]["integration_time"]
-    assert response_data["creation_time"] == pulse_create_datetime
+    _assert_equal_pulses(response_data, pulse_payload[0])
     assert response_data["pulse_id"] == pulse_id
 
 
@@ -92,7 +78,7 @@ def test_create_pulse_with_invalid_integration_time(
     device_id: UUID,
 ) -> None:
     pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
-    pulse_payload[0]["integration_time"] = "a"  # type: ignore[typeddict-item]
+    pulse_payload[0]["integration_time_ms"] = "a"  # type: ignore[typeddict-item]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -176,21 +162,6 @@ def test_get_all_pulses(client: TestClient, device_id: UUID) -> None:
         PulseCreate.create_mock(device_id=device_id).as_dict() for _ in range(2)
     ]
 
-    pulse_1_creation_time = (
-        datetime.fromisoformat(
-            pulses_payload[0]["creation_time"],
-        )
-        .astimezone(ZoneInfo("UTC"))
-        .strftime("%Y-%m-%dT%H:%M:%S.%f")
-    )
-    pulse_2_creation_time = (
-        datetime.fromisoformat(
-            pulses_payload[1]["creation_time"],
-        )
-        .astimezone(ZoneInfo("UTC"))
-        .strftime("%Y-%m-%dT%H:%M:%S.%f")
-    )
-
     pulses_response = client.post(
         "/pulses/create/",
         json=pulses_payload,
@@ -204,17 +175,9 @@ def test_get_all_pulses(client: TestClient, device_id: UUID) -> None:
 
     assert pulses_response.status_code == 200
     assert len(pulses_data) == 2
-    assert pulses_data[0]["device_id"] == device_id
-    assert pulses_data[0]["delays"] == pulses_payload[0]["delays"]
-    assert pulses_data[0]["signal"] == pulses_payload[0]["signal"]
-    assert pulses_data[0]["integration_time"] == pulses_payload[0]["integration_time"]
-    assert pulses_data[0]["creation_time"] == pulse_1_creation_time
+    _assert_equal_pulses(pulses_data[0], pulses_payload[0])
+    _assert_equal_pulses(pulses_data[1], pulses_payload[1])
     assert pulses_data[0]["pulse_id"] == pulse_ids[0]
-    assert pulses_data[1]["device_id"] == device_id
-    assert pulses_data[1]["delays"] == pulses_payload[1]["delays"]
-    assert pulses_data[1]["signal"] == pulses_payload[1]["signal"]
-    assert pulses_data[1]["integration_time"] == pulses_payload[1]["integration_time"]
-    assert pulses_data[1]["creation_time"] == pulse_2_creation_time
     assert pulses_data[1]["pulse_id"] == pulse_ids[1]
 
 
@@ -232,22 +195,13 @@ def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
 
     pulse_str_attr_payload = PulseAttrsStrCreate.create_mock().as_dict()
     pulse_float_attr_payload = PulseAttrsFloatCreate.create_mock().as_dict()
+    pulse_int_attr_payload = PulseAttrsFloatCreate.create_mock(value=42).as_dict()
 
     pulse_payload[0]["pulse_attributes"] = [
         pulse_str_attr_payload,
         pulse_float_attr_payload,
+        pulse_int_attr_payload,
     ]
-
-    # The creation_time is stored as UTC in the database.
-    # We thus need to read in the ISO time, convert to UTC, and back to a string,
-    # so we can compare with what comes out of the database.
-    pulse_create_datetime = (
-        datetime.fromisoformat(
-            pulse_payload[0]["creation_time"],
-        )
-        .astimezone(ZoneInfo("UTC"))
-        .strftime("%Y-%m-%dT%H:%M:%S.%f")
-    )
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -267,17 +221,16 @@ def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
     expected_str_attr.pop("data_type")
     expected_float_attr = {**pulse_float_attr_payload}
     expected_float_attr.pop("data_type")
+    expected_int_attr = {**pulse_int_attr_payload}
+    expected_int_attr.pop("data_type")
 
     assert response.status_code == 200
     assert response_attrs.status_code == 200
-    assert response_data["device_id"] == device_id
-    assert response_data["delays"] == pulse_payload[0]["delays"]
-    assert response_data["signal"] == pulse_payload[0]["signal"]
-    assert response_data["integration_time"] == pulse_payload[0]["integration_time"]
-    assert response_data["creation_time"] == pulse_create_datetime
+    _assert_equal_pulses(response_data, pulse_payload[0])
     assert response_data["pulse_id"] == pulse_id
     assert expected_str_attr in response_attrs_data
     assert expected_float_attr in response_attrs_data
+    assert expected_int_attr in response_attrs_data
 
 
 def test_add_pulses_raises_err_on_wrong_datatype(
@@ -332,3 +285,25 @@ def test_add_pulses_saves_new_keys(
     )
     new_keys = client.get("/attrs/keys").json()
     assert len(new_keys) == 1
+
+
+def _assert_equal_pulses(
+    received_pulse: dict[str, Any],
+    created_pulse: TPulseDict,
+) -> None:
+    """Assert that two pulses are equal."""
+    # The creation_time is stored as UTC in the database.
+    # We thus need to read in the ISO time, convert to UTC, and back to a string,
+    # so we can compare with what comes out of the database.
+    creation_time = (
+        datetime.fromisoformat(
+            created_pulse["creation_time"],
+        )
+        .astimezone(ZoneInfo("UTC"))
+        .strftime("%Y-%m-%dT%H:%M:%S.%f")
+    )
+    assert received_pulse["device_id"] == created_pulse["device_id"]
+    assert received_pulse["delays"] == created_pulse["delays"]
+    assert received_pulse["signal"] == created_pulse["signal"]
+    assert received_pulse["integration_time_ms"] == created_pulse["integration_time_ms"]
+    assert received_pulse["creation_time"] == creation_time

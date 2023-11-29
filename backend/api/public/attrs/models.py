@@ -9,7 +9,7 @@ from enum import Enum
 from typing import Self, TypeAlias, TypedDict
 from uuid import UUID, uuid4
 
-from pydantic import BaseModel
+from pydantic import BaseModel, validator
 from pydantic.types import StrictFloat, StrictInt, StrictStr
 from sqlmodel import Field, SQLModel
 
@@ -99,13 +99,21 @@ class PulseAttrsFloat(PulseAttrsBase, table=True):
 
     index: UUID = Field(default_factory=uuid4, primary_key=True)
 
+    @validator("value", pre=True)
+    def allow_ints(cls: type[PulseAttrsFloat], v: object) -> object:  # noqa: N805
+        # Allow ints to be used as floats. We cannot simply annotate `value`,
+        # as PostgreSQL have separated types for int and float.
+        if isinstance(v, int):
+            return float(v)
+        return v
+
 
 class PulseAttrsFloatRead(PulseAttrsReadBase):
     value: StrictFloat
 
 
 class PulseAttrsFloatCreate(PulseAttrsCreateBase):
-    value: StrictFloat
+    value: StrictFloat | StrictInt
     data_type: AttrDataType = Field(default=AttrDataType.FLOAT.value)
 
     @classmethod

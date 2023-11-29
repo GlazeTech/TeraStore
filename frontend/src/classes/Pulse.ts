@@ -63,6 +63,28 @@ export class AnnotatedPulse {
 			parsed.pulse_attributes,
 		);
 	}
+
+	static pulseAttrAsBackendCompatible(key: string, value: string | number) {
+		const dataType = typeof value === "string" ? "string" : "float";
+		return {
+			key: key,
+			value: value,
+			data_type: dataType,
+		};
+	}
+
+	asBackendCompatible() {
+		return {
+			delays: this.pulse.time,
+			signal: this.pulse.signal,
+			integration_time_ms: this.integration_time_ms,
+			creation_time: this.creation_time.toISOString(),
+			device_id: this.device_id,
+			pulse_attributes: this.pulse_attributes.map((attr) =>
+				AnnotatedPulse.pulseAttrAsBackendCompatible(attr.key, attr.value),
+			),
+		};
+	}
 }
 
 const annotatedPulseSchema = z.object({

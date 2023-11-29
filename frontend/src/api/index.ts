@@ -88,17 +88,16 @@ export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
 	);
 }
 
-// TODO: Implement uploadPulses
-// export async function uploadPulses(pulses: AnnotatedPulse[]) {
-// 	return api.post<boolean>("/pulses/upload", pulses).then((resp) => resp.data);
-// }
-
-export async function uploadPulses(_: AnnotatedPulse[]) {
-	return new Promise<void>((resolve) => {
-		setTimeout(() => {
-			resolve();
-		}, 1000);
-	});
+export async function uploadPulses(pulses: AnnotatedPulse[]) {
+	return api
+		.post<PulseID[]>(
+			"/pulses/create",
+			pulses.map((pulse) => pulse.asBackendCompatible()),
+		)
+		.then((resp) => resp.data)
+		.catch((err) => {
+			console.log(err);
+		});
 }
 
 export async function getDevices() {
