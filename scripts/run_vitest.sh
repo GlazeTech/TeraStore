@@ -1,3 +1,4 @@
+#!/bin/sh
 # Start backend server in backend container
 docker compose -f ./docker-compose-test.yml exec -T --detach backend-test python asgi.py --lifespan INTEGRATION_TEST
 
