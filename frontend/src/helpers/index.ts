@@ -68,5 +68,5 @@ export function getBackendUrl(): string {
 	} catch (e) {}
 
 	// Default to localhost:8000, when running in dev mode
-	return "http://0.0.0.0:8000"
+	return "http://0.0.0.0:8000";
 }
