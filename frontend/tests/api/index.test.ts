@@ -8,6 +8,10 @@ import {
 } from "classes";
 import { KVType, PulseFilter } from "interfaces";
 import { describe, expect, test } from "vitest";
+import { uploadPulses } from "api";
+import { extractPulses } from "helpers/data-io";
+import { BackendTHzDevice } from "interfaces";
+import { readTestingAsset } from "@tests/testing-utils";
 
 describe("getFilteredPulses", async () => {
 	const pulseKeys = await getPulseKeys();
@@ -54,5 +58,28 @@ describe("getFilteredPulses", async () => {
 		const result = await getFilteredPulses(filters);
 		expect(result).toBeInstanceOf(FilterResult);
 		expect(result.nPulses).toBeGreaterThan(0);
+	});
+});
+
+describe("uploadPulses", () => {
+	const devices: BackendTHzDevice[] = [
+		{
+			friendly_name: "My friendly device",
+			device_id: "5042dbda-e9bc-4216-a614-ac56d0a32023",
+		},
+	];
+	const pulses = extractPulses(
+		readTestingAsset("valid-annotated-pulse.json"),
+		devices,
+	);
+
+	test("should upload pulses successfully", async () => {
+		const result = await uploadPulses(pulses);
+		console.log(result);
+		expect(Array.isArray(result)).toBe(true);
+		if (result) {
+			expect(result.length).toBe(pulses.length);
+			expect(typeof result[0]).toBe("string");
+		}
 	});
 });
