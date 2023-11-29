@@ -56,11 +56,17 @@ export function uniqueElements<T>(list: T[]): T[] {
 
 export function getBackendUrl(): string {
 	// import.meta.env.* is only available in production
-	// for test runs, URL is injected via environment variables
+	if (import.meta.env.PROD) {
+		return import.meta.env.VITE_BACKEND_URL;
+	}
+
+	// for test runs, URL is injected via environment variables - this won't be available in a browser
+	try {
+		if (process.env.BACKEND_URL) {
+			return `http://${process.env.BACKEND_URL}`;
+		}
+	} catch (e) {}
+
 	// Default to localhost:8000, when running in dev mode
-	return import.meta.env.PROD
-		? import.meta.env.VITE_BACKEND_URL
-		: process.env.BACKEND_URL
-		? `http://${process.env.BACKEND_URL}`
-		: "http://0.0.0.0:8000";
+	return "http://0.0.0.0:8000"
 }
