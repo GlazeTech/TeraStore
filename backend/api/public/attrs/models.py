@@ -20,7 +20,6 @@ from api.utils.exceptions import AttrDataTypeDoesNotExistError
 # See: https://github.com/python/mypy/issues/15238
 TAttrDataType: TypeAlias = StrictStr | StrictFloat
 TAttrDataTypeList: TypeAlias = Sequence[StrictStr] | Sequence[StrictFloat]
-TPulseAttr: TypeAlias = float | str
 
 
 class AttrDict(TypedDict):

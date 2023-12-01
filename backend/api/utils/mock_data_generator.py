@@ -19,7 +19,7 @@ def create_devices_and_pulses() -> None:
         device_carmen = create_device(DeviceCreate.create_mock("Carmen"), sess)
 
         pulse_1 = create_pulses(
-            [PulseCreate.create_mock(device_id=device_g_1.device_id)],
+            [PulseCreate.create_mock_w_errs(device_id=device_g_1.device_id)],
             sess,
         )
         pulse_2 = create_pulses(
@@ -30,7 +30,7 @@ def create_devices_and_pulses() -> None:
             [PulseCreate.create_mock(device_id=device_carmen.device_id)],
             sess,
         )
-
+        add_attr(pulse_1[0], PulseAttrsFloatCreate(key="has_errors", value=1.0), sess)
         add_attr(pulse_1[0], PulseAttrsFloatCreate(key="angle", value=29.0), sess)
         add_attr(
             pulse_1[0],

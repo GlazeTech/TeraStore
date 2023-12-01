@@ -85,6 +85,9 @@ ignore = [
 "api/**/views.py" = [
   "B008", # To be able to use FastAPI Depends() in function calls
 ]
+"api/**/helpers.py" = [
+  "B008", # To be able to use FastAPI Depends() in function calls
+]
 "api/main.py" = ["ARG001"] # Unused function args
 
 [tool.black]

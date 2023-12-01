@@ -1,8 +1,8 @@
 import * as M from "@mantine/core";
 import { useDisclosure, useListState } from "@mantine/hooks";
 import { notifications } from "@mantine/notifications";
-import { getFilteredPulses, getPulse, getPulses } from "api";
-import { Pulse } from "classes";
+import { getFilteredPulses, getPulses } from "api";
+import { AnnotatedPulse } from "classes";
 import { downloadJson } from "helpers";
 import { PulseMetadata } from "interfaces";
 import { useEffect, useState } from "react";
@@ -17,11 +17,11 @@ function PulseCard({
 	isSelected: boolean;
 	setSelected: (value: React.SetStateAction<PulseMetadata | null>) => void;
 }) {
-	const [pulse, setPulse] = useState<Pulse | null>(null);
+	const [pulse, setPulse] = useState<AnnotatedPulse | null>(null);
 
 	useEffect(() => {
 		if (isSelected) {
-			getPulse(pulseMetadata.pulseID).then((p) => setPulse(p));
+			getPulses([pulseMetadata.pulseID]).then((p) => setPulse(p[0]));
 		}
 	}, [isSelected]);
 
@@ -54,10 +54,10 @@ function PulseCard({
 				</M.Card>
 			</M.Popover.Target>
 			<M.Popover.Dropdown>
-				<M.Text>Datapoints: {pulse?.time.length}</M.Text>
-				<M.Text>Integration Time: {pulse?.integrationTime} ms</M.Text>
+				<M.Text>Datapoints: {pulse?.pulse.time.length}</M.Text>
+				<M.Text>Integration Time: {pulse?.integration_time_ms} ms</M.Text>
 				<M.Text>
-					Creation Time: {pulse?.creationTime.toLocaleDateString("en-GB")}
+					Creation Time: {pulse?.creation_time.toLocaleDateString("en-GB")}
 				</M.Text>
 			</M.Popover.Dropdown>
 		</M.Popover>

@@ -30,6 +30,26 @@ def test_create_pulse(client: TestClient, device_id: UUID) -> None:
     assert response_data["pulse_id"] == pulse_id
 
 
+def test_create_pulse_w_errors(client: TestClient, device_id: UUID) -> None:
+    pulse_payload = [PulseCreate.create_mock_w_errs(device_id=device_id).as_dict()]
+
+    pulse_response = client.post(
+        "/pulses/create/",
+        json=pulse_payload,
+    )
+
+    pulse_data = pulse_response.json()
+    pulse_id = pulse_data[0]
+
+    response = client.get(f"/pulses/{pulse_id}")
+
+    response_data = response.json()
+
+    assert response.status_code == 200
+    _assert_equal_pulses(response_data, pulse_payload[0])
+    assert response_data["pulse_id"] == pulse_id
+
+
 def test_create_pulse_with_invalid_json(client: TestClient, device_id: UUID) -> None:
     pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
 
@@ -188,6 +208,35 @@ def test_read_pulses_with_ids(client: TestClient) -> None:
     selected_pulses = client.post("/pulses/get", json=wanted_pulse_ids).json()
     selected_pulse_ids = [pulse["pulse_id"] for pulse in selected_pulses]
     assert wanted_pulse_ids == selected_pulse_ids
+    assert {"key": "angle", "value": 29.0} in selected_pulses[0]["pulse_attributes"]
+    assert {"key": "angle", "value": 17.1} in selected_pulses[0]["pulse_attributes"]
+    assert {"key": "substrate", "value": "sand-blasted steel"} in selected_pulses[0][
+        "pulse_attributes"
+    ]
+
+
+def test_read_pulses_with_error(client: TestClient, device_id: UUID) -> None:
+    pulses_payload = [
+        PulseCreate.create_mock_w_errs(device_id=device_id, length=2).as_dict()
+        for _ in range(1)
+    ]
+
+    pulses_response = client.post(
+        "/pulses/create/",
+        json=pulses_payload,
+    ).json()
+
+    selected_pulses = client.post("/pulses/get", json=[pulses_response[0]]).json()
+    assert selected_pulses[0]["signal_error"] == pulses_payload[0]["signal_error"]
+
+
+def test_read_pulses_with_nonexisting_id(client: TestClient) -> None:
+    create_devices_and_pulses()
+    nonexistent_id = str(uuid4())
+    response = client.post("/pulses/get", json=[nonexistent_id])
+
+    assert response.status_code == 404
+    assert nonexistent_id in response.json()["detail"]
 
 
 def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
@@ -228,9 +277,9 @@ def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
     assert response_attrs.status_code == 200
     _assert_equal_pulses(response_data, pulse_payload[0])
     assert response_data["pulse_id"] == pulse_id
-    assert expected_str_attr in response_attrs_data
-    assert expected_float_attr in response_attrs_data
-    assert expected_int_attr in response_attrs_data
+    assert expected_str_attr in response_attrs_data[pulse_id]
+    assert expected_float_attr in response_attrs_data[pulse_id]
+    assert expected_int_attr in response_attrs_data[pulse_id]
 
 
 def test_add_pulses_raises_err_on_wrong_datatype(
