@@ -1,10 +1,10 @@
 import { IAttrKey } from "interfaces";
 import { useEffect, useState } from "react";
-import { useFiltersStore } from "store";
+import { useStoreShallow } from "store";
 import { RecommendedCard } from "./RecommendedFilterCard";
 
 function RecommendedFilters() {
-	const [notAppliedPulseKeys, pulseFilters] = useFiltersStore((state) => [
+	const [notAppliedPulseKeys, pulseFilters] = useStoreShallow((state) => [
 		state.notAppliedPulseKeys,
 		state.pulseFilters,
 	]);

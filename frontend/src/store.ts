@@ -3,6 +3,7 @@ import { DateAttrKey } from "classes";
 import { produce } from "immer";
 import { IAttrKey, PulseFilter } from "interfaces";
 import { create } from "zustand";
+import { useShallow } from "zustand/react/shallow";
 
 interface filtersStore {
 	notAppliedPulseKeys: IAttrKey[] | undefined;
@@ -13,7 +14,7 @@ interface filtersStore {
 	fetchInitialState: () => Promise<void>;
 }
 
-export const useFiltersStore = create<filtersStore>()((set, get) => ({
+export const useStore = create<filtersStore>()((set, get) => ({
 	notAppliedPulseKeys: undefined,
 	setNotAppliedPulseKeys: (keys) =>
 		set(produce((_state) => ({ notAppliedPulseKeys: keys }))),
@@ -54,3 +55,6 @@ export const useFiltersStore = create<filtersStore>()((set, get) => ({
 		});
 	},
 }));
+
+export const useStoreShallow = <T>(selector: (state: filtersStore) => T) =>
+	useStore(useShallow(selector));

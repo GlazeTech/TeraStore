@@ -12,7 +12,7 @@ import {
 import { getFilterResultsForEachStringValue, uniqueElements } from "helpers";
 import { IAttrKey, SliderMark } from "interfaces";
 import { useEffect, useState } from "react";
-import { useFiltersStore } from "store";
+import { useStoreShallow } from "store";
 
 export function recoCardContentFactory(key: IAttrKey) {
 	if (key instanceof StringAttrKey) {
@@ -65,7 +65,7 @@ export function NumberFilterCard({ attrKey }: { attrKey: NumberAttrKey }) {
 	);
 	const [displayValue, setDisplayValue] = useState<[number, number]>([0, 1]);
 	const [selectedValue, setSelectedValue] = useState<[number, number]>([0, 1]);
-	const [addPulseFilter, pulseFilters] = useFiltersStore((state) => [
+	const [addPulseFilter, pulseFilters] = useStoreShallow((state) => [
 		state.addPulseFilter,
 		state.pulseFilters,
 	]);
@@ -186,7 +186,7 @@ function StringFilterCard({ attrKey }: { attrKey: StringAttrKey }) {
 	const [filterResults, setFilterResults] = useState<FilterResult[] | null>(
 		null,
 	);
-	const [addPulseFilter, pulseFilters] = useFiltersStore((state) => [
+	const [addPulseFilter, pulseFilters] = useStoreShallow((state) => [
 		state.addPulseFilter,
 		state.pulseFilters,
 	]);
@@ -229,7 +229,7 @@ export function DateFilterCard({ attrKey }: { attrKey: DateAttrKey }) {
 		null,
 	]);
 
-	const [addPulseFilter, pulseFilters] = useFiltersStore((state) => [
+	const [addPulseFilter, pulseFilters] = useStoreShallow((state) => [
 		state.addPulseFilter,
 		state.pulseFilters,
 	]);
@@ -257,7 +257,7 @@ export function DateFilterCard({ attrKey }: { attrKey: DateAttrKey }) {
 
 	// Set selected dates to min and max date, when dates have been fetched
 	useEffect(() => {
-		if (allDates) {
+		if (allDates && allDates.length > 0) {
 			setSelectedDates([
 				dateToEarliestTimeOfDay(allDates[0]),
 				dateToLatestTimeOfDay(allDates[allDates.length - 1]),

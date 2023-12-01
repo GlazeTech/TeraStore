@@ -9,7 +9,7 @@ import {
 import { getFilterResultsForEachStringValue } from "helpers";
 import { IAttrKey, Option } from "interfaces";
 import { useEffect, useState } from "react";
-import { useFiltersStore } from "store";
+import { useStoreShallow } from "store";
 import { DateFilterCard, NumberFilterCard } from "./RecommendedFilterCard";
 
 function selectValueFactory(pulseKey: IAttrKey) {
@@ -28,7 +28,7 @@ function SelectStringFilter({
 	selectedPulseKey,
 }: { selectedPulseKey: StringAttrKey }) {
 	const [selectValueOptions, setSelectValueOptions] = useState<Option[]>([]);
-	const [addPulseFilter, pulseFilters] = useFiltersStore((state) => [
+	const [addPulseFilter, pulseFilters] = useStoreShallow((state) => [
 		state.addPulseFilter,
 		state.pulseFilters,
 	]);
@@ -79,7 +79,7 @@ function FilterMenu() {
 	const [selectedPulseKey, setSelectedPulseKey] = useState<IAttrKey | null>(
 		null,
 	);
-	const [pulseKeys, pulseFilters, removePulseFilter] = useFiltersStore(
+	const [pulseKeys, pulseFilters, removePulseFilter] = useStoreShallow(
 		(state) => [
 			state.notAppliedPulseKeys,
 			state.pulseFilters,

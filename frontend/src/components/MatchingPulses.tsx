@@ -6,7 +6,7 @@ import { Pulse } from "classes";
 import { downloadJson } from "helpers";
 import { PulseMetadata } from "interfaces";
 import { useEffect, useState } from "react";
-import { useFiltersStore } from "store";
+import { useStoreShallow } from "store";
 
 function PulseCard({
 	pulseMetadata,
@@ -143,7 +143,7 @@ function MatchingPulses() {
 		null,
 	);
 	const [selectedItem, setSelectedItem] = useState<PulseMetadata | null>(null);
-	const [pulseFilters] = useFiltersStore((state) => [state.pulseFilters]);
+	const [pulseFilters] = useStoreShallow((state) => [state.pulseFilters]);
 	const [modalIsOpen, modalHandler] = useDisclosure(false);
 
 	useEffect(() => {

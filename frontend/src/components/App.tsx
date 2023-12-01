@@ -6,14 +6,14 @@ import "@mantine/notifications/styles.css";
 import { AppShell, Divider, MantineProvider } from "@mantine/core";
 import { Notifications } from "@mantine/notifications";
 import { useEffect } from "react";
-import { useFiltersStore } from "store";
+import { useStoreShallow } from "store";
 import FilterMenu from "./FilterMenu";
 import MatchingPulses from "./MatchingPulses";
 import PulseUploader from "./PulseUploader";
 import RecommendedFilters from "./RecommendedFilters";
 
 function App() {
-	const fetchInitialState = useFiltersStore((store) => store.fetchInitialState);
+	const fetchInitialState = useStoreShallow((store) => store.fetchInitialState);
 
 	useEffect(() => {
 		fetchInitialState();
