@@ -61,7 +61,7 @@ export class AnnotatedPulse {
 			{
 				time: parsed.pulse.time,
 				signal: parsed.pulse.signal,
-				signal_err: parsed.pulse.signal_err,
+				signal_err: parsed.pulse.signal_err ? parsed.pulse.signal_err : null,
 			},
 			parsed.integration_time_ms,
 			creationTime,

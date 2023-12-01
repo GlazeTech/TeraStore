@@ -28,6 +28,15 @@ describe("extractPulses", () => {
 		expect(result.length).toBe(1);
 	});
 
+	test("should extract single pulse with errors from file content succesfully", () => {
+		const fileContent = readTestingAsset(
+			"valid-annotated-pulse-with-error.json",
+		);
+		const result = extractPulses(fileContent, devices);
+		expect(result.every((item) => item instanceof AnnotatedPulse)).toBe(true);
+		expect(result.length).toBe(1);
+	});
+
 	test("should extract pulses from array in file content succesfully", () => {
 		const fileContent = readTestingAsset("valid-annotated-pulse-list.json");
 		const result = extractPulses(fileContent, devices);
