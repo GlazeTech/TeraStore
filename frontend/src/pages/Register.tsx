@@ -9,13 +9,12 @@ import {
 import { notifications } from "@mantine/notifications";
 import { register } from "auth";
 import { FormEvent, useState } from "react";
-import { Link, Navigate, useLocation } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 enum SignupStatus {
 	NOT_REGISTERED = 1,
 	REGISTERING = 2,
 	REGISTERED = 3,
-	REDIRECTING = 4,
 }
 
 const style = {
@@ -25,9 +24,8 @@ const style = {
 export default function Register() {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
-	const location = useLocation();
-
 	const [signupStatus, setSignupStatus] = useState(SignupStatus.NOT_REGISTERED);
+	const navigate = useNavigate();
 
 	const handleRegister = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -44,7 +42,7 @@ export default function Register() {
 					color: "green",
 				});
 				setTimeout(() => {
-					setSignupStatus(SignupStatus.REDIRECTING);
+					navigate("/login");
 				}, refreshDuration);
 			})
 			.catch((err) => {
@@ -57,49 +55,47 @@ export default function Register() {
 			});
 	};
 
-	if (signupStatus !== SignupStatus.REDIRECTING) {
-		return (
-			<Stack style={style} mt={100}>
-				<h1>Welcome to TeraStore</h1>
-				<Card
-					shadow="xl"
-					withBorder
-					padding="xl"
-					style={{ minWidth: 400 }}
-					pos={"relative"}
-				>
-					<LoadingOverlay visible={signupStatus === SignupStatus.REGISTERING} />
-					<h2>Create Account</h2>
-					<form onSubmit={handleRegister}>
-						<TextInput
-							required
-							type="email"
-							placeholder="Email"
-							value={email}
-							onChange={(event) => setEmail(event.currentTarget.value)}
-							pt={10}
-							pb={10}
-						/>
-						<TextInput
-							required
-							type="password"
-							placeholder="Password"
-							value={password}
-							onChange={(event) => setPassword(event.currentTarget.value)}
-							pt={10}
-							pb={10}
-						/>
-						<Button type="submit" fullWidth pt={10} pb={10}>
-							Register
-						</Button>
-						<Box pt={20}>
-							<Link to="/login">Already have an account? Sign in</Link>
-						</Box>
-					</form>
-				</Card>
-			</Stack>
-		);
-	} else if (signupStatus === SignupStatus.REDIRECTING) {
-		return <Navigate to={"/login"} state={{ from: location }} replace />;
-	}
+	return (
+		<Stack style={style} mt={100}>
+			<h1>Welcome to TeraStore</h1>
+			<Card
+				shadow="xl"
+				withBorder
+				padding="xl"
+				style={{ minWidth: 400 }}
+				pos={"relative"}
+			>
+				<LoadingOverlay visible={signupStatus === SignupStatus.REGISTERING} />
+				<h2>Create Account</h2>
+				<form onSubmit={handleRegister}>
+					<TextInput
+						required
+						type="email"
+						placeholder="Email"
+						value={email}
+						onChange={(event) => setEmail(event.currentTarget.value)}
+						pt={10}
+						pb={10}
+						disabled={signupStatus !== SignupStatus.NOT_REGISTERED}
+					/>
+					<TextInput
+						required
+						type="password"
+						placeholder="Password"
+						value={password}
+						onChange={(event) => setPassword(event.currentTarget.value)}
+						pt={10}
+						pb={10}
+						disabled={signupStatus !== SignupStatus.NOT_REGISTERED}
+					/>
+					<Button type="submit" fullWidth pt={10} pb={10}>
+						Register
+					</Button>
+					<Box pt={20}>
+						<Link to="/login">Already have an account? Sign in</Link>
+					</Box>
+				</form>
+			</Card>
+		</Stack>
+	);
 }

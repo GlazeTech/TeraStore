@@ -2,7 +2,6 @@ import { Button, Group } from "@mantine/core";
 import { logout } from "auth";
 import { useState } from "react";
 import { Navigate } from "react-router-dom";
-import { useLocation } from "react-router-dom";
 
 enum LoginStatus {
 	LoggedIn = 1,
@@ -11,7 +10,6 @@ enum LoginStatus {
 
 export default function Header() {
 	const [loginStatus, setLoginStatus] = useState(LoginStatus.LoggedIn);
-	const location = useLocation();
 
 	const handleLogout = () => {
 		logout().then(() => {
@@ -28,6 +26,6 @@ export default function Header() {
 			</Group>
 		);
 	} else if (loginStatus === LoginStatus.LoggedOut) {
-		return <Navigate to={"/login"} state={{ from: location }} replace />;
+		return <Navigate to={"/login"} />;
 	}
 }
