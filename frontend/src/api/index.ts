@@ -11,6 +11,8 @@ import {
 } from "interfaces";
 import { BackendTHzDevice } from "interfaces/backend";
 
+// TODO: Add interceptor which refreshes token if it is expired
+// See this: https://www.thedutchlab.com/en/insights/using-axios-interceptors-for-refreshing-your-api-token
 const api = setupCache(
 	axios.create({
 		baseURL: getBackendUrl(),

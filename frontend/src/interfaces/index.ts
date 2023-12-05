@@ -1,5 +1,6 @@
 export * from "./backend";
 export * from "./mantine";
+export * from "./auth";
 
 export enum KVType {
 	NUMBER = "float",
