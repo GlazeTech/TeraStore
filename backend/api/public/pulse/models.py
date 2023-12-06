@@ -7,7 +7,12 @@ from uuid import UUID, uuid4
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
 
-from api.public.attrs.models import AttrDict, PulseAttrs, TPulseAttrsCreate
+from api.public.attrs.models import (
+    AttrDict,
+    PulseAttrs,
+    TAttrReadDataType,
+    TPulseAttrsCreate,
+)
 from api.utils.helpers import (
     generate_random_integration_time,
     generate_random_numbers,
@@ -19,6 +24,7 @@ from api.utils.helpers import (
 class TPulseDict(TypedDict):
     delays: list[float]
     signal: list[float]
+    signal_error: list[float] | None
     integration_time_ms: int
     creation_time: str
     device_id: str
@@ -43,6 +49,7 @@ class PulseBase(SQLModel):
 
     delays: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
     signal: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
+    signal_error: list[float] | None = Field(sa_column=Column(postgresql.ARRAY(Float)))
     integration_time_ms: int
     creation_time: datetime
     device_id: UUID = Field(foreign_key="devices.device_id")
@@ -65,6 +72,7 @@ class Pulse(PulseBase, table=True):
         return Pulse(
             delays=pulse["delays"],
             signal=pulse["signal"],
+            signal_error=pulse["signal_error"],
             integration_time_ms=pulse["integration_time_ms"],
             creation_time=pulse["creation_time"],
             device_id=pulse["device_id"],
@@ -97,6 +105,28 @@ class PulseCreate(PulseBase):
             pulse_attributes=[],
         )
 
+    @classmethod
+    def create_mock_w_errs(
+        cls: type[PulseCreate],
+        device_id: UUID,
+        length: int = 600,
+        timescale: float = 1e-10,
+        amplitude: float = 100.0,
+    ) -> PulseCreate:
+        return cls(
+            delays=generate_scaled_numbers(length, timescale),
+            signal=generate_random_numbers(length, -amplitude, amplitude),
+            signal_error=generate_random_numbers(
+                length,
+                -amplitude * 0.01,
+                amplitude * 0.01,
+            ),
+            integration_time_ms=generate_random_integration_time(),
+            creation_time=get_now(),
+            device_id=device_id,
+            pulse_attributes=[],
+        )
+
     def as_dict(self: Self) -> TPulseDict:
         pulse_attributes = [
             pulse_attr.as_dict() for pulse_attr in self.pulse_attributes
@@ -104,6 +134,7 @@ class PulseCreate(PulseBase):
         return {
             "delays": self.delays,
             "signal": self.signal,
+            "signal_error": self.signal_error,
             "integration_time_ms": self.integration_time_ms,
             "creation_time": self.creation_time.isoformat(),
             "device_id": str(self.device_id),
@@ -127,6 +158,25 @@ class PulseRead(PulseBase):
     """
 
     pulse_id: UUID
+
+
+class AnnotatedPulseRead(PulseBase):
+    """Model for reading a Pulse.
+
+    This model is for FastAPI calls that return a Pulse
+    from the db, as this requires the pulse_id.
+    """
+
+    pulse_id: UUID
+    pulse_attributes: list[TAttrReadDataType]
+
+    @classmethod
+    def new(
+        cls: type[AnnotatedPulseRead],
+        pulse: Pulse,
+        attrs: list[TAttrReadDataType],
+    ) -> AnnotatedPulseRead:
+        return cls(**pulse.dict(), pulse_attributes=attrs)
 
 
 class TemporaryPulseIdTable(SQLModel, table=True):

@@ -1,28 +1,34 @@
-import { BackendTHzDevice, PulseID } from "interfaces";
+import { BackendPulse, BackendTHzDevice } from "interfaces";
 import { z } from "zod";
-
-export class Pulse {
-	constructor(
-		public time: number[],
-		public signal: number[],
-		public integrationTime: number,
-		public creationTime: Date,
-		public ID: PulseID,
-	) {}
-}
 
 export class AnnotatedPulse {
 	constructor(
 		public pulse: {
 			time: number[];
 			signal: number[];
-			signal_err?: number[] | null;
+			signal_err: number[] | null;
 		},
 		public integration_time_ms: number,
 		public creation_time: Date,
 		public device_id: string,
 		public pulse_attributes: { key: string; value: string | number }[],
+		public pulse_id?: string,
 	) {}
+
+	static fromBackendPulse(pulse: BackendPulse): AnnotatedPulse {
+		return new AnnotatedPulse(
+			{
+				time: pulse.delays,
+				signal: pulse.signal,
+				signal_err: pulse.signal_error,
+			},
+			pulse.integration_time_ms,
+			new Date(pulse.creation_time),
+			pulse.device_id,
+			pulse.pulse_attributes,
+			pulse.pulse_id,
+		);
+	}
 
 	static validateAndParse(
 		data: unknown,
@@ -55,7 +61,7 @@ export class AnnotatedPulse {
 			{
 				time: parsed.pulse.time,
 				signal: parsed.pulse.signal,
-				signal_err: parsed.pulse.signal_err,
+				signal_err: parsed.pulse.signal_err ? parsed.pulse.signal_err : null,
 			},
 			parsed.integration_time_ms,
 			creationTime,
