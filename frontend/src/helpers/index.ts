@@ -56,9 +56,11 @@ export function uniqueElements<T>(list: T[]): T[] {
 
 export function getBackendUrl(): string {
 	// import.meta.env.* is only available in production
-	if (import.meta.env.PROD) {
-		return import.meta.env.VITE_BACKEND_URL;
-	}
+	try {
+		if (import.meta.env.PROD) {
+			return import.meta.env.VITE_BACKEND_URL;
+		}
+	} catch (e) {}
 
 	// for test runs, URL is injected via environment variables - this won't be available in a browser
 	try {
