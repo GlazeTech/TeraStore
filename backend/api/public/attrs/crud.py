@@ -2,10 +2,9 @@ from collections.abc import Sequence
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import intersect
 from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import NoResultFound
-from sqlmodel import Session, col, select
+from sqlmodel import Session, col, intersect, select
 from sqlmodel.sql.expression import SelectOfScalar
 
 from api.database import get_session
@@ -228,7 +227,7 @@ def filter_on_key_value_pairs(
             db.execute(
                 select(*get_model_columns_from_names(wanted_columns, Pulse)).join(
                     sub_query,
-                    Pulse.pulse_id == sub_query.c.pulse_id,  # type: ignore[arg-type]
+                    col(Pulse.pulse_id) == sub_query.c.pulse_id,
                 ),
             )
             .unique()
