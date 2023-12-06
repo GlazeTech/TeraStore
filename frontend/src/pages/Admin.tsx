@@ -1,8 +1,8 @@
 import { LoadingOverlay } from "@mantine/core";
 import AdminDashboard from "components/AdminDashboard";
 import { useIsAuthorized } from "hooks";
-import { Navigate, useLocation } from "react-router-dom";
 import { AuthLevel } from "interfaces";
+import { Navigate, useLocation } from "react-router-dom";
 
 export default function Admin() {
 	const authLevel = useIsAuthorized();

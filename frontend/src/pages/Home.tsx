@@ -1,8 +1,8 @@
 import { LoadingOverlay } from "@mantine/core";
 import App from "components/App";
 import { useIsAuthorized } from "hooks";
-import { Navigate, useLocation } from "react-router-dom";
 import { AuthLevel } from "interfaces";
+import { Navigate, useLocation } from "react-router-dom";
 
 export default function Home() {
 	const authLevel = useIsAuthorized();

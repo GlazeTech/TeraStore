@@ -1,6 +1,6 @@
 import { getAuthLevel } from "auth";
-import { useEffect, useState } from "react";
 import { AuthLevel } from "interfaces";
+import { useEffect, useState } from "react";
 
 export function useIsAuthorized() {
 	const [authLevel, setAuthLevel] = useState(AuthLevel.LOADING);
