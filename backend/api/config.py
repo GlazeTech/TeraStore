@@ -1,7 +1,7 @@
 import os
 from functools import lru_cache
 
-from pydantic import BaseSettings
+from pydantic_settings import BaseSettings
 
 
 def get_env_var(var_name: str) -> str:
@@ -14,8 +14,8 @@ def get_env_var(var_name: str) -> str:
 
 
 class Settings(BaseSettings):
-    PROJECT_NAME = "TeraStore API"
-    DATABASE_URL = get_env_var("DATABASE_URL")
+    PROJECT_NAME: str = "TeraStore API"
+    DATABASE_URL: str = get_env_var("DATABASE_URL")
 
 
 @lru_cache

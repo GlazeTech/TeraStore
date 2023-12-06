@@ -140,7 +140,7 @@ def read_pulse_attrs(
                 # Mypy thinks attr is PulseAttrsBase, which is wrong
                 if attr.pulse_id == pulse_id:  # type: ignore[attr-defined]
                     results[pulse_id].append(
-                        attrs_read_class.from_orm(attr),
+                        attrs_read_class.model_validate(attr),
                     )
 
     return results
