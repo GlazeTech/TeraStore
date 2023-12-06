@@ -1,12 +1,6 @@
 import { getAuthLevel } from "auth";
 import { useEffect, useState } from "react";
-
-export enum AuthLevel {
-	LOADING = 1,
-	UNAUTHORIZED = 2,
-	USER = 3,
-	ADMIN = 4,
-}
+import { AuthLevel } from "interfaces";
 
 export function useIsAuthorized() {
 	const [authLevel, setAuthLevel] = useState(AuthLevel.LOADING);

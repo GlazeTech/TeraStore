@@ -6,6 +6,7 @@ const authService = axios.create({
 	baseURL: getBackendUrl(),
 });
 
+// The function commented out below will be commented back in as soon as the backend implements auth
 // export async function login(username: string, password: string) {
 // 	return authService
 // 		.post("/auth/login", {
@@ -32,6 +33,7 @@ export async function refreshAccessToken(): Promise<string> {
 	});
 }
 
+// The function commented out below will be commented back in as soon as the backend implements auth
 // export function register(email: string, password: string): Promise<void> {
 // 	return authService.post("/auth/register", {
 // 		email,
@@ -47,6 +49,7 @@ export function register(_: string, __: string): Promise<void> {
 	});
 }
 
+// The function commented out below will be commented back in as soon as the backend implements auth
 // export async function logout(): Promise<void> {
 // 	clearAccessToken();
 // 	return authService.post("/auth/logout");
