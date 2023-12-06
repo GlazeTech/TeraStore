@@ -1,6 +1,6 @@
 import axios from "axios";
 import { setupCache } from "axios-cache-interceptor";
-import { AnnotatedPulse, FilterResult, Pulse, attrKeyFactory } from "classes";
+import { AnnotatedPulse, FilterResult, attrKeyFactory } from "classes";
 import { getBackendUrl, sortPulseFilters } from "helpers";
 import {
 	BackendAttrKey,
@@ -58,34 +58,15 @@ export async function getFilteredPulses(
 		});
 }
 
-export async function getPulse(pulseID: PulseID): Promise<Pulse> {
-	return api.get<BackendPulse>(`/pulses/${pulseID}`).then((resp) => {
-		return new Pulse(
-			resp.data.delays,
-			resp.data.signal,
-			resp.data.integration_time,
-			new Date(resp.data.creation_time),
-			resp.data.pulse_id,
-		);
-	});
-}
-
-export async function getPulses(pulseIDs: PulseID[]): Promise<Pulse[]> {
+export async function getPulses(
+	pulseIDs: PulseID[],
+): Promise<AnnotatedPulse[]> {
 	return (
 		api
 			// sort pulse IDs for improved caching
 			.post<BackendPulse[]>("/pulses/get", [...pulseIDs].sort())
 			.then((resp) => {
-				return resp.data.map(
-					(el: BackendPulse) =>
-						new Pulse(
-							el.delays,
-							el.signal,
-							el.integration_time,
-							new Date(el.creation_time),
-							el.pulse_id,
-						),
-				);
+				return resp.data.map(AnnotatedPulse.fromBackendPulse);
 			})
 	);
 }

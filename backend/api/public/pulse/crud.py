@@ -7,8 +7,15 @@ from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, col, select
 
 from api.database import get_session
-from api.public.attrs.crud import add_attrs
-from api.public.pulse.models import Pulse, PulseCreate, PulseRead, TemporaryPulseIdTable
+from api.public.attrs.crud import add_attrs, read_pulse_attrs
+from api.public.pulse.helpers import assert_pulses_exist
+from api.public.pulse.models import (
+    AnnotatedPulseRead,
+    Pulse,
+    PulseCreate,
+    PulseRead,
+    TemporaryPulseIdTable,
+)
 from api.utils.exceptions import (
     AttrDataTypeExistsError,
     DeviceNotFoundError,
@@ -75,7 +82,10 @@ def read_pulses(
 def read_pulses_with_ids(
     ids: list[UUID],
     db: Session = Depends(get_session),
-) -> list[PulseRead]:
+) -> list[AnnotatedPulseRead]:
+    # Assert wanted pulses exist
+    assert_pulses_exist(pulse_ids=ids, db=db)
+
     # Save wanted ID's in a temporary table
     db.bulk_save_objects([TemporaryPulseIdTable(pulse_id=idx) for idx in ids])
     db.commit()
@@ -84,15 +94,21 @@ def read_pulses_with_ids(
     pulses = db.exec(
         select(Pulse).join(
             TemporaryPulseIdTable,
-            TemporaryPulseIdTable.pulse_id == Pulse.pulse_id,  # type: ignore[arg-type]
+            col(TemporaryPulseIdTable.pulse_id) == col(Pulse.pulse_id),
             isouter=False,
         ),
     ).all()
 
+    # Find all attributes for the selected pulses
+    pulse_attrs = read_pulse_attrs(pulse_ids=ids, db=db, check_pulses_exist=False)
+
     # Delete the entries from the temporary table again
     db.query(TemporaryPulseIdTable).delete()
     db.commit()
-    return [PulseRead.from_orm(pulse) for pulse in pulses]
+    return [
+        AnnotatedPulseRead.new(pulse=pulse, attrs=pulse_attrs[pulse.pulse_id])
+        for pulse in pulses
+    ]
 
 
 def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> PulseRead:

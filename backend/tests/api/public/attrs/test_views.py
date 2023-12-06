@@ -75,14 +75,14 @@ def test_get_attrs_on_pulse(client: TestClient, device_id: UUID) -> None:
     response = client.get(f"/pulses/{pulse_id}/attrs/")
     response_data = response.json()
 
-    response_keys = [d["key"] for d in response_data]
-    response_values = [d["value"] for d in response_data]
+    response_keys = [d["key"] for d in response_data[pulse_id]]
+    response_values = [d["value"] for d in response_data[pulse_id]]
 
     assert pulse_response.status_code == 200
     assert attrs_1_data.status_code == 200
     assert attrs_2_data.status_code == 200
     assert response.status_code == 200
-    assert len(response_data) == 2
+    assert len(response_data[pulse_id]) == 2
     assert attrs_1_payload["key"] in response_keys
     assert attrs_2_payload["key"] in response_keys
     assert attrs_1_payload["value"] in response_values
@@ -97,7 +97,7 @@ def test_get_pulse_attrs_on_non_existing_pulse(client: TestClient) -> None:
     response_data = response.json()
 
     assert response.status_code == 404
-    assert response_data["detail"] == f"Pulse not found with id: {pulse_id}"
+    assert response_data["detail"] == f"Pulse not found with id: [UUID('{pulse_id}')]"
 
 
 def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: UUID) -> None:
@@ -121,13 +121,13 @@ def test_add_pulse_attrs_on_pulse(client: TestClient, device_id: UUID) -> None:
     response = client.get(f"/pulses/{pulse_id}/attrs/")
     response_data = response.json()
 
-    response_keys = [d["key"] for d in response_data]
-    response_values = [d["value"] for d in response_data]
+    response_keys = [d["key"] for d in response_data[pulse_id]]
+    response_values = [d["value"] for d in response_data[pulse_id]]
 
     assert pulse_response.status_code == 200
     assert attrs_response.status_code == 200
     assert response.status_code == 200
-    assert len(response_data) == 1
+    assert len(response_data[pulse_id]) == 1
     assert attrs_payload["key"] in response_keys
     assert attrs_payload["value"] in response_values
 

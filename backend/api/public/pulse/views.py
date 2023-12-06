@@ -12,7 +12,7 @@ from api.public.pulse.crud import (
     read_pulses,
     read_pulses_with_ids,
 )
-from api.public.pulse.models import PulseCreate, PulseRead
+from api.public.pulse.models import AnnotatedPulseRead, PulseCreate, PulseRead
 
 router = APIRouter()
 
@@ -38,7 +38,7 @@ def get_pulses(
 def get_pulses_from_ids(
     ids: list[UUID],
     db: Session = Depends(get_session),
-) -> list[PulseRead]:
+) -> list[AnnotatedPulseRead]:
     return read_pulses_with_ids(ids, db=db)
 
 
@@ -61,5 +61,5 @@ def add_kv_pair(
 def get_pulse_keys(
     pulse_id: UUID,
     db: Session = Depends(get_session),
-) -> list[TAttrReadDataType]:
-    return read_pulse_attrs(pulse_id=pulse_id, db=db)
+) -> dict[UUID, list[TAttrReadDataType]]:
+    return read_pulse_attrs(pulse_ids=[pulse_id], db=db)

@@ -2,10 +2,9 @@ from collections.abc import Sequence
 from uuid import UUID
 
 from fastapi import Depends
-from sqlalchemy import intersect
 from sqlalchemy.engine.row import Row
 from sqlalchemy.exc import NoResultFound
-from sqlmodel import Session, col, select
+from sqlmodel import Session, col, intersect, select
 from sqlmodel.sql.expression import SelectOfScalar
 
 from api.database import get_session
@@ -26,6 +25,7 @@ from api.public.attrs.models import (
     get_pulse_attrs_class,
     get_pulse_attrs_read_class,
 )
+from api.public.pulse.helpers import assert_pulses_exist
 from api.public.pulse.models import Pulse
 from api.utils.exceptions import (
     AttrDataTypeExistsError,
@@ -113,27 +113,37 @@ def add_attr(
 
 
 def read_pulse_attrs(
-    pulse_id: UUID,
+    pulse_ids: Sequence[UUID],
     db: Session = Depends(get_session),
-) -> list[TAttrReadDataType]:
+    *,
+    check_pulses_exist: bool = True,
+) -> dict[UUID, list[TAttrReadDataType]]:
     """Get all the keys for a pulse with id pulse_id."""
-    pulse = db.get(Pulse, pulse_id)
+    if check_pulses_exist:
+        assert_pulses_exist(pulse_ids=pulse_ids, db=db)
 
-    attrs_list = []
+    results: dict[UUID, list[TAttrReadDataType]] = {
+        pulse_id: [] for pulse_id in pulse_ids
+    }
 
-    if not pulse:
-        raise PulseNotFoundError(pulse_id=pulse_id)
-
+    # Read attrs for all data types
     for data_type in AttrDataType:
         attrs_class = get_pulse_attrs_class(data_type)
         attrs_read_class = get_pulse_attrs_read_class(data_type)
-        results = db.exec(
-            select(attrs_class).where(attrs_class.pulse_id == pulse_id),
+        loaded_attrs = db.exec(
+            select(attrs_class).where(col(attrs_class.pulse_id).in_(pulse_ids)),
         ).all()
-        attrs = [attrs_read_class.from_orm(obj) for obj in results]
-        attrs_list += attrs
 
-    return attrs_list
+        # Add loaded attrs to results
+        for pulse_id in pulse_ids:
+            for attr in loaded_attrs:
+                # Mypy thinks attr is PulseAttrsBase, which is wrong
+                if attr.pulse_id == pulse_id:  # type: ignore[attr-defined]
+                    results[pulse_id].append(
+                        attrs_read_class.from_orm(attr),
+                    )
+
+    return results
 
 
 def read_all_keys(
@@ -217,7 +227,7 @@ def filter_on_key_value_pairs(
             db.execute(
                 select(*get_model_columns_from_names(wanted_columns, Pulse)).join(
                     sub_query,
-                    Pulse.pulse_id == sub_query.c.pulse_id,  # type: ignore[arg-type]
+                    col(Pulse.pulse_id) == sub_query.c.pulse_id,
                 ),
             )
             .unique()

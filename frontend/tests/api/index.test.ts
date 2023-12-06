@@ -1,7 +1,8 @@
 import { readTestingAsset } from "@tests/testing-utils";
-import { getFilteredPulses, getPulseKeys } from "api";
+import { getFilteredPulses, getPulseKeys, getPulses } from "api";
 import { uploadPulses } from "api";
 import {
+	AnnotatedPulse,
 	DateAttrKey,
 	FilterResult,
 	PulseDateFilter,
@@ -93,5 +94,25 @@ describe("uploadPulses", () => {
 			expect(result.length).toBe(pulses.length);
 			expect(typeof result[0]).toBe("string");
 		}
+	});
+});
+
+describe("getPulses", () => {
+	test("should return annotated pulses", async () => {
+		const allPulses = await getFilteredPulses([]);
+		const downloadablePulses = await getPulses(
+			allPulses.pulsesMetadata.map((p) => p.pulseID).slice(0, 5),
+		);
+		downloadablePulses.forEach((pulse) => {
+			expect(pulse).toBeInstanceOf(AnnotatedPulse);
+			expect(pulse.pulse.time).toBeDefined();
+			expect(pulse.pulse.signal).toBeDefined();
+			expect(pulse.pulse.signal_err).toBeDefined();
+			expect(pulse.pulse_attributes).toBeDefined();
+			expect(pulse.device_id).toBeDefined();
+			expect(pulse.integration_time_ms).toBeDefined();
+			expect(pulse.pulse).toBeDefined();
+			expect(pulse.pulse_id).toBeDefined();
+		});
 	});
 });
