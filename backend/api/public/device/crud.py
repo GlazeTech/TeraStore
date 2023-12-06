@@ -12,11 +12,11 @@ def create_device(
     device: DeviceCreate | Device,
     db: Session = Depends(get_session),
 ) -> DeviceRead:
-    device_to_db = Device.from_orm(device)
+    device_to_db = Device.model_validate(device)
     db.add(device_to_db)
     db.commit()
     db.refresh(device_to_db)
-    return DeviceRead.from_orm(device_to_db)
+    return DeviceRead.model_validate(device_to_db)
 
 
 def read_devices(
@@ -25,11 +25,11 @@ def read_devices(
     db: Session = Depends(get_session),
 ) -> list[DeviceRead]:
     devices = db.exec(select(Device).offset(offset).limit(limit)).all()
-    return [DeviceRead.from_orm(device) for device in devices]
+    return [DeviceRead.model_validate(device) for device in devices]
 
 
 def read_device(device_id: UUID, db: Session = Depends(get_session)) -> DeviceRead:
     device = db.get(Device, device_id)
     if not device:
         raise DeviceNotFoundError(device_id=device_id)
-    return DeviceRead.from_orm(device)
+    return DeviceRead.model_validate(device)

@@ -76,7 +76,7 @@ def read_pulses(
 ) -> list[PulseRead]:
     """Get all pulses in the database."""
     pulses = db.exec(select(Pulse).offset(offset).limit(limit)).all()
-    return [PulseRead.from_orm(pulse) for pulse in pulses]
+    return [PulseRead.model_validate(pulse) for pulse in pulses]
 
 
 def read_pulses_with_ids(
@@ -115,4 +115,4 @@ def read_pulse(pulse_id: UUID, db: Session = Depends(get_session)) -> PulseRead:
     pulse = db.get(Pulse, pulse_id)
     if not pulse:
         raise PulseNotFoundError(pulse_id=pulse_id)
-    return PulseRead.from_orm(pulse)
+    return PulseRead.model_validate(pulse)

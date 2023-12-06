@@ -49,7 +49,10 @@ class PulseBase(SQLModel):
 
     delays: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
     signal: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
-    signal_error: list[float] | None = Field(sa_column=Column(postgresql.ARRAY(Float)))
+    signal_error: list[float] | None = Field(
+        default=None,
+        sa_column=Column(postgresql.ARRAY(Float)),
+    )
     integration_time_ms: int
     creation_time: datetime
     device_id: UUID = Field(foreign_key="devices.device_id")
@@ -142,7 +145,7 @@ class PulseCreate(PulseBase):
         }
 
     def create_pulse(self: Self) -> tuple[Pulse, PulseAttrs]:
-        pulse = Pulse.create(self.dict(exclude={"pulse_attributes"}))
+        pulse = Pulse.create(self.model_dump(exclude={"pulse_attributes"}))
         pulse_attributes = PulseAttrs(
             pulse_id=pulse.pulse_id,
             pulse_attributes=self.pulse_attributes,
@@ -176,7 +179,7 @@ class AnnotatedPulseRead(PulseBase):
         pulse: Pulse,
         attrs: list[TAttrReadDataType],
     ) -> AnnotatedPulseRead:
-        return cls(**pulse.dict(), pulse_attributes=attrs)
+        return cls(**pulse.model_dump(), pulse_attributes=attrs)
 
 
 class TemporaryPulseIdTable(SQLModel, table=True):

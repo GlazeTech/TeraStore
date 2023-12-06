@@ -10,26 +10,28 @@ readme = "README.md"
 dynamic = ["version"]
 
 dependencies = [
-  "fastapi[all]==0.99.1",
-  "sqlmodel==0.0.12",
+  "fastapi[all]==0.104.1",
+  "sqlmodel==0.0.14",
+  "pydantic==2.5.2",
+  "pydantic-settings==2.1.0",
   "psycopg2-binary==2.9.9",
 ]
 
 [project.optional-dependencies]
 test = [
-  "mypy==1.7.0",
+  "mypy==1.7.1",
   "black==23.11.0",
-  "ruff==0.1.6",
+  "ruff==0.1.7",
   "pytest==7.4.3",
-  "types-psycopg2==2.9.21.16",
+  "types-psycopg2==2.9.21.19",
   "pytest-cov==4.1.0",
 ]
 dev = [
-  "mypy==1.7.0",
+  "mypy==1.7.1",
   "black==23.11.0",
-  "ruff==0.1.6",
+  "ruff==0.1.7",
   "pytest==7.4.3",
-  "types-psycopg2==2.9.21.16",
+  "types-psycopg2==2.9.21.19",
   "pytest-cov==4.1.0",
 ]
 
@@ -48,6 +50,7 @@ no_implicit_reexport = true
 no_implicit_optional = true
 disallow_untyped_defs = true
 show_error_codes = true
+
 
 [tool.pydantic-mypy]
 init_forbid_extra = true

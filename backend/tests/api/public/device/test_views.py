@@ -27,8 +27,8 @@ def test_create_device_with_invalid_friendly_name(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "str type expected"
-    assert data["detail"][0]["type"] == "type_error.str"
+    assert data["detail"][0]["msg"] == "Input should be a valid string"
+    assert data["detail"][0]["type"] == "string_type"
 
 
 def test_create_device_with_extra_params(client: TestClient) -> None:
@@ -40,8 +40,8 @@ def test_create_device_with_extra_params(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "extra fields not permitted"
-    assert data["detail"][0]["type"] == "value_error.extra"
+    assert data["detail"][0]["msg"] == "Extra inputs are not permitted"
+    assert data["detail"][0]["type"] == "extra_forbidden"
 
 
 def test_create_device_with_empty_body(client: TestClient) -> None:
@@ -53,8 +53,8 @@ def test_create_device_with_empty_body(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "field required"
-    assert data["detail"][0]["type"] == "value_error.missing"
+    assert data["detail"][0]["msg"] == "Field required"
+    assert data["detail"][0]["type"] == "missing"
 
 
 def test_create_device_with_invalid_device_id(client: TestClient) -> None:
@@ -69,8 +69,8 @@ def test_create_device_with_invalid_device_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "extra fields not permitted"
-    assert data["detail"][0]["type"] == "value_error.extra"
+    assert data["detail"][0]["msg"] == "Extra inputs are not permitted"
+    assert data["detail"][0]["type"] == "extra_forbidden"
 
 
 def test_get_device(client: TestClient) -> None:
@@ -99,8 +99,11 @@ def test_get_device_with_invalid_device_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid uuid"
-    assert data["detail"][0]["type"] == "type_error.uuid"
+    assert data["detail"][0]["msg"] == (
+        "Input should be a valid UUID, invalid length: "
+        "expected length 32 for simple format, found 3"
+    )
+    assert data["detail"][0]["type"] == "uuid_parsing"
 
 
 def test_get_device_with_nonexistent_device_id(client: TestClient) -> None:
@@ -183,8 +186,11 @@ def test_get_all_devices_with_invalid_limit(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid integer"
-    assert data["detail"][0]["type"] == "type_error.integer"
+    assert (
+        data["detail"][0]["msg"]
+        == "Input should be a valid integer, unable to parse string as an integer"
+    )
+    assert data["detail"][0]["type"] == "int_parsing"
 
 
 def test_get_all_devices_with_offset(client: TestClient) -> None:
@@ -224,8 +230,11 @@ def test_get_all_devices_with_invalid_offset(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid integer"
-    assert data["detail"][0]["type"] == "type_error.integer"
+    assert (
+        data["detail"][0]["msg"]
+        == "Input should be a valid integer, unable to parse string as an integer"
+    )
+    assert data["detail"][0]["type"] == "int_parsing"
 
 
 def test_get_all_devices_with_limit_and_offset(client: TestClient) -> None:
@@ -265,7 +274,13 @@ def test_get_all_devices_with_invalid_limit_and_offset(client: TestClient) -> No
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid integer"
-    assert data["detail"][0]["type"] == "type_error.integer"
-    assert data["detail"][1]["msg"] == "value is not a valid integer"
-    assert data["detail"][1]["type"] == "type_error.integer"
+    assert (
+        data["detail"][0]["msg"]
+        == "Input should be a valid integer, unable to parse string as an integer"
+    )
+    assert data["detail"][0]["type"] == "int_parsing"
+    assert (
+        data["detail"][1]["msg"]
+        == "Input should be a valid integer, unable to parse string as an integer"
+    )
+    assert data["detail"][1]["type"] == "int_parsing"

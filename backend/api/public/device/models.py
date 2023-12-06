@@ -43,7 +43,7 @@ class DeviceCreate(DeviceBase):
         return cls(friendly_name=friendly_name)
 
     def as_dict(self: Self) -> dict[str, str]:
-        return self.dict()
+        return self.model_dump()
 
 
 class DeviceRead(DeviceBase):

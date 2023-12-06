@@ -73,8 +73,11 @@ def test_create_pulse_with_invalid_delays(client: TestClient, device_id: UUID) -
     pulse_data = pulse_response.json()
 
     assert pulse_response.status_code == 422
-    assert pulse_data["detail"][0]["msg"] == "value is not a valid float"
-    assert pulse_data["detail"][0]["type"] == "type_error.float"
+    assert (
+        pulse_data["detail"][0]["msg"]
+        == "Input should be a valid number, unable to parse string as a number"
+    )
+    assert pulse_data["detail"][0]["type"] == "float_parsing"
 
 
 def test_create_pulse_with_invalid_signal(client: TestClient, device_id: UUID) -> None:
@@ -89,8 +92,11 @@ def test_create_pulse_with_invalid_signal(client: TestClient, device_id: UUID) -
     pulse_data = pulse_response.json()
 
     assert pulse_response.status_code == 422
-    assert pulse_data["detail"][0]["msg"] == "value is not a valid float"
-    assert pulse_data["detail"][0]["type"] == "type_error.float"
+    assert (
+        pulse_data["detail"][0]["msg"]
+        == "Input should be a valid number, unable to parse string as a number"
+    )
+    assert pulse_data["detail"][0]["type"] == "float_parsing"
 
 
 def test_create_pulse_with_invalid_integration_time(
@@ -108,8 +114,11 @@ def test_create_pulse_with_invalid_integration_time(
     pulse_data = pulse_response.json()
 
     assert pulse_response.status_code == 422
-    assert pulse_data["detail"][0]["msg"] == "value is not a valid integer"
-    assert pulse_data["detail"][0]["type"] == "type_error.integer"
+    assert (
+        pulse_data["detail"][0]["msg"]
+        == "Input should be a valid integer, unable to parse string as an integer"
+    )
+    assert pulse_data["detail"][0]["type"] == "int_parsing"
 
 
 def test_create_pulse_with_nonexistent_device_id(client: TestClient) -> None:
@@ -138,8 +147,11 @@ def test_create_pulse_with_invalid_device_id(
     )
 
     assert pulse_response.status_code == 422
-    assert pulse_response.json()["detail"][0]["msg"] == "value is not a valid uuid"
-    assert pulse_response.json()["detail"][0]["type"] == "type_error.uuid"
+    assert pulse_response.json()["detail"][0]["msg"] == (
+        "Input should be a valid UUID, invalid length: "
+        "expected length 32 for simple format, found 1"
+    )
+    assert pulse_response.json()["detail"][0]["type"] == "uuid_parsing"
 
 
 def test_create_pulse_with_invalid_creation_time(
@@ -155,8 +167,11 @@ def test_create_pulse_with_invalid_creation_time(
     )
 
     assert pulse_response.status_code == 422
-    assert pulse_response.json()["detail"][0]["msg"] == "invalid datetime format"
-    assert pulse_response.json()["detail"][0]["type"] == "value_error.datetime"
+    assert (
+        pulse_response.json()["detail"][0]["msg"]
+        == "Input should be a valid datetime, input is too short"
+    )
+    assert pulse_response.json()["detail"][0]["type"] == "datetime_parsing"
 
 
 def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:
@@ -164,8 +179,11 @@ def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "value is not a valid uuid"
-    assert data["detail"][0]["type"] == "type_error.uuid"
+    assert data["detail"][0]["msg"] == (
+        "Input should be a valid UUID, invalid length: "
+        "expected length 32 for simple format, found 3"
+    )
+    assert data["detail"][0]["type"] == "uuid_parsing"
 
 
 def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
