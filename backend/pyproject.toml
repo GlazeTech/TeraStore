@@ -15,6 +15,8 @@ dependencies = [
   "pydantic==2.5.2",
   "pydantic-settings==2.1.0",
   "psycopg2-binary==2.9.9",
+  "python-jose[cryptography]==3.3.0",
+  "passlib[bcrypt]==1.7.4",
 ]
 
 [project.optional-dependencies]
@@ -25,6 +27,8 @@ test = [
   "pytest==7.4.3",
   "types-psycopg2==2.9.21.19",
   "pytest-cov==4.1.0",
+  "types-python-jose==3.3.4.8",
+  "types-passlib==1.7.7.13",
 ]
 dev = [
   "mypy==1.7.1",
@@ -33,6 +37,8 @@ dev = [
   "pytest==7.4.3",
   "types-psycopg2==2.9.21.19",
   "pytest-cov==4.1.0",
+  "types-python-jose==3.3.4.8",
+  "types-passlib==1.7.7.13",
 ]
 
 [tool.mypy]
@@ -89,6 +95,9 @@ ignore = [
   "B008", # To be able to use FastAPI Depends() in function calls
 ]
 "api/**/helpers.py" = [
+  "B008", # To be able to use FastAPI Depends() in function calls
+]
+"api/**/auth_handler.py" = [
   "B008", # To be able to use FastAPI Depends() in function calls
 ]
 "api/main.py" = ["ARG001"] # Unused function args
