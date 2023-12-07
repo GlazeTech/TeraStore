@@ -26,6 +26,9 @@ To run the application, you must first set the following environment variables:
 * `POSTGRES_USER`: The PostgreSQL username to be used by the backend
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
+* `SECRET_KEY`: A secret key for hashing passwords
+
+You can create `SECRET_KEY` by running `openssl rand -hex 32` in your terminal.
 
 We suggest you create a `.env` file in the root of the project.
 This will contain the above mentioned environment variables, and you can fill it out like so:
