@@ -36,6 +36,15 @@ class UserCreate(BaseModel):
     password: str
 
 
+class UserDelete(BaseModel):
+    email: str
+
+
+class UserUpdate(BaseModel):
+    email: str
+    auth_level: AuthLevel
+
+
 class Token(BaseModel):
     access_token: str
     token_type: str = "bearer"

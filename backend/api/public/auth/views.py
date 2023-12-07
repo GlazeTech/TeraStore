@@ -1,3 +1,4 @@
+from collections.abc import Sequence
 from datetime import timedelta
 from typing import Annotated
 
@@ -8,8 +9,8 @@ from sqlmodel import Session
 from api.config import get_auth_settings
 from api.database import get_session
 from api.public.auth.auth_handler import authenticate_user, create_access_token
-from api.public.auth.crud import create_user
-from api.public.auth.models import Token, UserCreate
+from api.public.auth.crud import create_user, get_users, remove_user, update_auth_level
+from api.public.auth.models import Token, UserCreate, UserDelete, UserRead, UserUpdate
 
 router = APIRouter()
 
@@ -42,18 +43,20 @@ def create_new_user(user: UserCreate, db: Session = Depends(get_session)) -> str
 
 
 @router.post("/delete")
-def delete_user() -> None:
-    pass
+def delete_user(user: UserDelete, db: Session = Depends(get_session)) -> str:
+    remove_user(user=user, db=db)
+    return "User deleted"
 
 
 @router.post("/update")
-def update_user() -> None:
-    pass
+def update_user(user: UserUpdate, db: Session = Depends(get_session)) -> str:
+    update_auth_level(user=user, db=db)
+    return "User updated"
 
 
-@router.post("/list")
-def list_users() -> None:
-    pass
+@router.get("/list")
+def list_users(db: Session = Depends(get_session)) -> Sequence[UserRead]:
+    return get_users(db=db)
 
 
 @router.post("/logout")
