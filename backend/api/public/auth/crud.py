@@ -25,8 +25,6 @@ def create_user(user: UserCreate, db: Session = Depends(get_session)) -> None:
     user_to_db = User(
         email=user.email,
         hashed_password=get_password_hash(user.password),
-        salt="",
-        hash_function="",
     )
     db.add(user_to_db)
     try:

@@ -22,8 +22,6 @@ class User(SQLModel, table=True):
     )
     auth_level: AuthLevel = AuthLevel.UNAUTHORIZED
     hashed_password: str
-    salt: str
-    hash_function: str
 
 
 class UserRead(BaseModel):
