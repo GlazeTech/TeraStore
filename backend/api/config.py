@@ -18,6 +18,17 @@ class Settings(BaseSettings):
     DATABASE_URL: str = get_env_var("DATABASE_URL")
 
 
+class AuthSettings(BaseSettings):
+    SECRET_KEY: str
+    ALGORITHM: str = "HS256"
+    ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
+
+
 @lru_cache
 def get_settings() -> Settings:
     return Settings()
+
+
+@lru_cache
+def get_auth_settings() -> AuthSettings:
+    return AuthSettings()

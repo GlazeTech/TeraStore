@@ -15,6 +15,8 @@ from api.utils.exception_handlers import (
     device_not_found_exception_handler,
     pulse_column_nonexistent_exception_handler,
     pulse_not_found_exception_handler,
+    username_already_exists_exception_handler,
+    username_or_password_incorrect_exception_handler,
 )
 from api.utils.exceptions import (
     AttrDataTypeDoesNotExistError,
@@ -23,6 +25,8 @@ from api.utils.exceptions import (
     DeviceNotFoundError,
     PulseColumnNonexistentError,
     PulseNotFoundError,
+    UserAlreadyExistsError,
+    UsernameOrPasswordIncorrectError,
 )
 from api.utils.logging import EndpointFilter
 from api.utils.mock_data_generator import (
@@ -102,6 +106,14 @@ def create_app(lifespan: Lifespan) -> FastAPI:
     app.add_exception_handler(
         PulseColumnNonexistentError,
         pulse_column_nonexistent_exception_handler,
+    )
+    app.add_exception_handler(
+        UsernameOrPasswordIncorrectError,
+        username_or_password_incorrect_exception_handler,
+    )
+    app.add_exception_handler(
+        UserAlreadyExistsError,
+        username_already_exists_exception_handler,
     )
 
     # Add logging filters

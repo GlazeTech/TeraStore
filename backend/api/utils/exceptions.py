@@ -75,3 +75,27 @@ class AttrDataTypeDoesNotExistError(Exception):
         super().__init__(
             f"Data type {data_type} does not exist.",
         )
+
+
+class UsernameOrPasswordIncorrectError(Exception):
+    """Exception raised when a username or password is incorrect."""
+
+    def __init__(
+        self: Self,
+    ) -> None:
+        super().__init__(
+            "Username or password is incorrect.",
+        )
+
+
+class UserAlreadyExistsError(Exception):
+    """Exception raised when a username already exists."""
+
+    def __init__(
+        self: Self,
+        username: str,
+    ) -> None:
+        self.username = username
+        super().__init__(
+            f"Username {username} already exists.",
+        )
