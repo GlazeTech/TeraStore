@@ -54,7 +54,7 @@ def update_user(user: UserUpdate, db: Session = Depends(get_session)) -> str:
     return "User updated"
 
 
-@router.get("/list")
+@router.get("/users")
 def list_users(db: Session = Depends(get_session)) -> Sequence[UserRead]:
     return get_users(db=db)
 

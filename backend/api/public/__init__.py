@@ -14,5 +14,5 @@ def make_api() -> APIRouter:
     api.include_router(devices.router, prefix="/devices", tags=["Devices"])
     api.include_router(eav.router, prefix="/attrs", tags=["Attrs"])
     api.include_router(health.router, prefix="/health", tags=["Health"])
-    api.include_router(auth.router, prefix="", tags=["Auth"])
+    api.include_router(auth.router, prefix="/auth", tags=["Auth"])
     return api

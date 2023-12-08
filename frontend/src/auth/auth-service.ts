@@ -1,30 +1,31 @@
-import axios from "axios";
+import axios, { AxiosResponse } from "axios";
 import { getBackendUrl } from "helpers";
-import { clearAccessToken } from "./accessToken";
+import { BackendUser } from "interfaces";
+import { clearAccessToken, setAccessToken } from "./accessToken";
 
 const authService = axios.create({
 	baseURL: getBackendUrl(),
 });
 
-// The function commented out below will be commented back in as soon as the backend implements auth
-// export async function login(username: string, password: string) {
-// 	return authService
-// 		.post("/auth/login", {
-// 			email,
-// 			password,
-// 		})
-// 		.then((resp) => {
-// 			setAccessToken(resp.data.accessToken);
-// 			return resp.data.accessToken;
-// 		});
-// }
-
-export async function login(_: string, __: string): Promise<string> {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve("fake-access-token");
-		}, 1000);
-	});
+// TODO: Add test
+export async function login(username: string, password: string) {
+	return authService
+		.post(
+			"/auth/login",
+			{
+				username: username,
+				password: password,
+			},
+			{
+				headers: {
+					"Content-Type": "application/x-www-form-urlencoded",
+				},
+			},
+		)
+		.then((resp) => {
+			setAccessToken(resp.data.accessToken);
+			return resp.data.accessToken;
+		});
 }
 
 export async function refreshAccessToken(): Promise<string> {
@@ -33,33 +34,32 @@ export async function refreshAccessToken(): Promise<string> {
 	});
 }
 
-// The function commented out below will be commented back in as soon as the backend implements auth
-// export function register(email: string, password: string): Promise<void> {
-// 	return authService.post("/auth/register", {
-// 		email,
-// 		password,
-// 	});
-// }
-
-export function register(_: string, __: string): Promise<void> {
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve();
-		}, 1000);
+export async function register(
+	email: string,
+	password: string,
+): Promise<AxiosResponse> {
+	return authService.post("/auth/signup", {
+		email,
+		password,
 	});
 }
 
-// The function commented out below will be commented back in as soon as the backend implements auth
-// export async function logout(): Promise<void> {
-// 	clearAccessToken();
-// 	return authService.post("/auth/logout");
-// }
-
+// TODO: Add test
 export async function logout(): Promise<void> {
 	clearAccessToken();
-	return new Promise((resolve) => {
-		setTimeout(() => {
-			resolve();
-		}, 100);
-	});
+	return authService.post("/auth/logout");
+}
+
+export async function getUsers(): Promise<BackendUser[]> {
+	return authService.get("/auth/users").then((resp) => resp.data);
+}
+
+export async function updateUser(
+	updatedUser: BackendUser,
+): Promise<AxiosResponse> {
+	return authService.post("/auth/update", updatedUser);
+}
+
+export async function deleteUser(user: BackendUser): Promise<AxiosResponse> {
+	return authService.post("/auth/delete", user);
 }

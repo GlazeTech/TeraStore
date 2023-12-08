@@ -1,11 +1,9 @@
-import { mockApi } from "@tests/apiMocks";
 import { setupFilterStore } from "@tests/store-utils";
 import { fireEvent, render, waitFor } from "@tests/testing-utils";
 import FilterMenu from "components/FilterMenu";
-import { beforeAll, beforeEach, describe, expect, test } from "vitest";
+import { beforeEach, describe, expect, test } from "vitest";
 
 describe("FilterMenu tests", () => {
-	beforeAll(mockApi);
 	beforeEach(setupFilterStore);
 	test("Component can render", () => {
 		const screen = render(<FilterMenu />);
@@ -27,7 +25,7 @@ describe("FilterMenu tests", () => {
 
 		// Select a key
 		await waitFor(() => {
-			fireEvent.click(screen.getByText("mocked_key1"));
+			fireEvent.click(screen.getByText("substrate"));
 		});
 
 		// // Open "Value" selection dropdown
@@ -35,11 +33,11 @@ describe("FilterMenu tests", () => {
 
 		// Select a value
 		await waitFor(() => {
-			screen.getByText("mocked_key1_val1 (2)");
+			screen.getByText("polymer (2)");
 		});
-		fireEvent.click(screen.getByText("mocked_key1_val1 (2)"));
+		fireEvent.click(screen.getByText("polymer (2)"));
 
 		// // Ensure a filter appears
-		expect(screen.getByText("mocked_key1: mocked_key1_val1"));
+		expect(screen.getByText("substrate: polymer"));
 	});
 });

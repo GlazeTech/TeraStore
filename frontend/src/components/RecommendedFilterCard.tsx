@@ -1,6 +1,10 @@
 import * as M from "@mantine/core";
 import { DateInput, DateValue } from "@mantine/dates";
-import { getFilteredPulses, getKeyValues } from "api";
+import {
+	getFilterResultsForEachStringValue,
+	getFilteredPulses,
+	getKeyValues,
+} from "api";
 import {
 	DateAttrKey,
 	FilterResult,
@@ -9,7 +13,7 @@ import {
 	PulseNumberFilter,
 	StringAttrKey,
 } from "classes";
-import { getFilterResultsForEachStringValue, uniqueElements } from "helpers";
+import { uniqueElements } from "helpers";
 import { IAttrKey, SliderMark } from "interfaces";
 import { useEffect, useState } from "react";
 import { useStoreShallow } from "store";

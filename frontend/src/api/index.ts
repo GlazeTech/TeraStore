@@ -1,6 +1,12 @@
 import axios from "axios";
 import { setupCache } from "axios-cache-interceptor";
-import { AnnotatedPulse, FilterResult, attrKeyFactory } from "classes";
+import {
+	AnnotatedPulse,
+	FilterResult,
+	PulseStringFilter,
+	StringAttrKey,
+	attrKeyFactory,
+} from "classes";
 import { getBackendUrl, sortPulseFilters } from "helpers";
 import {
 	BackendAttrKey,
@@ -56,6 +62,20 @@ export async function getFilteredPulses(
 				}),
 			);
 		});
+}
+
+export async function getFilterResultsForEachStringValue(
+	key: StringAttrKey,
+	pulseFilters: PulseFilter[],
+): Promise<FilterResult[]> {
+	const keyValues = await getKeyValues<string[]>(key);
+	const allFilters = keyValues.map((attrValue) => [
+		...pulseFilters,
+		new PulseStringFilter(key, attrValue as string),
+	]);
+	return Promise.all(
+		allFilters.map(async (filters) => getFilteredPulses(filters)),
+	);
 }
 
 export async function getPulses(

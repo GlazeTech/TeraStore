@@ -8,6 +8,7 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { register } from "auth";
+import { AxiosError } from "axios";
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -46,10 +47,16 @@ export default function Register() {
 				}, refreshDuration);
 			})
 			.catch((err) => {
+				let msg = "An error occurred";
+				if (err instanceof AxiosError) {
+					if (err.response?.status === 409) {
+						msg = err.response?.data?.detail;
+					}
+				}
 				setSignupStatus(SignupStatus.NOT_REGISTERED);
 				notifications.show({
 					title: "Error",
-					message: err.message,
+					message: msg,
 					color: "red",
 				});
 			});

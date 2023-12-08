@@ -1,5 +1,8 @@
-import { getFilteredPulses, getKeyValues } from "api";
-import { getFilterResultsForEachStringValue } from "helpers";
+import {
+	getFilterResultsForEachStringValue,
+	getFilteredPulses,
+	getKeyValues,
+} from "api";
 import { IAttrKey, KVType, PulseFilter } from "interfaces";
 import { PulseDateFilter, PulseNumberFilter } from "./PulseFilter";
 
