@@ -1,8 +1,8 @@
-from datetime import timedelta
-from typing import Any, Self
+from datetime import datetime, timedelta
+from typing import Any
 
-from fastapi import Depends, Form
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+from fastapi import Depends, Response
+from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlmodel import Session
 
@@ -19,31 +19,7 @@ from api.utils.helpers import get_now
 
 auth_settings = get_auth_settings()
 
-
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
-
-
-# Adapted from https://github.com/tiangolo/fastapi/discussions/8879
-class OAuth2PasswordAndRefreshRequestForm(OAuth2PasswordRequestForm):
-    def __init__(  # noqa: PLR0913
-        self: Self,
-        grant_type: str = Form(default=None, regex="password|refresh_token"),
-        username: str = Form(default=""),
-        password: str = Form(default=""),
-        refresh_token: str = Form(default=""),
-        scope: str = Form(default=""),
-        client_id: str | None = Form(default=None),
-        client_secret: str | None = Form(default=None),
-    ) -> None:
-        super().__init__(
-            grant_type=grant_type,
-            username=username,
-            password=password,
-            client_id=client_id,
-            client_secret=client_secret,
-        )
-        self.scopes = scope.split()
-        self.refresh_token = refresh_token
 
 
 def authenticate_user_password(
@@ -77,12 +53,11 @@ def authenticate_user_token(
 
 def create_token(
     data: dict[str, Any],
-    expires_delta: timedelta,
+    expires: datetime,
     algorithm: str = auth_settings.ALGORITHM,
 ) -> str:
     to_encode = data.copy()
-    expire = get_now() + expires_delta
-    to_encode.update({"exp": expire})
+    to_encode.update({"exp": expires})
     return jwt.encode(
         to_encode,
         auth_settings.SECRET_KEY,
@@ -97,18 +72,30 @@ async def get_current_user(
     return authenticate_user_token(token, db=db)
 
 
-def create_tokens_from_user(user: User) -> dict[str, str]:
-    jwt_data = {"sub": str(user.email), "auth_level": user.auth_level.value}
+def create_tokens_from_user(response: Response, user: User) -> str:
+    jwt_data = {"sub": str(user.email)}
 
+    access_token_expires = get_now() + timedelta(
+        minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES,
+    )
     access_token = create_token(
         data=jwt_data,
-        expires_delta=timedelta(minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES),
+        expires=access_token_expires,
+    )
+
+    refresh_token_expires = get_now() + timedelta(
+        minutes=auth_settings.REFRESH_TOKEN_EXPIRE_MINUTES,
     )
     refresh_token = create_token(
         data=jwt_data,
-        expires_delta=timedelta(minutes=auth_settings.REFRESH_TOKEN_EXPIRE_MINUTES),
+        expires=refresh_token_expires,
     )
-    return {
-        "access_token": access_token,
-        "refresh_token": refresh_token,
-    }
+
+    response.set_cookie(
+        key=auth_settings.REFRESH_TOKEN_COOKIE_NAME,
+        value=refresh_token,
+        expires=int(refresh_token_expires.timestamp()),
+        path=auth_settings.REFRESH_ENDPOINT,
+        httponly=True,
+    )
+    return access_token
