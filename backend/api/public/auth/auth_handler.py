@@ -98,7 +98,7 @@ async def get_current_user(
 
 
 def create_tokens_from_user(user: User) -> dict[str, str]:
-    jwt_data = {"sub": str(user.email)}
+    jwt_data = {"sub": str(user.email), "auth_level": user.auth_level.value}
 
     access_token = create_token(
         data=jwt_data,
