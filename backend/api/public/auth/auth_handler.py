@@ -20,7 +20,7 @@ from api.utils.helpers import get_now
 auth_settings = get_auth_settings()
 
 
-oauth2_scheme = OAuth2PasswordBearer(tokenUrl="login")
+oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
 
 # Adapted from https://github.com/tiangolo/fastapi/discussions/8879

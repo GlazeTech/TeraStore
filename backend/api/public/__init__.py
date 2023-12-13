@@ -39,5 +39,5 @@ def make_api() -> APIRouter:
         dependencies=PROTECTED,
     )
     api.include_router(health.router, prefix="/health", tags=["Health"])
-    api.include_router(auth.router, prefix="", tags=["Auth"])
+    api.include_router(auth.router, prefix="/auth", tags=["Auth"])
     return api
