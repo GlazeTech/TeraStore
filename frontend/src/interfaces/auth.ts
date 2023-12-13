@@ -1,8 +1,8 @@
 export enum AuthLevel {
-	LOADING = 1,
-	UNAUTHORIZED = 2,
-	USER = 3,
-	ADMIN = 4,
+	LOADING = 0,
+	UNAUTHORIZED = 1,
+	USER = 2,
+	ADMIN = 3,
 }
 
 export enum BackendAuthLevel {
@@ -13,4 +13,10 @@ export enum BackendAuthLevel {
 export interface BackendUser {
 	email: string;
 	auth_level: BackendAuthLevel;
+}
+
+export interface BackendDecodedJWT {
+	sub: string;
+	auth_level: BackendAuthLevel;
+	exp: number;
 }

@@ -1,4 +1,4 @@
-import { AuthLevel } from "interfaces";
+import { AuthLevel, BackendDecodedJWT } from "interfaces";
 import { refreshAccessToken } from "./auth-service";
 import { jwtDecode } from "jwt-decode";
 
@@ -35,11 +35,7 @@ export const getAuthLevel = async () => {
 		if (!token) {
 			return AuthLevel.UNAUTHORIZED;
 		}
-		const decoded = jwtDecode(token);
-		console.log(decoded);
-		// TODO: Implement decoding.
-		// decodedToken = decodeToken(token);
-		// authLevel = decodedToken.authLevel;
-		return AuthLevel.ADMIN;
+		const decoded = jwtDecode(token) as BackendDecodedJWT;
+		return decoded.auth_level as unknown as AuthLevel;
 	});
 };
