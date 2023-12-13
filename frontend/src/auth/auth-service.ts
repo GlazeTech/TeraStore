@@ -29,7 +29,7 @@ export async function login(username: string, password: string) {
 }
 
 export async function refreshAccessToken(): Promise<string> {
-	return authService.get("/auth/refresh").then((resp) => {
+	return authService.post("/auth/refresh").then((resp) => {
 		return resp.data.accessToken;
 	});
 }

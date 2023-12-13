@@ -73,7 +73,7 @@ async def get_current_user(
 
 
 def create_tokens_from_user(response: Response, user: User) -> str:
-    jwt_data = {"sub": str(user.email)}
+    jwt_data = {"sub": str(user.email), "auth_level": user.auth_level.value}
 
     access_token_expires = get_now() + timedelta(
         minutes=auth_settings.ACCESS_TOKEN_EXPIRE_MINUTES,

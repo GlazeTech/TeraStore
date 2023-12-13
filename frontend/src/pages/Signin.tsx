@@ -7,7 +7,8 @@ import {
 	TextInput,
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
-import { login, setAccessToken } from "auth";
+import { getAuthLevel, login, setAccessToken } from "auth";
+import { AuthLevel } from "interfaces";
 import { FormEvent, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 
@@ -31,8 +32,26 @@ export default function Signin() {
 		event.preventDefault();
 		setSigninStatus(SigninStatus.LOGGING_IN);
 		login(username, password)
-			.then((token) => {
+			.then(async (token) => {
 				setAccessToken(token);
+				const authLevel = await getAuthLevel();
+				if (authLevel === AuthLevel.UNAUTHORIZED) {
+					setAccessToken(token);
+					setSigninStatus(SigninStatus.NOT_LOGGED_IN);
+					notifications.show({
+						title: "Unauthorized",
+						message:
+							"You have not yet been authorized to use the app. Please contact an administrator.",
+						color: "red",
+						autoClose: 3000,
+					});
+					await new Promise((resolve) => {
+						setTimeout(() => {
+							navigate("/login");
+							resolve(null);
+						}, 3000);
+					});
+				}
 				navigate("/");
 			})
 			.catch((err) => {

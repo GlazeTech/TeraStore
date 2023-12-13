@@ -7,7 +7,14 @@ from sqlmodel import Session, select
 
 from api.database import get_session
 from api.public.auth.helpers import get_password_hash
-from api.public.auth.models import User, UserCreate, UserDelete, UserRead, UserUpdate
+from api.public.auth.models import (
+    AuthLevel,
+    User,
+    UserCreate,
+    UserDelete,
+    UserRead,
+    UserUpdate,
+)
 from api.utils.exceptions import (
     UserAlreadyExistsError,
     UsernameOrPasswordIncorrectError,
@@ -21,10 +28,15 @@ def get_user(email: str, db: Session = Depends(get_session)) -> User:
     return user
 
 
-def create_user(user: UserCreate, db: Session = Depends(get_session)) -> None:
+def create_user(
+    user: UserCreate,
+    auth_level: AuthLevel = AuthLevel.UNAUTHORIZED,
+    db: Session = Depends(get_session),
+) -> None:
     user_to_db = User(
         email=user.email,
         hashed_password=get_password_hash(user.password),
+        auth_level=auth_level,
     )
     db.add(user_to_db)
     try:

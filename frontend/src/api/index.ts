@@ -1,5 +1,3 @@
-import axios from "axios";
-import { setupCache } from "axios-cache-interceptor";
 import {
 	AnnotatedPulse,
 	FilterResult,
@@ -7,7 +5,7 @@ import {
 	StringAttrKey,
 	attrKeyFactory,
 } from "classes";
-import { getBackendUrl, sortPulseFilters } from "helpers";
+import { sortPulseFilters } from "helpers";
 import {
 	BackendAttrKey,
 	BackendPulse,
@@ -16,15 +14,9 @@ import {
 	PulseID,
 } from "interfaces";
 import { BackendTHzDevice } from "interfaces/backend";
+import { apiFactory } from "./factory";
 
-// TODO: Add interceptor which refreshes token if it is expired
-// See this: https://www.thedutchlab.com/en/insights/using-axios-interceptors-for-refreshing-your-api-token
-const api = setupCache(
-	axios.create({
-		baseURL: getBackendUrl(),
-	}),
-	{ methods: ["get", "post"] },
-);
+const api = apiFactory();
 
 export async function getPulseKeys(): Promise<IAttrKey[]> {
 	return api.get<BackendAttrKey[]>("/attrs/keys").then((resp) => {
