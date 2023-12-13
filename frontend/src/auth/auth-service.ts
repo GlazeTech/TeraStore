@@ -23,8 +23,8 @@ export async function login(username: string, password: string) {
 			},
 		)
 		.then((resp) => {
-			setAccessToken(resp.data.accessToken);
-			return resp.data.accessToken;
+			setAccessToken(resp.data.access_token);
+			return resp.data.access_token;
 		});
 }
 
@@ -47,19 +47,19 @@ export async function register(
 // TODO: Add test
 export async function logout(): Promise<void> {
 	clearAccessToken();
-	return authService.post("/auth/logout");
+	return authService.post("/user/logout");
 }
 
 export async function getUsers(): Promise<BackendUser[]> {
-	return authService.get("/auth/users").then((resp) => resp.data);
+	return authService.get("/user/users").then((resp) => resp.data);
 }
 
 export async function updateUser(
 	updatedUser: BackendUser,
 ): Promise<AxiosResponse> {
-	return authService.post("/auth/update", updatedUser);
+	return authService.post("/user/update", updatedUser);
 }
 
 export async function deleteUser(user: BackendUser): Promise<AxiosResponse> {
-	return authService.post("/auth/delete", user);
+	return authService.post("/user/delete", user);
 }

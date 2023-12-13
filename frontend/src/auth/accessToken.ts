@@ -1,8 +1,9 @@
 import { AuthLevel } from "interfaces";
 import { refreshAccessToken } from "./auth-service";
+import { jwtDecode } from "jwt-decode";
 
 // Use a global variable to store a JWT token used for authentication.
-let accessToken: string | null = "fake-access-token";
+let accessToken: string | null = null;
 
 export const getAccessToken = async () => {
 	// If we already have an access token, we return it immediately.
@@ -34,7 +35,8 @@ export const getAuthLevel = async () => {
 		if (!token) {
 			return AuthLevel.UNAUTHORIZED;
 		}
-
+		const decoded = jwtDecode(token);
+		console.log(decoded);
 		// TODO: Implement decoding.
 		// decodedToken = decodeToken(token);
 		// authLevel = decodedToken.authLevel;
