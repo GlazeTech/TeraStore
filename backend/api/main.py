@@ -12,6 +12,7 @@ from api.utils.exception_handlers import (
     attr_data_type_does_not_exist_exception_handler,
     attr_data_type_exists_exception_handler,
     attr_key_does_not_exist_exception_handler,
+    credentials_incorrect_exception_handler,
     device_not_found_exception_handler,
     pulse_column_nonexistent_exception_handler,
     pulse_not_found_exception_handler,
@@ -22,6 +23,7 @@ from api.utils.exceptions import (
     AttrDataTypeDoesNotExistError,
     AttrDataTypeExistsError,
     AttrKeyDoesNotExistError,
+    CredentialsIncorrectError,
     DeviceNotFoundError,
     PulseColumnNonexistentError,
     PulseNotFoundError,
@@ -114,6 +116,10 @@ def create_app(lifespan: Lifespan) -> FastAPI:
     app.add_exception_handler(
         UserAlreadyExistsError,
         username_already_exists_exception_handler,
+    )
+    app.add_exception_handler(
+        CredentialsIncorrectError,
+        credentials_incorrect_exception_handler,
     )
 
     # Add logging filters

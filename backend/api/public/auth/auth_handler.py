@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any
 
-from fastapi import Depends, HTTPException, status
+from fastapi import Depends
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt
 from sqlmodel import Session
@@ -11,7 +11,10 @@ from api.database import get_session
 from api.public.auth.crud import get_user
 from api.public.auth.helpers import verify_password
 from api.public.auth.models import TokenData, User
-from api.utils.exceptions import UsernameOrPasswordIncorrectError
+from api.utils.exceptions import (
+    CredentialsIncorrectError,
+    UsernameOrPasswordIncorrectError,
+)
 from api.utils.helpers import get_now
 
 auth_settings = get_auth_settings()
@@ -52,11 +55,6 @@ async def get_current_user(
     token: str = Depends(oauth2_scheme),
     db: Session = Depends(get_session),
 ) -> User:
-    credentials_exception = HTTPException(
-        status_code=status.HTTP_401_UNAUTHORIZED,
-        detail="Could not validate credentials",
-        headers={"WWW-Authenticate": "Bearer"},
-    )
     try:
         payload = jwt.decode(
             token,
@@ -65,11 +63,8 @@ async def get_current_user(
         )
         email = payload.get("sub")
         if email is None:
-            raise credentials_exception
+            raise CredentialsIncorrectError
         token_data = TokenData(email=email)
     except JWTError as e:
-        raise credentials_exception from e
-    user = get_user(email=token_data.email, db=db)
-    if user is None:
-        raise credentials_exception
-    return user
+        raise CredentialsIncorrectError from e
+    return get_user(email=token_data.email, db=db)

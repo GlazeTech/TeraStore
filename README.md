@@ -137,3 +137,16 @@ If you run
 a Docker Compose instance will spin up, and do all the tests for you!
 
 Nifty!
+
+## Password handling
+
+We hash and salt user passwords.
+We use [PassLib](https://passlib.readthedocs.io/en/stable/) with an Argon2 hash.
+
+The hashed password that we save in the database has the following format:
+
+```
+$argon2X$v=V$m=M,t=T,p=P$salt$digest
+```
+
+See a detailed explanation [here](https://passlib.readthedocs.io/en/stable/lib/passlib.hash.argon2.html#format-algorithm).

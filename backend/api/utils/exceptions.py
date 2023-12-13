@@ -93,9 +93,20 @@ class UserAlreadyExistsError(Exception):
 
     def __init__(
         self: Self,
-        username: str,
+        email: str,
     ) -> None:
-        self.username = username
+        self.email = email
         super().__init__(
-            f"Username {username} already exists.",
+            f"Email {email} already exists.",
+        )
+
+
+class CredentialsIncorrectError(Exception):
+    """Exception raised when credentials are incorrect."""
+
+    def __init__(
+        self: Self,
+    ) -> None:
+        super().__init__(
+            "Could not validate credentials.",
         )

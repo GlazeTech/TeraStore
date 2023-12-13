@@ -6,6 +6,7 @@ from api.utils.exceptions import (
     AttrDataTypeDoesNotExistError,
     AttrDataTypeExistsError,
     AttrKeyDoesNotExistError,
+    CredentialsIncorrectError,
     DeviceNotFoundError,
     PulseColumnNonexistentError,
     PulseNotFoundError,
@@ -89,4 +90,15 @@ async def username_already_exists_exception_handler(
     return JSONResponse(
         status_code=status.HTTP_409_CONFLICT,
         content={"detail": str(exc)},
+    )
+
+
+async def credentials_incorrect_exception_handler(
+    _request: Request,
+    exc: CredentialsIncorrectError,
+) -> JSONResponse:
+    return JSONResponse(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        content={"detail": str(exc)},
+        headers={"WWW-Authenticate": "Bearer"},
     )
