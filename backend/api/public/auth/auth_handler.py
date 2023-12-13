@@ -99,3 +99,11 @@ def create_tokens_from_user(response: Response, user: User) -> str:
         httponly=True,
     )
     return access_token
+
+
+def logout_user(response: Response) -> str:
+    response.delete_cookie(
+        key=auth_settings.REFRESH_TOKEN_COOKIE_NAME,
+        path=auth_settings.REFRESH_ENDPOINT,
+    )
+    return "Logout successful"

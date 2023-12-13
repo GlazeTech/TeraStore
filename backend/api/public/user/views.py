@@ -1,9 +1,10 @@
 from collections.abc import Sequence
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from sqlmodel import Session
 
 from api.database import get_session
+from api.public.auth.auth_handler import logout_user
 from api.public.auth.crud import get_users, remove_user, update_auth_level
 from api.public.auth.models import UserDelete, UserRead, UserUpdate
 
@@ -28,5 +29,5 @@ def list_users(db: Session = Depends(get_session)) -> Sequence[UserRead]:
 
 
 @router.post("/logout")
-def logout_user() -> None:
-    pass
+def logout(response: Response) -> str:
+    return logout_user(response=response)
