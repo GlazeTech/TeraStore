@@ -23,6 +23,8 @@ class AuthSettings(BaseSettings):
     ALGORITHM: str = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES: int = 30
     REFRESH_TOKEN_EXPIRE_MINUTES: int = 60 * 24 * 100
+    REFRESH_TOKEN_COOKIE_NAME: str = "terastore_refresh_token"
+    REFRESH_ENDPOINT: str = "/auth/refresh"
 
 
 @lru_cache
