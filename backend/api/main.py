@@ -25,10 +25,10 @@ from api.utils.exceptions import (
     AttrKeyDoesNotExistError,
     CredentialsIncorrectError,
     DeviceNotFoundError,
+    EmailOrPasswordIncorrectError,
     PulseColumnNonexistentError,
     PulseNotFoundError,
     UserAlreadyExistsError,
-    UsernameOrPasswordIncorrectError,
 )
 from api.utils.logging import EndpointFilter
 from api.utils.mock_data_generator import (
@@ -70,7 +70,7 @@ async def lifespan_integration_test(app: FastAPI) -> AsyncGenerator[None, None]:
 LIFESPAN_FUNCTIONS = {
     Lifespan.PROD: lifespan_prod,
     Lifespan.DEV: lifespan_dev,
-    Lifespan.TEST: lifespan_dev,
+    Lifespan.TEST: None,
     Lifespan.INTEGRATION_TEST: lifespan_integration_test,
 }
 
@@ -113,7 +113,7 @@ def create_app(lifespan: Lifespan) -> FastAPI:
         pulse_column_nonexistent_exception_handler,
     )
     app.add_exception_handler(
-        UsernameOrPasswordIncorrectError,
+        EmailOrPasswordIncorrectError,
         username_or_password_incorrect_exception_handler,
     )
     app.add_exception_handler(

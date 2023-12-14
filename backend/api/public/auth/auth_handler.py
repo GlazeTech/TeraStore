@@ -13,7 +13,7 @@ from api.public.auth.helpers import verify_password
 from api.public.auth.models import User
 from api.utils.exceptions import (
     CredentialsIncorrectError,
-    UsernameOrPasswordIncorrectError,
+    EmailOrPasswordIncorrectError,
 )
 from api.utils.helpers import get_now
 
@@ -29,7 +29,7 @@ def authenticate_user_password(
 ) -> User:
     user = get_user(username, db=db)
     if not verify_password(password, user.hashed_password):
-        raise UsernameOrPasswordIncorrectError
+        raise EmailOrPasswordIncorrectError
     return user
 
 

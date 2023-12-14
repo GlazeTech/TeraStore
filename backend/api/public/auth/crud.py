@@ -16,15 +16,15 @@ from api.public.auth.models import (
     UserUpdate,
 )
 from api.utils.exceptions import (
+    EmailOrPasswordIncorrectError,
     UserAlreadyExistsError,
-    UsernameOrPasswordIncorrectError,
 )
 
 
 def get_user(email: str, db: Session = Depends(get_session)) -> User:
     user = db.exec(select(User).where(User.email == email)).first()
     if not user:
-        raise UsernameOrPasswordIncorrectError
+        raise EmailOrPasswordIncorrectError
     return user
 
 

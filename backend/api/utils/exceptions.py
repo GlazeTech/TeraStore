@@ -77,14 +77,14 @@ class AttrDataTypeDoesNotExistError(Exception):
         )
 
 
-class UsernameOrPasswordIncorrectError(Exception):
+class EmailOrPasswordIncorrectError(Exception):
     """Exception raised when a username or password is incorrect."""
 
     def __init__(
         self: Self,
     ) -> None:
         super().__init__(
-            "Username or password is incorrect.",
+            "Email or password is incorrect.",
         )
 
 
