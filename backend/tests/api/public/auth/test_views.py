@@ -84,8 +84,8 @@ def test_update_auth_level(client: TestClient) -> None:
 
 
 def test_logout(client: TestClient) -> None:
-    response = client.post("/user/logout")
+    response = client.get("/user/logout")
     data = response.json()
 
     assert response.status_code == 200
-    assert data == "Logout successful"
+    assert data == "logged out"
