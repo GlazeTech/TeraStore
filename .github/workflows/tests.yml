@@ -10,6 +10,7 @@ env:
   POSTGRES_PASSWORD: terastore-password
   POSTGRES_DB: terastore-db
   SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  ACTIONS_RUNNER_DEBUG: true
 
 jobs:
   backend-image-check-and-push:
