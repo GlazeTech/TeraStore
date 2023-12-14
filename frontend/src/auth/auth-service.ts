@@ -11,6 +11,16 @@ const authService = axios.create({
 	baseURL: getBackendUrl(),
 });
 
+const getCredentials = async () => {
+	const token = await getAccessToken();
+	return {
+		headers: {
+			Authorization: `Bearer ${token}`,
+		},
+		withCredentials: true,
+	};
+};
+
 // TODO: Add test
 export async function login(username: string, password: string) {
 	return authService
@@ -64,15 +74,17 @@ export async function logout(): Promise<void> {
 }
 
 export async function getUsers(): Promise<BackendUser[]> {
-	return authService.get("/user/users").then((resp) => resp.data);
+	return authService
+		.get("/user/users", await getCredentials())
+		.then((resp) => resp.data);
 }
 
 export async function updateUser(
 	updatedUser: BackendUser,
 ): Promise<AxiosResponse> {
-	return authService.post("/user/update", updatedUser);
+	return authService.post("/user/update", updatedUser, await getCredentials());
 }
 
 export async function deleteUser(user: BackendUser): Promise<AxiosResponse> {
-	return authService.post("/user/delete", user);
+	return authService.post("/user/delete", user, await getCredentials());
 }
