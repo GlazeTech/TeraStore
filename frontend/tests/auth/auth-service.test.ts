@@ -4,9 +4,9 @@ import { getAccessToken } from "auth";
 import {
 	deleteUser,
 	getUsers,
+	logout,
 	register,
 	updateUser,
-	logout,
 } from "auth/auth-service";
 import { BackendAuthLevel } from "interfaces";
 

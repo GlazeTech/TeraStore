@@ -3,8 +3,8 @@ import { getBackendUrl } from "helpers";
 import { BackendUser } from "interfaces";
 import {
 	clearAccessToken,
-	setAccessToken,
 	getAccessToken,
+	setAccessToken,
 } from "./accessToken";
 
 const authService = axios.create({

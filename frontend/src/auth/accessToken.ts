@@ -1,6 +1,6 @@
 import { AuthLevel, BackendDecodedJWT } from "interfaces";
-import { refreshAccessToken } from "./auth-service";
 import { jwtDecode } from "jwt-decode";
+import { refreshAccessToken } from "./auth-service";
 
 // Use a global variable to store a JWT token used for authentication.
 let accessToken: string | null = null;
