@@ -12,7 +12,7 @@ import {
 import { extractPulses } from "helpers/data-io";
 import { KVType, PulseFilter } from "interfaces";
 import { BackendTHzDevice } from "interfaces";
-import { beforeAll, describe, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 
 describe("getFilteredPulses", async () => {
 	await loginAsAdmin();
