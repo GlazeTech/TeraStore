@@ -9,13 +9,12 @@ env:
   POSTGRES_USER: terastore-user
   POSTGRES_PASSWORD: terastore-password
   POSTGRES_DB: terastore-db
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
 
 jobs:
   backend-image-check-and-push:
     timeout-minutes: 15
     runs-on: ubuntu-latest
-    env:
-      SECRET_KEY: ${{ secrets.SECRET_KEY }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
