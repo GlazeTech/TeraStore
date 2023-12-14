@@ -18,6 +18,13 @@ describe("register", () => {
 		const password = "password123";
 		const response = await register(email, password);
 		expect(response.status).toBe(200);
+
+		// Clean up the new user
+		await loginAsAdmin();
+		await deleteUser({
+			email: email,
+			auth_level: BackendAuthLevel.UNAUTHORIZED,
+		});
 	});
 	test("should create, verify, and delete a user", async () => {
 		const email = "test2@example.com";
@@ -82,6 +89,13 @@ describe("register", () => {
 			throw new Error("Updated user not found");
 		}
 		expect(updatedUser.auth_level).toBe(newRole);
+
+		// Clean up the new user
+		await loginAsAdmin();
+		await deleteUser({
+			email: email,
+			auth_level: BackendAuthLevel.UNAUTHORIZED,
+		});
 	});
 
 	test("should logout the user", async () => {

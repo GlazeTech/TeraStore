@@ -15,7 +15,7 @@ import { BackendTHzDevice } from "interfaces";
 import { beforeAll, describe, expect, test } from "vitest";
 
 describe("getFilteredPulses", async () => {
-	loginAsAdmin();
+	await loginAsAdmin();
 	const pulseKeys = await getPulseKeys();
 
 	test("no filters should return all pulses", async () => {
