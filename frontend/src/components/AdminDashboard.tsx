@@ -30,13 +30,13 @@ export default function AdminDashboard() {
 		deleteUserOnBackend(user).then((res) => {
 			if (res.status === 200) {
 				notifications.show({
-					title: "Download pulses",
+					title: "Success",
 					message: "User deleted.",
 					autoClose: 1000,
 				});
+				usersHandler.remove(users.findIndex((u) => u.email === user.email));
 			}
 		});
-		usersHandler.remove(users.findIndex((u) => u.email === user.email));
 	};
 
 	if (!users) {
@@ -86,7 +86,9 @@ function UserTable({
 	deleteUser: (user: BackendUser) => void;
 }) {
 	const setAuthLevel = (user: BackendUser, newAuthLevel: string | null) => {
-		if (newAuthLevel === null) return;
+		if (newAuthLevel === null) {
+			return;
+		}
 
 		const updatedUser = { ...user };
 		updatedUser.auth_level =
@@ -94,8 +96,8 @@ function UserTable({
 		updateUserOnBackend(updatedUser).then((res) => {
 			if (res.status === 200) {
 				notifications.show({
-					title: "Download pulses",
-					message: "User updates.",
+					title: "Success",
+					message: "User updated.",
 					autoClose: 1000,
 				});
 				updateUsers(updatedUser);

@@ -48,10 +48,8 @@ export default function Register() {
 			})
 			.catch((err) => {
 				let msg = "An error occurred";
-				if (err instanceof AxiosError) {
-					if (err.response?.status === 409) {
-						msg = err.response?.data?.detail;
-					}
+				if (err instanceof AxiosError && err.response?.status === 409) {
+					msg = err.response?.data?.detail;
 				}
 				setSignupStatus(SignupStatus.NOT_REGISTERED);
 				notifications.show({

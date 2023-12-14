@@ -21,7 +21,6 @@ const getCredentials = async () => {
 	};
 };
 
-// TODO: Add test
 export async function login(username: string, password: string) {
 	return authService
 		.post(
