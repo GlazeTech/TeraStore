@@ -1,7 +1,11 @@
 import axios, { AxiosResponse } from "axios";
 import { getBackendUrl } from "helpers";
 import { BackendUser } from "interfaces";
-import { clearAccessToken, setAccessToken } from "./accessToken";
+import {
+	clearAccessToken,
+	setAccessToken,
+	getAccessToken,
+} from "./accessToken";
 
 const authService = axios.create({
 	baseURL: getBackendUrl(),
@@ -20,6 +24,7 @@ export async function login(username: string, password: string) {
 				headers: {
 					"Content-Type": "application/x-www-form-urlencoded",
 				},
+				withCredentials: true,
 			},
 		)
 		.then((resp) => {
@@ -29,9 +34,13 @@ export async function login(username: string, password: string) {
 }
 
 export async function refreshAccessToken(): Promise<string> {
-	return authService.post("/auth/refresh").then((resp) => {
-		return resp.data.accessToken;
-	});
+	return authService
+		.get("/auth/refresh", {
+			withCredentials: true,
+		})
+		.then((resp) => {
+			return resp.data.access_token;
+		});
 }
 
 export async function register(
@@ -46,8 +55,12 @@ export async function register(
 
 // TODO: Add test
 export async function logout(): Promise<void> {
+	const accessToken = await getAccessToken();
 	clearAccessToken();
-	return authService.post("/user/logout");
+	return authService.get("/user/logout", {
+		headers: { Authorization: `Bearer ${accessToken}` },
+		withCredentials: true,
+	});
 }
 
 export async function getUsers(): Promise<BackendUser[]> {

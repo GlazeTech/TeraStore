@@ -79,9 +79,12 @@ def create_app(lifespan: Lifespan) -> FastAPI:
     app = FastAPI(lifespan=LIFESPAN_FUNCTIONS[lifespan])
     app.add_middleware(
         CORSMiddleware,
-        allow_origins=["*"],
         allow_methods=["*"],
         allow_headers=["*"],
+        allow_origins=[
+            "http://0.0.0.0:5173",
+        ],
+        allow_credentials=True,
     )
 
     # Add exception handlers

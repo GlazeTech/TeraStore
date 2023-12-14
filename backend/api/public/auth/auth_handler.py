@@ -95,15 +95,14 @@ def create_tokens_from_user(response: Response, user: User) -> str:
         key=auth_settings.REFRESH_TOKEN_COOKIE_NAME,
         value=refresh_token,
         expires=int(refresh_token_expires.timestamp()),
-        path=auth_settings.REFRESH_ENDPOINT,
         httponly=True,
     )
     return access_token
 
 
-def logout_user(response: Response) -> str:
+def logout_user(response: Response) -> Response:
     response.delete_cookie(
         key=auth_settings.REFRESH_TOKEN_COOKIE_NAME,
-        path=auth_settings.REFRESH_ENDPOINT,
+        httponly=True,
     )
-    return "Logout successful"
+    return response

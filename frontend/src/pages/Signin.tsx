@@ -8,9 +8,10 @@ import {
 } from "@mantine/core";
 import { notifications } from "@mantine/notifications";
 import { getAuthLevel, login, setAccessToken } from "auth";
+import { useIsAuthorized } from "hooks";
 import { AuthLevel } from "interfaces";
 import { FormEvent, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 
 enum SigninStatus {
 	NOT_LOGGED_IN = 1,
@@ -25,8 +26,9 @@ const style = {
 export default function Signin() {
 	const [username, setUsername] = useState("");
 	const [password, setPassword] = useState("");
-	const navigate = useNavigate();
 	const [signinStatus, setSigninStatus] = useState(SigninStatus.NOT_LOGGED_IN);
+	const navigate = useNavigate();
+	const authLevel = useIsAuthorized();
 
 	const handleLogin = (event: FormEvent<HTMLFormElement>) => {
 		event.preventDefault();
@@ -34,8 +36,8 @@ export default function Signin() {
 		login(username, password)
 			.then(async (token) => {
 				setAccessToken(token);
-				const authLevel = await getAuthLevel();
-				if (authLevel === AuthLevel.UNAUTHORIZED) {
+				const newAuthLevel = await getAuthLevel();
+				if (newAuthLevel === AuthLevel.UNAUTHORIZED) {
 					setAccessToken(token);
 					setSigninStatus(SigninStatus.NOT_LOGGED_IN);
 					notifications.show({
@@ -63,6 +65,10 @@ export default function Signin() {
 				});
 			});
 	};
+
+	if (authLevel > AuthLevel.UNAUTHORIZED) {
+		return <Navigate to="/" />;
+	}
 
 	return (
 		<Stack style={style} mt={100}>

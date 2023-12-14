@@ -28,6 +28,7 @@ def list_users(db: Session = Depends(get_session)) -> Sequence[UserRead]:
     return get_users(db=db)
 
 
-@router.post("/logout")
+@router.get("/logout")
 def logout(response: Response) -> str:
-    return logout_user(response=response)
+    logout_user(response=response)
+    return "logged out"

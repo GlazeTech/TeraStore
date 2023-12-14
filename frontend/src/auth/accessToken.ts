@@ -12,7 +12,7 @@ export const getAccessToken = async () => {
 	}
 
 	// If page is refreshed (access token is lost), try to refresh access token.
-	refreshAccessToken()
+	return refreshAccessToken()
 		.then((token) => {
 			setAccessToken(token);
 			return token;

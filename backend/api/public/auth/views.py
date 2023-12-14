@@ -29,7 +29,7 @@ async def login_for_access_token(
     return Token(access_token=access_token)
 
 
-@router.post("/refresh")
+@router.get("/refresh")
 async def login_for_refresh_token(
     request: Request,
     response: Response,
