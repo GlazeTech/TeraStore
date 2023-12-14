@@ -64,7 +64,7 @@ def create_frontend_dev_data() -> None:
     """Create devices and pulses for testing purposes."""
     with Session(app_engine) as sess:
         create_user(
-            UserCreate(email="admin@admin", password="admin"),
+            UserCreate(email="admin@admin", password="admin"),  # noqa: S106
             auth_level=AuthLevel.ADMIN,
             db=sess,
         )
