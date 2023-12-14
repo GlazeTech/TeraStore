@@ -83,6 +83,7 @@ def create_app(lifespan: Lifespan) -> FastAPI:
         allow_headers=["*"],
         allow_origins=[
             "http://0.0.0.0:5173",
+            "http://localhost:3000",
         ],
         allow_credentials=True,
     )

@@ -63,8 +63,7 @@ export async function register(
 	});
 }
 
-// TODO: Add test
-export async function logout(): Promise<void> {
+export async function logout(): Promise<AxiosResponse> {
 	const accessToken = await getAccessToken();
 	clearAccessToken();
 	return authService.get("/user/logout", {

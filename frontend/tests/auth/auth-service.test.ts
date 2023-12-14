@@ -1,5 +1,13 @@
 // auth-service.test.ts
-import { deleteUser, getUsers, register, updateUser } from "auth/auth-service";
+import { loginAsAdmin } from "@tests/testing-utils";
+import { getAccessToken } from "auth";
+import {
+	deleteUser,
+	getUsers,
+	register,
+	updateUser,
+	logout,
+} from "auth/auth-service";
 import { BackendAuthLevel } from "interfaces";
 
 import { describe, expect, test } from "vitest";
@@ -18,6 +26,9 @@ describe("register", () => {
 		// Create a new user
 		const registerResponse = await register(email, password);
 		expect(registerResponse.status).toBe(200);
+
+		// Login as admin for proper access rights
+		await loginAsAdmin();
 
 		// List all users and verify the new user exists
 		const users = await getUsers();
@@ -46,6 +57,9 @@ describe("register", () => {
 		const registerResponse = await register(email, password);
 		expect(registerResponse.status).toBe(200);
 
+		// Login as admin for proper access rights
+		await loginAsAdmin();
+
 		// List all users and find the new user
 		const users = await getUsers();
 		const newUser = users.find((user) => user.email === email);
@@ -68,5 +82,14 @@ describe("register", () => {
 			throw new Error("Updated user not found");
 		}
 		expect(updatedUser.auth_level).toBe(newRole);
+	});
+
+	test("should logout the user", async () => {
+		await loginAsAdmin();
+
+		const response = await logout();
+
+		expect(response.status).toBe(200);
+		expect(await getAccessToken()).toBeNull();
 	});
 });

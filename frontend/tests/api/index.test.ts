@@ -1,4 +1,4 @@
-import { readTestingAsset } from "@tests/testing-utils";
+import { loginAsAdmin, readTestingAsset } from "@tests/testing-utils";
 import { getFilteredPulses, getPulseKeys, getPulses } from "api";
 import { uploadPulses } from "api";
 import {
@@ -12,9 +12,10 @@ import {
 import { extractPulses } from "helpers/data-io";
 import { KVType, PulseFilter } from "interfaces";
 import { BackendTHzDevice } from "interfaces";
-import { describe, expect, test } from "vitest";
+import { beforeAll, describe, expect, test } from "vitest";
 
 describe("getFilteredPulses", async () => {
+	loginAsAdmin();
 	const pulseKeys = await getPulseKeys();
 
 	test("no filters should return all pulses", async () => {
