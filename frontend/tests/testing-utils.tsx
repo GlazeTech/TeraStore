@@ -2,6 +2,7 @@ import fs from "fs";
 import path from "path";
 import { MantineProvider } from "@mantine/core";
 import { render as testingLibraryRender } from "@testing-library/react";
+import { login } from "auth";
 import React from "react";
 
 export * from "@testing-library/react";
@@ -21,3 +22,5 @@ export function readTestingAsset(name: string) {
 		"utf-8",
 	);
 }
+
+export const loginAsAdmin = async () => login("admin@admin", "admin");

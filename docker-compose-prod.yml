@@ -23,7 +23,11 @@ services:
     container_name: terastore-backend-prod
     command: python asgi.py --lifespan PROD
     environment:
-      - "DATABASE_URL=postgresql+psycopg2://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-prod:5432/${POSTGRES_DB}"
+      - SECRET_KEY=${SECRET_KEY}
+      - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-prod/${POSTGRES_DB}"
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - TERASTORE_ADMIN_USERNAME=${TERASTORE_ADMIN_USERNAME}
+      - TERASTORE_ADMIN_PASSWORD=${TERASTORE_ADMIN_PASSWORD}
     healthcheck:
       test: curl -s http://localhost:8000/health | grep healthy
       timeout: 1s

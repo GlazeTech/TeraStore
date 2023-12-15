@@ -20,7 +20,11 @@ services:
     image: ghcr.io/glazetech/terastore/terastore-backend-test:latest
     container_name: terastore-backend-test
     environment:
+      - SECRET_KEY=${SECRET_KEY}
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test:5432/${POSTGRES_DB}"
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
+      - TERASTORE_ADMIN_USERNAME=${TERASTORE_ADMIN_USERNAME}
+      - TERASTORE_ADMIN_PASSWORD=${TERASTORE_ADMIN_PASSWORD}
     volumes:
       - ./backend:/app
       - ./scripts:/scripts

@@ -9,6 +9,8 @@ env:
   POSTGRES_USER: terastore-user
   POSTGRES_PASSWORD: terastore-password
   POSTGRES_DB: terastore-db
+  SECRET_KEY: ${{ secrets.SECRET_KEY }}
+  ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
 
 jobs:
   backend-image-check-and-push:
@@ -93,6 +95,8 @@ jobs:
       POSTGRES_USER: ${{ secrets.TERASTORE_DB_USER }}
       POSTGRES_PASSWORD: ${{ secrets.TERASTORE_DB_PASSWORD }}
       POSTGRES_DB: ${{ secrets.TERASTORE_DB_NAME}}
+      SECRET_KEY: ${{ secrets.SECRET_KEY }}
+      ALLOWED_ORIGINS: ${{ secrets.ALLOWED_ORIGINS }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4

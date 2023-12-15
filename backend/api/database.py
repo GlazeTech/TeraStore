@@ -8,7 +8,7 @@ from api.config import get_settings
 settings = get_settings()
 app_engine = create_engine(
     settings.DATABASE_URL,
-    echo=True,
+    echo=False,
 )
 
 

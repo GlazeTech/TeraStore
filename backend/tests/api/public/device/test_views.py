@@ -7,10 +7,7 @@ from api.public.device.models import DeviceCreate
 
 def test_create_device(client: TestClient) -> None:
     device_payload = {"friendly_name": "Glaze I"}
-    response = client.post(
-        "/devices/",
-        json=device_payload,
-    )
+    response = client.post("/devices/", json=device_payload)
     data = response.json()
 
     assert response.status_code == 200

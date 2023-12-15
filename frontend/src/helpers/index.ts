@@ -1,20 +1,4 @@
-import { getFilteredPulses, getKeyValues } from "api";
-import { FilterResult, PulseStringFilter, StringAttrKey } from "classes";
 import { PulseFilter } from "interfaces";
-
-export async function getFilterResultsForEachStringValue(
-	key: StringAttrKey,
-	pulseFilters: PulseFilter[],
-): Promise<FilterResult[]> {
-	const keyValues = await getKeyValues<string[]>(key);
-	const allFilters = keyValues.map((attrValue) => [
-		...pulseFilters,
-		new PulseStringFilter(key, attrValue as string),
-	]);
-	return Promise.all(
-		allFilters.map(async (filters) => getFilteredPulses(filters)),
-	);
-}
 
 export function downloadJson(jsonData: object, fileName: string): undefined {
 	const jsonString = JSON.stringify(jsonData, null, 2); // The second argument specifies the number of spaces for formatting
@@ -72,3 +56,9 @@ export function getBackendUrl(): string {
 	// Default to localhost:8000, when running in dev mode
 	return "http://0.0.0.0:8000";
 }
+
+export const getEnumKeys = (enumObj: object): string[] => {
+	return Object.keys(enumObj).filter(
+		(x) => !(parseInt(x) >= 0),
+	) as (keyof typeof enumObj)[];
+};

@@ -5,6 +5,8 @@ from sqlmodel import Session
 from api.database import app_engine
 from api.public.attrs.crud import add_attr
 from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
+from api.public.auth.crud import create_user
+from api.public.auth.models import AuthLevel, UserCreate
 from api.public.device.crud import create_device
 from api.public.device.models import Device, DeviceCreate
 from api.public.pulse.crud import create_pulses
@@ -61,6 +63,11 @@ def create_devices_and_pulses() -> None:
 def create_frontend_dev_data() -> None:
     """Create devices and pulses for testing purposes."""
     with Session(app_engine) as sess:
+        create_user(
+            UserCreate(email="admin@admin", password="admin"),  # noqa: S106
+            auth_level=AuthLevel.ADMIN,
+            db=sess,
+        )
         device_g_1 = create_device(
             Device(
                 friendly_name="Glaze I",

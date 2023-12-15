@@ -1,4 +1,5 @@
 import * as M from "@mantine/core";
+import { getFilterResultsForEachStringValue } from "api";
 import {
 	DateAttrKey,
 	FilterResult,
@@ -6,7 +7,6 @@ import {
 	PulseStringFilter,
 	StringAttrKey,
 } from "classes";
-import { getFilterResultsForEachStringValue } from "helpers";
 import { IAttrKey, Option } from "interfaces";
 import { useEffect, useState } from "react";
 import { useStoreShallow } from "store";

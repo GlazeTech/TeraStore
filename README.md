@@ -26,6 +26,14 @@ To run the application, you must first set the following environment variables:
 * `POSTGRES_USER`: The PostgreSQL username to be used by the backend
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
+* `DATABASE_URL`: The URL of the database containing connection information.
+* `TERASTORE_ADMIN_USERNAME`: The username of a user with administrator righs to be created in the database
+* `TERASTORE_ADMIN_PASSWORD`: The password of a user with administrator righs to be created in the database
+* `SECRET_KEY`: A secret key for hashing passwords
+* `ALLOWED_ORIGINS`: A comma-separated list of allowed origins to communicate with the backend
+* 
+
+You can create `SECRET_KEY` by running `openssl rand -hex 32` in your terminal.
 
 We suggest you create a `.env` file in the root of the project.
 This will contain the above mentioned environment variables, and you can fill it out like so:
@@ -34,6 +42,11 @@ This will contain the above mentioned environment variables, and you can fill it
 POSTGRES_USER=terastore-user
 POSTGRES_PASSWORD=terastore-password
 POSTGRES_DB=terastore-db
+DATABASE_URL="postgresql://username:password@host/database"
+TERASTORE_ADMIN_USERNAME="admin@terastore"
+TERASTORE_ADMIN_PASSWORD="administrator123"
+SECRET_KEY="some-long-secret-123"
+ALLOWED_ORIGINS="http://0.0.0.0:5173,http://localhost:3000"
 ```
 
 Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
@@ -134,3 +147,16 @@ If you run
 a Docker Compose instance will spin up, and do all the tests for you!
 
 Nifty!
+
+## Password handling
+
+We hash and salt user passwords.
+We use [PassLib](https://passlib.readthedocs.io/en/stable/) with an Argon2 hash.
+
+The hashed password that we save in the database has the following format:
+
+```
+$argon2X$v=V$m=M,t=T,p=P$salt$digest
+```
+
+See a detailed explanation [here](https://passlib.readthedocs.io/en/stable/lib/passlib.hash.argon2.html#format-algorithm).
