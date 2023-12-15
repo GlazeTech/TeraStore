@@ -26,7 +26,10 @@ To run the application, you must first set the following environment variables:
 * `POSTGRES_USER`: The PostgreSQL username to be used by the backend
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
+* `DATABASE_URL`: The URL of the database containing connection information.
 * `SECRET_KEY`: A secret key for hashing passwords
+* `ALLOWED_ORIGINS`: A comma-separated list of allowed origins to communicate with the backend
+* 
 
 You can create `SECRET_KEY` by running `openssl rand -hex 32` in your terminal.
 
@@ -37,6 +40,9 @@ This will contain the above mentioned environment variables, and you can fill it
 POSTGRES_USER=terastore-user
 POSTGRES_PASSWORD=terastore-password
 POSTGRES_DB=terastore-db
+DATABASE_URL="postgresql://username:password@host/database"
+SECRET_KEY="some-long-secret-123"
+ALLOWED_ORIGINS="http://0.0.0.0:5173,http://localhost:3000"
 ```
 
 Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,

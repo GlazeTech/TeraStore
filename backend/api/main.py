@@ -6,6 +6,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
 
+from api.config import get_settings
 from api.database import create_db_and_tables, drop_tables
 from api.public import make_api
 from api.utils.exception_handlers import (
@@ -76,15 +77,13 @@ LIFESPAN_FUNCTIONS = {
 
 
 def create_app(lifespan: Lifespan) -> FastAPI:
+    settings = get_settings()
     app = FastAPI(lifespan=LIFESPAN_FUNCTIONS[lifespan])
     app.add_middleware(
         CORSMiddleware,
         allow_methods=["*"],
         allow_headers=["*"],
-        allow_origins=[
-            "http://0.0.0.0:5173",
-            "http://localhost:3000",
-        ],
+        allow_origins=settings.ALLOWED_ORIGINS.split(","),
         allow_credentials=True,
     )
 

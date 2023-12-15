@@ -29,6 +29,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-dev/${POSTGRES_DB}"
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     healthcheck:
       test: curl -s http://localhost:8000/health | grep healthy
       timeout: 1s

@@ -22,6 +22,7 @@ services:
     environment:
       - SECRET_KEY=${SECRET_KEY}
       - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-test:5432/${POSTGRES_DB}"
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
     volumes:
       - ./backend:/app
       - ./scripts:/scripts
