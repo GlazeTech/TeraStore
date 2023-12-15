@@ -67,7 +67,7 @@ async def lifespan_prod(app: FastAPI) -> AsyncGenerator[None, None]:
                 auth_level=AuthLevel.ADMIN,
                 db=session,
             )
-    except IntegrityError:
+    except UserAlreadyExistsError:
         pass
     yield
 
