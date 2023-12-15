@@ -27,6 +27,8 @@ To run the application, you must first set the following environment variables:
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
 * `DATABASE_URL`: The URL of the database containing connection information.
+* `TERASTORE_ADMIN_USERNAME`: The username of a user with administrator righs to be created in the database
+* `TERASTORE_ADMIN_PASSWORD`: The password of a user with administrator righs to be created in the database
 * `SECRET_KEY`: A secret key for hashing passwords
 * `ALLOWED_ORIGINS`: A comma-separated list of allowed origins to communicate with the backend
 * 
@@ -41,6 +43,8 @@ POSTGRES_USER=terastore-user
 POSTGRES_PASSWORD=terastore-password
 POSTGRES_DB=terastore-db
 DATABASE_URL="postgresql://username:password@host/database"
+TERASTORE_ADMIN_USERNAME="admin@terastore"
+TERASTORE_ADMIN_PASSWORD="administrator123"
 SECRET_KEY="some-long-secret-123"
 ALLOWED_ORIGINS="http://0.0.0.0:5173,http://localhost:3000"
 ```

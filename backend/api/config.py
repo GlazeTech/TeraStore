@@ -16,6 +16,8 @@ def get_env_var(var_name: str) -> str:
 class Settings(BaseSettings):
     PROJECT_NAME: str = "TeraStore API"
     DATABASE_URL: str = get_env_var("DATABASE_URL")
+    TERASTORE_ADMIN_USERNAME: str = get_env_var("TERASTORE_ADMIN_USERNAME")
+    TERASTORE_ADMIN_PASSWORD: str = get_env_var("TERASTORE_ADMIN_PASSWORD")
     ALLOWED_ORIGINS: str = get_env_var(
         "ALLOWED_ORIGINS",  # comma-separated list of allowed origins
     )

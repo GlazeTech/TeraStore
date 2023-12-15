@@ -5,10 +5,13 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.exc import IntegrityError
+from sqlmodel import Session
 
 from api.config import get_settings
-from api.database import create_db_and_tables, drop_tables
+from api.database import app_engine, create_db_and_tables, drop_tables
 from api.public import make_api
+from api.public.auth.crud import create_user
+from api.public.auth.models import AuthLevel, UserCreate
 from api.utils.exception_handlers import (
     attr_data_type_does_not_exist_exception_handler,
     attr_data_type_exists_exception_handler,
@@ -50,7 +53,22 @@ async def lifespan_dev(app: FastAPI) -> AsyncGenerator[None, None]:
 
 @asynccontextmanager
 async def lifespan_prod(app: FastAPI) -> AsyncGenerator[None, None]:
+    settings = get_settings()
     create_db_and_tables()
+
+    # On first run, create admin user
+    try:
+        with Session(app_engine) as session:
+            create_user(
+                UserCreate(
+                    email=settings.TERASTORE_ADMIN_USERNAME,
+                    password=settings.TERASTORE_ADMIN_PASSWORD,
+                ),
+                auth_level=AuthLevel.ADMIN,
+                db=session,
+            )
+    except IntegrityError:
+        pass
     yield
 
 
