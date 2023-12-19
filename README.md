@@ -14,15 +14,7 @@ To interact with the Postgres DB, you may use Jetbrains' [DataGrip](https://www.
 
 ## Deployment
 Before deploying the applications the environment variables
-* VITE_BACKEND_URL: The URL of the backend endpoint. A special environment variable (see [this](https://vitejs.dev/guide/env-and-mode.html)), which is loaded at build-time.
-
-For deployment of the app, run
-
-`docker compose up`
-
-## Develop
-
-To run the application, you must first set the following environment variables:
+* `VITE_BACKEND_URL`: The URL of the backend endpoint. A special environment variable (see [this](https://vitejs.dev/guide/env-and-mode.html)), which is loaded at build-time.
 * `POSTGRES_USER`: The PostgreSQL username to be used by the backend
 * `POSTGRES_PASSWORD`: The PostgreSQL password for `POSTGRES_USER`
 * `POSTGRES_DB`: The PostgreSQL database for storage
@@ -32,16 +24,18 @@ To run the application, you must first set the following environment variables:
 * `SECRET_KEY`: A secret key for hashing passwords
 * `ALLOWED_ORIGINS`: A comma-separated list of allowed origins to communicate with the backend
 * 
+For deployment of the app, run
+`docker compose -f ./docker-compose-prod.yml up`
 
-You can create `SECRET_KEY` by running `openssl rand -hex 32` in your terminal.
+## Develop
 
-We suggest you create a `.env` file in the root of the project.
+To run the application, you must first set the environment variables listed above, except for `VITE_BACKEND_URL`, which is not strictly required for running a development environment. We suggest you create a `.env` file in the root of the project.
 This will contain the above mentioned environment variables, and you can fill it out like so:
 
 ```bash
-POSTGRES_USER=terastore-user
-POSTGRES_PASSWORD=terastore-password
-POSTGRES_DB=terastore-db
+POSTGRES_USER="terastore-user"
+POSTGRES_PASSWORD="terastore-password"
+POSTGRES_DB="terastore-db"
 DATABASE_URL="postgresql://username:password@host/database"
 TERASTORE_ADMIN_USERNAME="admin@terastore"
 TERASTORE_ADMIN_PASSWORD="administrator123"
@@ -49,7 +43,22 @@ SECRET_KEY="some-long-secret-123"
 ALLOWED_ORIGINS="http://0.0.0.0:5173,http://localhost:3000"
 ```
 
-Further, if you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
+A development environment can then be created by running
+`docker compose -f ./docker-compose-dev.yml up`
+
+The frontend can now be visited on [http://0.0.0.0:5173/](http://0.0.0.0:5173/). Log in using email `admin@admin` and password `admin`, which is a user created as part of spinning up the development environment. 
+
+Hot-reloading on code changes is enabled, so both backend and frontend can now be developed. 
+
+## Tests
+
+All tests (unit- and integration tests) can be run (using bash) with
+`./scripts/run_all_tests.sh`
+
+Currently, a powershell script for running tests on Windows is not supplied.
+
+## Development with VS Code
+If you wish to develop from the root of the workspace, instead of opening e.g. `./backend` to work on the API,
 you may create a file `.vscode/settings.json`, and populate it like so:
 
 ```json
@@ -88,12 +97,12 @@ It also ensures that VS Code knows where the functions and classes of this modul
 
 Then, install the environments and dependencies.
 
-First, make sure that you have Python 3.11.
+First, make sure that you have Python 3.12.
 You may have a look at [pyenv](https://github.com/pyenv/pyenv) to administer several Python versions on one machine.
 
 Then, run
 ```bash
-python3.11 -m venv .venv --prompt terastore-backend
+python3.12 -m venv .venv --prompt terastore-backend
 pip install ./backend[dev]
 ```
 
