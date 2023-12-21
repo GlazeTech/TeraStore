@@ -1,6 +1,7 @@
 import logging
 from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
+from uuid import UUID
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,6 +13,8 @@ from api.database import app_engine, create_db_and_tables, drop_tables
 from api.public import make_api
 from api.public.auth.crud import create_user
 from api.public.auth.models import AuthLevel, UserCreate
+from api.public.device.crud import create_device
+from api.public.device.models import Device, DeviceCreate
 from api.utils.exception_handlers import (
     attr_data_type_does_not_exist_exception_handler,
     attr_data_type_exists_exception_handler,
@@ -68,6 +71,34 @@ async def lifespan_prod(app: FastAPI) -> AsyncGenerator[None, None]:
                 db=session,
             )
     except UserAlreadyExistsError:
+        pass
+    try:
+        with Session(app_engine) as session:
+            create_device(
+                Device(
+                    friendly_name="Glaze I",
+                    # Device ID from glaze API
+                    device_id=UUID("5042dbda-e9bc-4216-a614-ac56d0a32023"),
+                ),
+                session,
+            )
+            create_device(
+                Device(
+                    friendly_name="Glaze II",
+                    # Device ID from glaze API
+                    device_id=UUID("66fa482a-1ef4-4076-a883-72d7bf43e151"),
+                ),
+                session,
+            )
+            create_device(
+                Device(
+                    friendly_name="Carmen",
+                    # Device ID from glaze API
+                    device_id=UUID("6a54db26-fa88-4146-b04f-b84b945bfea8"),
+                ),
+                session,
+            )
+    except IntegrityError:
         pass
     yield
 
