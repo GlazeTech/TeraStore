@@ -108,7 +108,7 @@ def add_attr(
     # Now, add the new EAV attribute
     pulse_attrs_class = get_pulse_attrs_class(AttrDataType(kv_pair.data_type))
 
-    db.add(pulse_attrs_class(**kv_pair.model_dump(), pulse_id=pulse_id))
+    db.add(pulse_attrs_class(**kv_pair.model_dump(warnings="none"), pulse_id=pulse_id))
     db.commit()
 
 

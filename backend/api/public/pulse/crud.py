@@ -103,6 +103,7 @@ def read_pulses_with_ids(
     pulse_attrs = read_pulse_attrs(pulse_ids=ids, db=db, check_pulses_exist=False)
 
     # Delete the entries from the temporary table again
+    # This raises a warning, but SQLModel's alternative solution does not work
     db.query(TemporaryPulseIdTable).delete()
     db.commit()
     return [
