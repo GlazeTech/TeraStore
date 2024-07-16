@@ -18,6 +18,8 @@ def setup_db() -> Generator[Session, None, None]:
     settings = get_settings()
     engine = create_engine(settings.DATABASE_URL, echo=True)
 
+    # In case of a dirty DB, drop all tables and recreate them for consistent testing
+    drop_tables(engine)
     create_db_and_tables(engine)
 
     user = UserCreate(

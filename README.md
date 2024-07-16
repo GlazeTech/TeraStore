@@ -64,11 +64,6 @@ you may create a file `.vscode/settings.json`, and populate it like so:
 ```json
 {
     "python.analysis.extraPaths": ["./backend"],
-    "black-formatter.args": [
-        "--config",
-        "./backend/pyproject.toml"
-    ],
-    "black-formatter.importStrategy": "fromEnvironment",
     "ruff.format.args": [
         "--config",
         "./backend/pyproject.toml"

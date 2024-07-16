@@ -10,30 +10,27 @@ readme = "README.md"
 dynamic = ["version"]
 
 dependencies = [
-  "fastapi[all]==0.104.1",
-  "sqlmodel==0.0.14",
-  "pydantic==2.5.2",
-  "pydantic-settings==2.1.0",
+  "fastapi[all]==0.111.1",
+  "sqlmodel==0.0.19",
+  "pydantic==2.8.2",
+  "pydantic-settings==2.3.4",
   "psycopg2-binary==2.9.9",
   "python-jose[cryptography]==3.3.0",
-  "passlib[argon2]==1.7.4",
+  "bcrypt==4.1.3",
 ]
 
 [project.optional-dependencies]
 test = [
-  "mypy==1.7.1",
-  "black==23.11.0",
-  "ruff==0.1.7",
+  "mypy>=1.10,<1.11",
+  "ruff>=0.5,<0.6",
   "pytest==7.4.3",
   "types-psycopg2==2.9.21.19",
   "pytest-cov==4.1.0",
   "types-python-jose==3.3.4.8",
-  "types-passlib==1.7.7.13",
 ]
 dev = [
-  "mypy==1.7.1",
-  "black==23.11.0",
-  "ruff==0.1.7",
+  "mypy>=1.10,<1.11",
+  "ruff>=0.5,<0.6",
   "pytest==7.4.3",
   "types-psycopg2==2.9.21.19",
   "pytest-cov==4.1.0",
@@ -65,9 +62,9 @@ warn_required_dynamic_aliases = true
 
 [tool.ruff]
 line-length = 88
-target-version = "py311"
-select = ["ALL"]
-ignore = [
+target-version = "py312"
+lint.select = ["ALL"]
+lint.ignore = [
   "D100", # allow undocumented public modules
   "D101", # allow undocumented public class
   "D102", # allow undocumented public method
@@ -77,9 +74,12 @@ ignore = [
   "D107", # allow undocumented public __init__
   "D203", # allow 0 black lines before class docstring
   "D213", # allow multiline docstring to start on first line
+  "UP040", # "type" keyword not implemented in mypy yet
+  "ISC001", # ruff recommends disabling when using the formatter
+  "COM812" # ruff recommends disabling when using the formatter
 ]
 
-[tool.ruff.per-file-ignores]
+[tool.ruff.lint.per-file-ignores]
 # from https://github.com/astral-sh/ruff/issues/4368
 "tests/**/*.py" = [
   "S101",    # asserts allowed in tests...
@@ -103,11 +103,6 @@ ignore = [
 ]
 "api/main.py" = ["ARG001"] # Unused function args
 
-[tool.black]
-line-length = 88
-target-version = ["py311"]
-# TODO: the below doesn't work...
-include = '(?:tests|api)\/.*\.pyi?$'
 
 [tool.coverage.run]
 omit = [
