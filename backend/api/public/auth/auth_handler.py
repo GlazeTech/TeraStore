@@ -40,7 +40,7 @@ def authenticate_user_token(
     try:
         payload = jwt.decode(
             jwt=token,
-            key=auth_settings.SECRET_KEY,
+            key=auth_settings.TERASTORE_JWT_SECRET,
             algorithms=[auth_settings.ALGORITHM],
         )
         email = payload.get("sub")
@@ -59,7 +59,7 @@ def create_token(
     to_encode = data.copy()
     to_encode.update({"exp": expires})
     return jwt.encode(
-        payload=to_encode, key=auth_settings.SECRET_KEY, algorithm=algorithm
+        payload=to_encode, key=auth_settings.TERASTORE_JWT_SECRET, algorithm=algorithm
     )
 
 
