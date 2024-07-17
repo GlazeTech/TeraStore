@@ -169,9 +169,9 @@ def test_create_pulse_with_invalid_creation_time(
     assert pulse_response.status_code == 422
     assert (
         pulse_response.json()["detail"][0]["msg"]
-        == "Input should be a valid datetime, input is too short"
+        == "Input should be a valid datetime or date, input is too short"
     )
-    assert pulse_response.json()["detail"][0]["type"] == "datetime_parsing"
+    assert pulse_response.json()["detail"][0]["type"] == "datetime_from_date_parsing"
 
 
 def test_get_pulse_with_invalid_pulse_id(client: TestClient) -> None:

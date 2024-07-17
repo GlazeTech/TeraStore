@@ -1,9 +1,9 @@
 from datetime import datetime, timedelta
 from typing import Any
 
+import jwt
 from fastapi import Depends, Response
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt
 from sqlmodel import Session
 
 from api.config import get_auth_settings
@@ -39,14 +39,14 @@ def authenticate_user_token(
 ) -> User:
     try:
         payload = jwt.decode(
-            token,
-            auth_settings.SECRET_KEY,
+            jwt=token,
+            key=auth_settings.SECRET_KEY,
             algorithms=[auth_settings.ALGORITHM],
         )
         email = payload.get("sub")
         if email is None:
             raise CredentialsIncorrectError
-    except JWTError as e:
+    except jwt.DecodeError as e:
         raise CredentialsIncorrectError from e
     return get_user(email=email, db=db)
 
@@ -59,9 +59,7 @@ def create_token(
     to_encode = data.copy()
     to_encode.update({"exp": expires})
     return jwt.encode(
-        to_encode,
-        auth_settings.SECRET_KEY,
-        algorithm=algorithm,
+        payload=to_encode, key=auth_settings.SECRET_KEY, algorithm=algorithm
     )
 
 

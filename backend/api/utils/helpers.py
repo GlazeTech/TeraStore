@@ -70,6 +70,6 @@ def get_model_columns_from_names(
     except AttributeError as e:
         raise PulseColumnNonexistentError(
             wanted=str(e),
-            columns=list(model.schema()["properties"]),
+            columns=list(model.model_json_schema()["properties"]),
         ) from e
     return fields

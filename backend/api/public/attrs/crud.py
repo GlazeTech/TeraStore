@@ -73,7 +73,7 @@ def add_attrs(
     for pulse_attrs in pulses_attrs:
         for attrs in pulse_attrs.pulse_attributes:
             attr_cls = get_pulse_attrs_class(attrs.data_type)
-            db.add(attr_cls(pulse_id=pulse_attrs.pulse_id, **attrs.dict()))
+            db.add(attr_cls(pulse_id=pulse_attrs.pulse_id, **attrs.model_dump()))
 
     # Finally, commit all changes
     db.commit()
@@ -108,7 +108,7 @@ def add_attr(
     # Now, add the new EAV attribute
     pulse_attrs_class = get_pulse_attrs_class(AttrDataType(kv_pair.data_type))
 
-    db.add(pulse_attrs_class(**kv_pair.dict(), pulse_id=pulse_id))
+    db.add(pulse_attrs_class(**kv_pair.model_dump(warnings="none"), pulse_id=pulse_id))
     db.commit()
 
 
@@ -242,9 +242,11 @@ def create_filter_query(
     kv_data_type: str,
 ) -> SelectOfScalar[UUID]:
     if kv_data_type == AttrDataType.STRING.value:
-        return create_attr_str_filter_query(PulseAttrsStrFilter(**kv_pair.dict()))
+        return create_attr_str_filter_query(PulseAttrsStrFilter(**kv_pair.model_dump()))
     if kv_data_type == AttrDataType.FLOAT.value:
-        return create_attr_float_filter_query(PulseAttrsFloatFilter(**kv_pair.dict()))
+        return create_attr_float_filter_query(
+            PulseAttrsFloatFilter(**kv_pair.model_dump())
+        )
 
     error_str = "kv_pair must be of type PulseAttrsStrFilter or PulseAttrsFloatFilter"
     raise TypeError(error_str)

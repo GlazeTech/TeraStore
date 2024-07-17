@@ -60,8 +60,8 @@ else
   echo -e "${YELLOW}Docker start succeeded. Using cached images...${NC}"
 fi
 
-run_test ./scripts/run_black.sh
-run_test ./scripts/run_ruff.sh
+run_test ./scripts/run_ruff_check.sh
+run_test ./scripts/run_ruff_format.sh
 run_test ./scripts/run_mypy.sh
 run_test ./scripts/run_pytest.sh
 run_test ./scripts/run_vitest.sh

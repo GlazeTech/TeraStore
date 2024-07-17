@@ -57,7 +57,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        test: [black, ruff, mypy, pytest, vitest]
+        test: [ruff_check, ruff_format, mypy, pytest, vitest]
     needs: backend-image-check-and-push
     runs-on: ubuntu-latest
     steps:

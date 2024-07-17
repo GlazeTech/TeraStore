@@ -19,6 +19,15 @@ def test_login_with_wrong_password(client: TestClient) -> None:
     assert data["detail"] == "Email or password is incorrect."
 
 
+def test_login_with_wrong_username(client: TestClient) -> None:
+    user_payload = {"username": "wrong_username@admin", "password": "admin"}
+    response = client.post("/auth/login", data=user_payload)
+    data = response.json()
+
+    assert response.status_code == 401
+    assert data["detail"] == "Email or password is incorrect."
+
+
 def test_get_all_users(client: TestClient) -> None:
     user_payload = {"email": "admin2@admin", "password": "admin"}
     response = client.post("/auth/signup", json=user_payload)

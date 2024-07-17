@@ -3,6 +3,7 @@ from __future__ import annotations
 from typing import Self
 from uuid import UUID, uuid4
 
+from pydantic import ConfigDict
 from sqlmodel import Field, SQLModel
 
 
@@ -35,8 +36,7 @@ class DeviceCreate(DeviceBase):
     it is only here for FastAPI documentation purposes.
     """
 
-    class Config:
-        extra = "forbid"
+    model_config = ConfigDict(extra="forbid")  # type: ignore[assignment]
 
     @classmethod
     def create_mock(cls: type[DeviceCreate], friendly_name: str) -> DeviceCreate:
