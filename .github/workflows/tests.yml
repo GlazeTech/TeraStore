@@ -92,17 +92,19 @@ jobs:
     runs-on: ubuntu-latest
     needs: [tests]
     env:
-      POSTGRES_USER: ${{ vars.POSTGRES_USER_DEV }}
-      POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD_DEV }}
-      POSTGRES_DB: ${{ vars.POSTGRES_DB_DEV}}
+      VITE_BACKEND_URL: http://${{vars.DROPLET_IP_DEV}}:8000"
       TERASTORE_JWT_SECRET: ${{ secrets.TERASTORE_JWT_SECRET }}
-      ALLOWED_ORIGINS: ${{ vars.ALLOWED_ORIGINS_DEV }}
+      POSTGRES_USER: ${{vars.POSTGRES_USER_DEV}}
+      POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD_DEV}}
+      POSTGRES_SERVER_URL: ${{vars.POSTGRES_SERVER_URL_DEV}}
+      POSTGRES_PORT: "${{vars.POSTGRES_PORT_DEV}}"
+      POSTGRES_DB: ${{vars.POSTGRES_DB_DEV}}
+      ALLOWED_ORIGINS: http://${{vars.DROPLET_IP_DEV}}
+      TERASTORE_ADMIN_USERNAME: ${{vars.TERASTORE_ADMIN_USERNAME_DEV}}
+      TERASTORE_ADMIN_PASSWORD: ${{secrets.TERASTORE_ADMIN_PASSWORD_DEV}}
     steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Build containers
-        run: docker compose -f docker-compose-prod.yml build
-      - name: Start application
-        run: docker compose -f docker-compose-prod.yml up --detach
-      - name: Close application
-        run: docker compose -f docker-compose-prod.yml down
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Build containers
+      # we only test building, as we do not have a staging environment for testing the deployment
+      run: docker compose -f docker-compose-prod.yml build
