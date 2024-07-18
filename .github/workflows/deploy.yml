@@ -10,7 +10,7 @@ jobs:
     - name: Deploy on DigitalOcean
       uses: appleboy/ssh-action@v1.0.3
       env:
-        VITE_BACKEND_URL: http://${{vars.DROPLET_IP}}:8000"
+        VITE_BACKEND_URL: http://${{vars.DROPLET_IP}}:8000
         TERASTORE_JWT_SECRET: ${{ secrets.TERASTORE_JWT_SECRET }}
         POSTGRES_USER: ${{vars.POSTGRES_USER_PROD}}
         POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD_PROD}}
