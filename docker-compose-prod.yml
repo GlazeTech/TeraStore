@@ -21,8 +21,8 @@ services:
     container_name: terastore-backend-prod
     command: python asgi.py --lifespan PROD
     environment:
-      - SECRET_KEY=${SECRET_KEY}
-      - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-prod/${POSTGRES_DB}"
+      - TERASTORE_JWT_SECRET=${TERASTORE_JWT_SECRET}
+      - "DATABASE_URL=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@${POSTGRES_SERVER_URL}:${POSTGRES_PORT}/${POSTGRES_DB}"
       - ALLOWED_ORIGINS=${ALLOWED_ORIGINS}
       - TERASTORE_ADMIN_USERNAME=${TERASTORE_ADMIN_USERNAME}
       - TERASTORE_ADMIN_PASSWORD=${TERASTORE_ADMIN_PASSWORD}
@@ -30,36 +30,12 @@ services:
       test: curl -s http://localhost:8000/health | grep healthy
       timeout: 1s
       interval: 5s
-      retries: 5
+      retries: 2
     ports:
       - 8000:8000
     volumes:
       - ./backend:/app
-    depends_on:
-      db-prod:
-        condition: service_healthy
-
-  db-prod:
-    image: postgres:16-alpine
-    healthcheck:
-      test: pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}
-      timeout: 1s
-      interval: 5s
-      retries: 5
-    environment:
-      - POSTGRES_DB=${POSTGRES_DB}
-      - POSTGRES_USER=${POSTGRES_USER}
-      - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-    restart: always
-    container_name: terastore-postgres-prod
-    ports:
-      - 5432:5432
-    volumes:
-      - db:/var/lib/postgresql/data
-
-volumes:
-  db:
-
+  
 networks:
   default:
     name: terastore-prod-network

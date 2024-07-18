@@ -1,0 +1,34 @@
+name: deploy
+run-name: Deploy TeraStore
+on: workflow_dispatch
+
+jobs:
+  deploy:
+    name: Deploy
+    runs-on: ubuntu-latest
+    steps:
+    - name: Deploy on DigitalOcean
+      uses: appleboy/ssh-action@v1.0.3
+      env:
+        VITE_BACKEND_URL: http://${{vars.DROPLET_IP}}:8000"
+        TERASTORE_JWT_SECRET: ${{ secrets.TERASTORE_JWT_SECRET }}
+        POSTGRES_USER: ${{vars.POSTGRES_USER_PROD}}
+        POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD_PROD}}
+        POSTGRES_SERVER_URL: ${{vars.POSTGRES_SERVER_URL_PROD}}
+        POSTGRES_PORT: "${{vars.POSTGRES_PORT_PROD}}"
+        POSTGRES_DB: ${{vars.POSTGRES_DB_PROD}}
+        ALLOWED_ORIGINS: http://${{vars.DROPLET_IP}}
+        TERASTORE_ADMIN_USERNAME: ${{vars.TERASTORE_ADMIN_USERNAME_PROD}}
+        TERASTORE_ADMIN_PASSWORD: ${{secrets.TERASTORE_ADMIN_PASSWORD}}
+      with:
+        host: ${{ vars.DROPLET_IP }}
+        username: root
+        key: ${{ secrets.TERASTORE_SSH_KEY}}
+        envs: VITE_BACKEND_URL, TERASTORE_JWT_SECRET, POSTGRES_USER, POSTGRES_PASSWORD, POSTGRES_SERVER_URL, POSTGRES_PORT, POSTGRES_DB, ALLOWED_ORIGINS, TERASTORE_ADMIN_USERNAME, TERASTORE_ADMIN_PASSWORD
+        script_stop: true
+        script: |
+          cd TeraStore
+          git pull
+          docker compose -f docker-compose-prod.yml down
+          docker compose -f docker-compose-prod.yml build --no-cache
+          docker compose -f docker-compose-prod.yml up --detach
