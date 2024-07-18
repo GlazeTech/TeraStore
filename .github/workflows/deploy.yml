@@ -10,7 +10,7 @@ jobs:
     - name: Deploy on DigitalOcean
       uses: appleboy/ssh-action@v1.0.3
       env:
-        VITE_BACKEND_URL: http://${{vars.DROPLET_IP}}:8000"
+        VITE_BACKEND_URL: http://${{vars.DROPLET_IP}}:8000
         TERASTORE_JWT_SECRET: ${{ secrets.TERASTORE_JWT_SECRET }}
         POSTGRES_USER: ${{vars.POSTGRES_USER_PROD}}
         POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD_PROD}}
@@ -28,16 +28,6 @@ jobs:
         script_stop: true
         script: |
           cd TeraStore
-          echo $VITE_BACKEND_URL > check.txt
-          echo $TERASTORE_JWT_SECRET >> check.txt
-          echo $POSTGRES_USER >> check.txt
-          echo $POSTGRES_PASSWORD >> check.txt
-          echo $POSTGRES_SERVER_URL >> check.txt
-          echo $POSTGRES_PORT >> check.txt
-          echo $POSTGRES_DB >> check.txt
-          echo $ALLOWED_ORIGINS >> check.txt
-          echo $TERASTORE_ADMIN_USERNAME >> check.txt
-          echo $TERASTORE_ADMIN_PASSWORD >> check.txt
           git pull
           docker compose -f docker-compose-prod.yml down
           docker compose -f docker-compose-prod.yml build --no-cache
