@@ -10,14 +10,14 @@ jobs:
     - name: Deploy on DigitalOcean
       uses: appleboy/ssh-action@v1.0.3
       env:
-        VITE_BACKEND_URL: http://${{vars.DROPLET_IP}}:8000
+        VITE_BACKEND_URL: https://${{vars.DOMAIN}}/api
         TERASTORE_JWT_SECRET: ${{ secrets.TERASTORE_JWT_SECRET }}
         POSTGRES_USER: ${{vars.POSTGRES_USER_PROD}}
         POSTGRES_PASSWORD: ${{secrets.POSTGRES_PASSWORD_PROD}}
         POSTGRES_SERVER_URL: ${{vars.POSTGRES_SERVER_URL_PROD}}
         POSTGRES_PORT: "${{vars.POSTGRES_PORT_PROD}}"
         POSTGRES_DB: ${{vars.POSTGRES_DB_PROD}}
-        ALLOWED_ORIGINS: http://${{vars.DROPLET_IP}}
+        ALLOWED_ORIGINS: ${{vars.ALLOWED_ORIGINS_PROD}}
         TERASTORE_ADMIN_USERNAME: ${{vars.TERASTORE_ADMIN_USERNAME_PROD}}
         TERASTORE_ADMIN_PASSWORD: ${{secrets.TERASTORE_ADMIN_PASSWORD}}
         HTTPS_CERTIFICATE_EMAIL: ${{vars.HTTPS_CERTIFICATE_EMAIL}}
