@@ -7,10 +7,10 @@ services:
       dockerfile: docker/Dockerfile.frontend.prod
       args:
         VITE_BACKEND_URL: ${VITE_BACKEND_URL}
-        HTTPS_CERTIFICATE_EMAIL: ${HTTPS_CERTIFICATE_EMAIL}
     container_name: terastore-frontend-prod
     ports:
       - 80:80
+      - 443:443
     depends_on:
       backend-prod:
         condition: service_healthy
