@@ -32,8 +32,6 @@ services:
       timeout: 1s
       interval: 5s
       retries: 2
-    ports:
-      - 8000:8000
     volumes:
       - ./backend:/app
   
