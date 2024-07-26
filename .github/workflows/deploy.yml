@@ -33,4 +33,4 @@ jobs:
           docker compose -f docker-compose-prod.yml down
           docker compose -f docker-compose-prod.yml build --no-cache
           docker compose -f docker-compose-prod.yml up --detach
-          docker exec -it terastore-frontend-prod certbot --nginx --non-interactive --email ${{ vars.HTTPS_CERTIFICATE_EMAIL }} --no-eff-email --domains terastore.dk --agree-tos
+          docker exec terastore-frontend-prod certbot --nginx --non-interactive --email ${{ vars.HTTPS_CERTIFICATE_EMAIL }} --no-eff-email --domains terastore.dk --agree-tos
