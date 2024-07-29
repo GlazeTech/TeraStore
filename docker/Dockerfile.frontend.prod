@@ -11,5 +11,6 @@ RUN npm --prefix frontend/ run build
 
 FROM nginx:latest
 
+RUN apt-get update && apt-get install -y certbot python3-certbot-nginx
 COPY --from=build-stage /frontend/dist/ /usr/share/nginx/html
 COPY ./nginx/nginx.conf /etc/nginx/conf.d/default.conf
