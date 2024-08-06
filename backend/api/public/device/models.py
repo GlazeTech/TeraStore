@@ -1,24 +1,13 @@
 from __future__ import annotations
 
+import re
 from typing import Self
-from uuid import UUID, uuid4
 
-from pydantic import ConfigDict
+from pydantic import ConfigDict, field_validator
 from sqlmodel import Field, SQLModel
 
 
-class DeviceBase(SQLModel):
-    """A Device is the data model representing a device that can create Pulses.
-
-    This class is the base class for all Device related models.
-    This is mostly for FastAPI's sake.
-    See: https://sqlmodel.tiangolo.com/tutorial/fastapi/multiple-models/
-    """
-
-    friendly_name: str
-
-
-class Device(DeviceBase, table=True):
+class Device(SQLModel, table=True):
     """The table model for Devices.
 
     The purpose of this class is to interact with the database.
@@ -26,10 +15,21 @@ class Device(DeviceBase, table=True):
 
     __tablename__ = "devices"
 
-    device_id: UUID = Field(default_factory=uuid4, primary_key=True)
+    device_id: str = Field(primary_key=True)
+
+    @field_validator("device_id", mode="before")
+    def validate_device_id(cls, value: str) -> str:  # noqa: N805
+        """Validate a device_id.
+
+        A valid device_id is a single capital letter, a hyphen, and four digits.
+        """
+        if not bool(re.match(r"^[A-Z]-\d{4}$", value)):
+            msg = "Invalid device_id"
+            raise ValueError(msg)
+        return value
 
 
-class DeviceCreate(DeviceBase):
+class DeviceCreate(Device):
     """The model for creating a new Device.
 
     As it does not take any other arguments than DeviceBase,
@@ -39,18 +39,16 @@ class DeviceCreate(DeviceBase):
     model_config = ConfigDict(extra="forbid")  # type: ignore[assignment]
 
     @classmethod
-    def create_mock(cls: type[DeviceCreate], friendly_name: str) -> DeviceCreate:
-        return cls(friendly_name=friendly_name)
+    def create_mock(cls: type[DeviceCreate], device_id: str) -> DeviceCreate:
+        return cls(device_id=device_id)
 
     def as_dict(self: Self) -> dict[str, str]:
         return self.model_dump()
 
 
-class DeviceRead(DeviceBase):
+class DeviceRead(Device):
     """The model for reading a Device.
 
     This model is for FastAPI calls that return a Device
     from the db, as this requires the device_id.
     """
-
-    device_id: UUID
