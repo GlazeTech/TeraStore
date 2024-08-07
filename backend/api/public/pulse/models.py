@@ -55,7 +55,7 @@ class PulseBase(SQLModel):
     )
     integration_time_ms: int
     creation_time: datetime
-    device_id: UUID = Field(foreign_key="devices.device_id")
+    device_id: str = Field(foreign_key="devices.device_id")
 
 
 class Pulse(PulseBase, table=True):
@@ -94,7 +94,7 @@ class PulseCreate(PulseBase):
     @classmethod
     def create_mock(
         cls: type[PulseCreate],
-        device_id: UUID,
+        device_id: str,
         length: int = 600,
         timescale: float = 1e-10,
         amplitude: float = 100.0,
@@ -111,7 +111,7 @@ class PulseCreate(PulseBase):
     @classmethod
     def create_mock_w_errs(
         cls: type[PulseCreate],
-        device_id: UUID,
+        device_id: str,
         length: int = 600,
         timescale: float = 1e-10,
         amplitude: float = 100.0,

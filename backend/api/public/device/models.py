@@ -17,16 +17,16 @@ class Device(SQLModel, table=True):
 
     device_id: str = Field(primary_key=True)
 
-    @field_validator("device_id", mode="before")
-    def validate_device_id(cls, value: str) -> str:  # noqa: N805
-        """Validate a device_id.
+    # @field_validator("device_id", mode="after")
+    # def validate_device_id(cls, value: str) -> str:  # noqa: N805
+    #     """Validate a device_id.
 
-        A valid device_id is a single capital letter, a hyphen, and four digits.
-        """
-        if not bool(re.match(r"^[A-Z]-\d{4}$", value)):
-            msg = "Invalid device_id"
-            raise ValueError(msg)
-        return value
+    #     A valid device_id is a single capital letter, a hyphen, and four digits.
+    #     """
+    #     if not bool(re.match(r"^[A-Z]-\d{4}$", value)):
+    #         msg = "Invalid device_id"
+    #         raise ValueError(msg)
+    #     return value
 
 
 class DeviceCreate(Device):
