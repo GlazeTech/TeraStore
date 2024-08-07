@@ -21,7 +21,7 @@ from api.utils.exceptions import (
     DeviceNotFoundError,
     PulseNotFoundError,
 )
-from api.utils.helpers import extract_device_id_from_pgerror
+from api.utils.helpers import extract_device_serial_number_from_pgerror
 
 if TYPE_CHECKING:
     from api.public.attrs.models import PulseAttrs
@@ -51,8 +51,10 @@ def create_pulses(
         if isinstance(e.orig, ForeignKeyViolation):
             if e.orig.pgerror is None:
                 raise
-            device_id = extract_device_id_from_pgerror(e.orig.pgerror)
-            raise DeviceNotFoundError(device_id=device_id) from e
+            device_serial_number = extract_device_serial_number_from_pgerror(
+                e.orig.pgerror
+            )
+            raise DeviceNotFoundError(device_serial_number=device_serial_number) from e
 
     try:
         add_attrs(pulses_attrs=pulses_attrs_to_db, db=db)

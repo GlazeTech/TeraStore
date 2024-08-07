@@ -1,6 +1,6 @@
 from datetime import datetime
 from typing import Any
-from uuid import UUID, uuid4
+from uuid import uuid4
 from zoneinfo import ZoneInfo
 
 from fastapi.testclient import TestClient
@@ -10,8 +10,10 @@ from api.public.pulse.models import PulseCreate, TPulseDict
 from api.utils.mock_data_generator import create_devices_and_pulses
 
 
-def test_create_pulse(client: TestClient, device_id: UUID) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+def test_create_pulse(client: TestClient, device_serial_number: str) -> None:
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -30,8 +32,12 @@ def test_create_pulse(client: TestClient, device_id: UUID) -> None:
     assert response_data["pulse_id"] == pulse_id
 
 
-def test_create_pulse_w_errors(client: TestClient, device_id: UUID) -> None:
-    pulse_payload = [PulseCreate.create_mock_w_errs(device_id=device_id).as_dict()]
+def test_create_pulse_w_errors(client: TestClient, device_serial_number: str) -> None:
+    pulse_payload = [
+        PulseCreate.create_mock_w_errs(
+            device_serial_number=device_serial_number
+        ).as_dict()
+    ]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -50,8 +56,12 @@ def test_create_pulse_w_errors(client: TestClient, device_id: UUID) -> None:
     assert response_data["pulse_id"] == pulse_id
 
 
-def test_create_pulse_with_invalid_json(client: TestClient, device_id: UUID) -> None:
-    pulse_payload = PulseCreate.create_mock(device_id=device_id).as_dict()
+def test_create_pulse_with_invalid_json(
+    client: TestClient, device_serial_number: str
+) -> None:
+    pulse_payload = PulseCreate.create_mock(
+        device_serial_number=device_serial_number
+    ).as_dict()
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -61,8 +71,12 @@ def test_create_pulse_with_invalid_json(client: TestClient, device_id: UUID) -> 
     assert pulse_response.status_code == 422
 
 
-def test_create_pulse_with_invalid_delays(client: TestClient, device_id: UUID) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+def test_create_pulse_with_invalid_delays(
+    client: TestClient, device_serial_number: str
+) -> None:
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
     pulse_payload[0]["delays"] = [1, "a", 3]  # type: ignore[list-item]
 
     pulse_response = client.post(
@@ -80,8 +94,12 @@ def test_create_pulse_with_invalid_delays(client: TestClient, device_id: UUID) -
     assert pulse_data["detail"][0]["type"] == "float_parsing"
 
 
-def test_create_pulse_with_invalid_signal(client: TestClient, device_id: UUID) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+def test_create_pulse_with_invalid_signal(
+    client: TestClient, device_serial_number: str
+) -> None:
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
     pulse_payload[0]["signal"] = [1, "a", 3]  # type: ignore[list-item]
 
     pulse_response = client.post(
@@ -101,9 +119,11 @@ def test_create_pulse_with_invalid_signal(client: TestClient, device_id: UUID) -
 
 def test_create_pulse_with_invalid_integration_time(
     client: TestClient,
-    device_id: UUID,
+    device_serial_number: str,
 ) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
     pulse_payload[0]["integration_time_ms"] = "a"  # type: ignore[typeddict-item]
 
     pulse_response = client.post(
@@ -122,8 +142,10 @@ def test_create_pulse_with_invalid_integration_time(
 
 
 def test_create_pulse_with_nonexistent_device_id(client: TestClient) -> None:
-    device_id = uuid4()
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    device_serial_number = "X-1234"
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
 
     pulse_response = client.post(
         "/pulses/create/",
@@ -131,34 +153,37 @@ def test_create_pulse_with_nonexistent_device_id(client: TestClient) -> None:
     )
 
     assert pulse_response.status_code == 404
-    assert pulse_response.json()["detail"] == f"Device not found with id: {device_id}"
+    assert (
+        pulse_response.json()["detail"]
+        == f"Device not found with serial number: {device_serial_number}"
+    )
 
 
 def test_create_pulse_with_invalid_device_id(
     client: TestClient,
-    device_id: UUID,
+    device_serial_number: str,
 ) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
-    pulse_payload[0]["device_id"] = "a"
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
+    pulse_payload[0]["device_serial_number"] = "a"
 
     pulse_response = client.post(
         "/pulses/create/",
         json=pulse_payload,
     )
 
-    assert pulse_response.status_code == 422
-    assert pulse_response.json()["detail"][0]["msg"] == (
-        "Input should be a valid UUID, invalid length: "
-        "expected length 32 for simple format, found 1"
-    )
-    assert pulse_response.json()["detail"][0]["type"] == "uuid_parsing"
+    assert pulse_response.status_code == 404
+    assert pulse_response.json()["detail"] == "Device not found with serial number: a"
 
 
 def test_create_pulse_with_invalid_creation_time(
     client: TestClient,
-    device_id: UUID,
+    device_serial_number: str,
 ) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
     pulse_payload[0]["creation_time"] = "a"
 
     pulse_response = client.post(
@@ -195,9 +220,10 @@ def test_get_pulse_with_nonexistent_pulse_id(client: TestClient) -> None:
     assert data["detail"] == f"Pulse not found with id: {pulse_id}"
 
 
-def test_get_all_pulses(client: TestClient, device_id: UUID) -> None:
+def test_get_all_pulses(client: TestClient, device_serial_number: str) -> None:
     pulses_payload = [
-        PulseCreate.create_mock(device_id=device_id).as_dict() for _ in range(2)
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+        for _ in range(2)
     ]
 
     pulses_response = client.post(
@@ -233,9 +259,11 @@ def test_read_pulses_with_ids(client: TestClient) -> None:
     ]
 
 
-def test_read_pulses_with_error(client: TestClient, device_id: UUID) -> None:
+def test_read_pulses_with_error(client: TestClient, device_serial_number: str) -> None:
     pulses_payload = [
-        PulseCreate.create_mock_w_errs(device_id=device_id, length=2).as_dict()
+        PulseCreate.create_mock_w_errs(
+            device_serial_number=device_serial_number, length=2
+        ).as_dict()
         for _ in range(1)
     ]
 
@@ -257,8 +285,10 @@ def test_read_pulses_with_nonexisting_id(client: TestClient) -> None:
     assert nonexistent_id in response.json()["detail"]
 
 
-def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+def test_create_pulse_with_attrs(client: TestClient, device_serial_number: str) -> None:
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
 
     pulse_str_attr_payload = PulseAttrsStrCreate.create_mock().as_dict()
     pulse_float_attr_payload = PulseAttrsFloatCreate.create_mock().as_dict()
@@ -302,9 +332,11 @@ def test_create_pulse_with_attrs(client: TestClient, device_id: UUID) -> None:
 
 def test_add_pulses_raises_err_on_wrong_datatype(
     client: TestClient,
-    device_id: UUID,
+    device_serial_number: str,
 ) -> None:
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
     pulse_float_attr_payload = PulseAttrsFloatCreate.create_mock().as_dict()
 
     pulse_payload[0]["pulse_attributes"] = [pulse_float_attr_payload]
@@ -314,7 +346,9 @@ def test_add_pulses_raises_err_on_wrong_datatype(
     ).json()
 
     # Now add a new pulse with the same key, but a different datatype
-    new_pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    new_pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
     new_pulse_attr_payload = {**pulse_float_attr_payload}
     new_pulse_attr_payload["data_type"] = "string"
     new_pulse_payload[0]["pulse_attributes"] = [new_pulse_attr_payload]  # type: ignore[list-item]
@@ -339,11 +373,13 @@ def test_add_pulses_raises_err_on_wrong_datatype(
 
 def test_add_pulses_saves_new_keys(
     client: TestClient,
-    device_id: UUID,
+    device_serial_number: str,
 ) -> None:
     keys = client.get("/attrs/keys").json()
     assert len(keys) == 0
-    pulse_payload = [PulseCreate.create_mock(device_id=device_id).as_dict()]
+    pulse_payload = [
+        PulseCreate.create_mock(device_serial_number=device_serial_number).as_dict()
+    ]
     pulse_float_attr_payload = PulseAttrsFloatCreate.create_mock().as_dict()
     pulse_payload[0]["pulse_attributes"] = [pulse_float_attr_payload]
     client.post(
@@ -369,7 +405,9 @@ def _assert_equal_pulses(
         .astimezone(ZoneInfo("UTC"))
         .strftime("%Y-%m-%dT%H:%M:%S.%f")
     )
-    assert received_pulse["device_id"] == created_pulse["device_id"]
+    assert (
+        received_pulse["device_serial_number"] == created_pulse["device_serial_number"]
+    )
     assert received_pulse["delays"] == created_pulse["delays"]
     assert received_pulse["signal"] == created_pulse["signal"]
     assert received_pulse["integration_time_ms"] == created_pulse["integration_time_ms"]

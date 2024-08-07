@@ -1,6 +1,5 @@
 import secrets
 from datetime import datetime
-from uuid import UUID
 from zoneinfo import ZoneInfo
 
 from pydantic import BaseModel
@@ -46,12 +45,12 @@ def create_mock_pulse(
     }
 
 
-def extract_device_id_from_pgerror(pgerror: str) -> UUID:
+def extract_device_serial_number_from_pgerror(pgerror: str) -> str:
     """Find a device_id in a PostgreSQL error message."""
-    detail = pgerror.split("Key (device_id)=(")[1]
-    uuid = detail.split(")")[0]
-    if uuid:
-        return UUID(uuid)
+    detail = pgerror.split("Key (device_serial_number)=(")[1]
+    serial_number = detail.split(")")[0]
+    if serial_number:
+        return serial_number
     error_str = "No device_id found in error message."
     raise ValueError(error_str)
 

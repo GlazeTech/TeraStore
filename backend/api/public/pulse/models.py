@@ -27,7 +27,7 @@ class TPulseDict(TypedDict):
     signal_error: list[float] | None
     integration_time_ms: int
     creation_time: str
-    device_id: str
+    device_serial_number: str
     pulse_attributes: list[AttrDict]
 
 
@@ -55,7 +55,7 @@ class PulseBase(SQLModel):
     )
     integration_time_ms: int
     creation_time: datetime
-    device_id: str = Field(foreign_key="devices.device_id")
+    device_serial_number: str = Field(foreign_key="devices.serial_number")
 
 
 class Pulse(PulseBase, table=True):
@@ -78,7 +78,7 @@ class Pulse(PulseBase, table=True):
             signal_error=pulse["signal_error"],
             integration_time_ms=pulse["integration_time_ms"],
             creation_time=pulse["creation_time"],
-            device_id=pulse["device_id"],
+            device_serial_number=pulse["device_serial_number"],
         )
 
 
@@ -94,7 +94,7 @@ class PulseCreate(PulseBase):
     @classmethod
     def create_mock(
         cls: type[PulseCreate],
-        device_id: str,
+        device_serial_number: str,
         length: int = 600,
         timescale: float = 1e-10,
         amplitude: float = 100.0,
@@ -104,14 +104,14 @@ class PulseCreate(PulseBase):
             signal=generate_random_numbers(length, -amplitude, amplitude),
             integration_time_ms=generate_random_integration_time(),
             creation_time=get_now(),
-            device_id=device_id,
+            device_serial_number=device_serial_number,
             pulse_attributes=[],
         )
 
     @classmethod
     def create_mock_w_errs(
         cls: type[PulseCreate],
-        device_id: str,
+        device_serial_number: str,
         length: int = 600,
         timescale: float = 1e-10,
         amplitude: float = 100.0,
@@ -126,7 +126,7 @@ class PulseCreate(PulseBase):
             ),
             integration_time_ms=generate_random_integration_time(),
             creation_time=get_now(),
-            device_id=device_id,
+            device_serial_number=device_serial_number,
             pulse_attributes=[],
         )
 
@@ -140,7 +140,7 @@ class PulseCreate(PulseBase):
             "signal_error": self.signal_error,
             "integration_time_ms": self.integration_time_ms,
             "creation_time": self.creation_time.isoformat(),
-            "device_id": str(self.device_id),
+            "device_serial_number": self.device_serial_number,
             "pulse_attributes": pulse_attributes,
         }
 

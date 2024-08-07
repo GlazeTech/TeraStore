@@ -28,9 +28,9 @@ class PulseColumnNonexistentError(Exception):
 class DeviceNotFoundError(Exception):
     """Exception raised when the data type of an attribute is not supported."""
 
-    def __init__(self: Self, device_id: UUID) -> None:
-        self.device_id = device_id
-        super().__init__(f"Device not found with id: {device_id}")
+    def __init__(self: Self, device_serial_number: str) -> None:
+        self.device_serial_number = device_serial_number
+        super().__init__(f"Device not found with serial number: {device_serial_number}")
 
 
 class AttrDataTypeExistsError(Exception):

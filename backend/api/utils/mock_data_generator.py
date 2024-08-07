@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from sqlmodel import Session
 
 from api.database import app_engine
@@ -16,20 +14,24 @@ from api.public.pulse.models import PulseCreate
 def create_devices_and_pulses() -> None:
     """Create devices and pulses for testing purposes."""
     with Session(app_engine) as sess:
-        device_g_1 = create_device(DeviceCreate.create_mock("Glaze I"), sess)
-        device_g_2 = create_device(DeviceCreate.create_mock("Glaze II"), sess)
-        device_carmen = create_device(DeviceCreate.create_mock("Carmen"), sess)
+        device_g_1 = create_device(DeviceCreate.create_mock("G-0001"), sess)
+        device_g_2 = create_device(DeviceCreate.create_mock("G-0002"), sess)
+        device_carmen = create_device(DeviceCreate.create_mock("C-0001"), sess)
 
         pulse_1 = create_pulses(
-            [PulseCreate.create_mock_w_errs(device_id=device_g_1.device_id)],
+            [
+                PulseCreate.create_mock_w_errs(
+                    device_serial_number=device_g_1.serial_number
+                )
+            ],
             sess,
         )
         pulse_2 = create_pulses(
-            [PulseCreate.create_mock(device_id=device_g_2.device_id)],
+            [PulseCreate.create_mock(device_serial_number=device_g_2.serial_number)],
             sess,
         )
         pulse_3 = create_pulses(
-            [PulseCreate.create_mock(device_id=device_carmen.device_id)],
+            [PulseCreate.create_mock(device_serial_number=device_carmen.serial_number)],
             sess,
         )
         add_attr(pulse_1[0], PulseAttrsFloatCreate(key="has_errors", value=1.0), sess)
@@ -68,30 +70,8 @@ def create_frontend_dev_data() -> None:
             auth_level=AuthLevel.ADMIN,
             db=sess,
         )
-        device_g_1 = create_device(
-            Device(
-                friendly_name="Glaze I",
-                # Device ID from glaze API
-                device_id=UUID("5042dbda-e9bc-4216-a614-ac56d0a32023"),
-            ),
-            sess,
-        )
-        device_g_2 = create_device(
-            Device(
-                friendly_name="Glaze II",
-                # Device ID from glaze API
-                device_id=UUID("66fa482a-1ef4-4076-a883-72d7bf43e151"),
-            ),
-            sess,
-        )
-        device_carmen = create_device(
-            Device(
-                friendly_name="Carmen",
-                # Device ID from glaze API
-                device_id=UUID("6a54db26-fa88-4146-b04f-b84b945bfea8"),
-            ),
-            sess,
-        )
+        device_g_1 = create_device(Device(serial_number="G-0003"), sess)
+        device_g_2 = create_device(Device(serial_number="G-0004"), sess)
 
         projects = {
             "CGM": 5,
@@ -102,9 +82,9 @@ def create_frontend_dev_data() -> None:
         for project, n_pulses in projects.items():
             pulses = [
                 PulseCreate.create_mock(
-                    device_id=device_carmen.device_id
+                    device_serial_number=device_g_1.serial_number
                     if count % 3 == 0
-                    else device_g_2.device_id,
+                    else device_g_2.serial_number,
                 )
                 for _ in range(n_pulses)
             ]
@@ -154,15 +134,11 @@ def create_frontend_dev_data() -> None:
                 count += 1
 
         pulse_1 = create_pulses(
-            [PulseCreate.create_mock(device_id=device_g_1.device_id)],
+            [PulseCreate.create_mock(device_serial_number=device_g_1.serial_number)],
             sess,
         )
         pulse_2 = create_pulses(
-            [PulseCreate.create_mock(device_id=device_g_2.device_id)],
-            sess,
-        )
-        pulse_3 = create_pulses(
-            [PulseCreate.create_mock(device_id=device_carmen.device_id)],
+            [PulseCreate.create_mock(device_serial_number=device_g_2.serial_number)],
             sess,
         )
 
@@ -177,12 +153,5 @@ def create_frontend_dev_data() -> None:
         add_attr(
             pulse_2[0],
             PulseAttrsStrCreate(key="substrate", value="plastic"),
-            sess,
-        )
-
-        add_attr(pulse_3[0], PulseAttrsFloatCreate(key="angle", value=17.2), sess)
-        add_attr(
-            pulse_3[0],
-            PulseAttrsStrCreate(key="substrate", value="polymer"),
             sess,
         )

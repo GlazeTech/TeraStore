@@ -16,7 +16,7 @@ from api.utils.types import Lifespan
 @pytest.fixture(name="db_session")
 def setup_db() -> Generator[Session, None, None]:
     settings = get_settings()
-    engine = create_engine(settings.DATABASE_URL, echo=True)
+    engine = create_engine(settings.DATABASE_URL, echo=False)
 
     # In case of a dirty DB, drop all tables and recreate them for consistent testing
     drop_tables(engine)
@@ -72,9 +72,9 @@ def client_fixture_with_access_token(
 
 
 @pytest.fixture()
-def device_id(client: TestClient) -> Generator[UUID, None, None]:
+def device_serial_number(client: TestClient) -> Generator[UUID, None, None]:
     """Create a Device for testing purposes."""
-    device_payload = {"friendly_name": "Glaze I"}
+    device_payload = {"serial_number": "G-0001"}
     response = client.post(
         "/devices/",
         json=device_payload,
@@ -82,6 +82,6 @@ def device_id(client: TestClient) -> Generator[UUID, None, None]:
 
     if response.status_code == 200:
         data = response.json()
-        yield data["device_id"]
+        yield data["serial_number"]
     else:
         pytest.fail(f"Failed to create device: {response.status_code}")

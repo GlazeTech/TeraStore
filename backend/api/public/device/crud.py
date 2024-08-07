@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import Depends
 from sqlmodel import Session, select
 
@@ -28,8 +26,12 @@ def read_devices(
     return [DeviceRead.model_validate(device) for device in devices]
 
 
-def read_device(device_id: UUID, db: Session = Depends(get_session)) -> DeviceRead:
-    device = db.get(Device, device_id)
+def read_device(
+    device_serial_number: str, db: Session = Depends(get_session)
+) -> DeviceRead:
+    device = db.exec(
+        select(Device).where(Device.serial_number == device_serial_number)
+    ).first()
     if not device:
-        raise DeviceNotFoundError(device_id=device_id)
+        raise DeviceNotFoundError(device_serial_number=device_serial_number)
     return DeviceRead.model_validate(device)

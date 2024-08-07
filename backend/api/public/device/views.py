@@ -1,5 +1,3 @@
-from uuid import UUID
-
 from fastapi import APIRouter, Depends, Query
 from sqlmodel import Session
 
@@ -27,6 +25,8 @@ def get_devices(
     return read_devices(offset=offset, limit=limit, db=db)
 
 
-@router.get("/{device_id}")
-def get_device(device_id: UUID, db: Session = Depends(get_session)) -> DeviceRead:
-    return read_device(device_id=device_id, db=db)
+@router.get("/{device_serial_number}")
+def get_device(
+    device_serial_number: str, db: Session = Depends(get_session)
+) -> DeviceRead:
+    return read_device(device_serial_number=device_serial_number, db=db)
