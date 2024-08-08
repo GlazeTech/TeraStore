@@ -6,6 +6,8 @@ from typing import Self
 from pydantic import ConfigDict, field_validator
 from sqlmodel import Field, SQLModel
 
+from api.utils.exceptions import InvalidSerialNumberError
+
 
 class DeviceBase(SQLModel):
     """A Device is the data model representing a device that can create Pulses.
@@ -28,15 +30,14 @@ class Device(DeviceBase, table=True):
 
     device_id: int | None = Field(default=None, primary_key=True)
 
-    @field_validator("serial_number", mode="after")
+    @field_validator("serial_number")
     def validate_device_id(cls, value: str) -> str:  # noqa: N805
         """Validate a device_id.
 
         A valid device_id is a single capital letter, a hyphen, and four digits.
         """
         if not bool(re.match(r"^[A-Z]-\d{4}$", value)):
-            msg = "Invalid device_id"
-            raise ValueError(msg)
+            raise InvalidSerialNumberError(value)
         return value
 
 

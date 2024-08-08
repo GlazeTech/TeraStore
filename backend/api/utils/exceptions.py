@@ -33,6 +33,14 @@ class DeviceNotFoundError(Exception):
         super().__init__(f"Device not found with serial number: {device_serial_number}")
 
 
+class InvalidSerialNumberError(Exception):
+    """Exception raised when the data type of an attribute is not supported."""
+
+    def __init__(self: Self, device_serial_number: str) -> None:
+        self.device_serial_number = device_serial_number
+        super().__init__(f"Ill-formatted serial number: {device_serial_number}")
+
+
 class AttrDataTypeExistsError(Exception):
     """Exception raised when the data type of an attribute already exists."""
 

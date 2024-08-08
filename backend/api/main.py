@@ -12,28 +12,8 @@ from api.database import app_engine, create_db_and_tables, drop_tables
 from api.public import make_api
 from api.public.auth.crud import create_user
 from api.public.auth.models import AuthLevel, UserCreate
-from api.utils.exception_handlers import (
-    attr_data_type_does_not_exist_exception_handler,
-    attr_data_type_exists_exception_handler,
-    attr_key_does_not_exist_exception_handler,
-    credentials_incorrect_exception_handler,
-    device_not_found_exception_handler,
-    pulse_column_nonexistent_exception_handler,
-    pulse_not_found_exception_handler,
-    username_already_exists_exception_handler,
-    username_or_password_incorrect_exception_handler,
-)
-from api.utils.exceptions import (
-    AttrDataTypeDoesNotExistError,
-    AttrDataTypeExistsError,
-    AttrKeyDoesNotExistError,
-    CredentialsIncorrectError,
-    DeviceNotFoundError,
-    EmailOrPasswordIncorrectError,
-    PulseColumnNonexistentError,
-    PulseNotFoundError,
-    UserAlreadyExistsError,
-)
+from api.utils.exception_handlers import exception_handlers_factory
+from api.utils.exceptions import UserAlreadyExistsError
 from api.utils.logging import EndpointFilter
 from api.utils.mock_data_generator import (
     create_devices_and_pulses,
@@ -105,43 +85,8 @@ def create_app(lifespan: Lifespan) -> FastAPI:
         allow_credentials=True,
     )
 
-    # Add exception handlers
-    app.add_exception_handler(
-        PulseNotFoundError,
-        pulse_not_found_exception_handler,
-    )
-    app.add_exception_handler(
-        DeviceNotFoundError,
-        device_not_found_exception_handler,
-    )
-    app.add_exception_handler(
-        AttrDataTypeExistsError,
-        attr_data_type_exists_exception_handler,
-    )
-    app.add_exception_handler(
-        AttrKeyDoesNotExistError,
-        attr_key_does_not_exist_exception_handler,
-    )
-    app.add_exception_handler(
-        AttrDataTypeDoesNotExistError,
-        attr_data_type_does_not_exist_exception_handler,
-    )
-    app.add_exception_handler(
-        PulseColumnNonexistentError,
-        pulse_column_nonexistent_exception_handler,
-    )
-    app.add_exception_handler(
-        EmailOrPasswordIncorrectError,
-        username_or_password_incorrect_exception_handler,
-    )
-    app.add_exception_handler(
-        UserAlreadyExistsError,
-        username_already_exists_exception_handler,
-    )
-    app.add_exception_handler(
-        CredentialsIncorrectError,
-        credentials_incorrect_exception_handler,
-    )
+    for exc, handler in exception_handlers_factory():
+        app.add_exception_handler(exc, handler)
 
     # Add logging filters
     uvicorn_logger = logging.getLogger("uvicorn.access")

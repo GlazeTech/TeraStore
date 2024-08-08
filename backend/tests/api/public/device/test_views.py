@@ -18,8 +18,8 @@ def test_create_device(client: TestClient) -> None:
     assert data[SERIAL_NUMBER_KEY] == G1_SERIAL_NUMBER
 
 
-def test_create_device_with_invalid_friendly_name(client: TestClient) -> None:
-    device_payload = {SERIAL_NUMBER_KEY: [1]}
+def test_create_device_with_nonstring_serial_no(client: TestClient) -> None:
+    device_payload = {SERIAL_NUMBER_KEY: 1}
     response = client.post(
         "/devices/",
         json=device_payload,
@@ -29,6 +29,18 @@ def test_create_device_with_invalid_friendly_name(client: TestClient) -> None:
     assert response.status_code == 422
     assert data["detail"][0]["msg"] == "Input should be a valid string"
     assert data["detail"][0]["type"] == "string_type"
+
+
+def test_create_device_with_wrong_format_serial_no(client: TestClient) -> None:
+    device_payload = {SERIAL_NUMBER_KEY: "wrong-serial"}
+    response = client.post(
+        "/devices/",
+        json=device_payload,
+    )
+    data = response.json()
+
+    assert response.status_code == 422
+    assert data["detail"] == "Ill-formatted serial number: wrong-serial"
 
 
 def test_create_device_with_extra_params(client: TestClient) -> None:
