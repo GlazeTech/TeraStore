@@ -10,6 +10,7 @@ from api.utils.exceptions import (
     AttrDataTypeExistsError,
     AttrKeyDoesNotExistError,
     CredentialsIncorrectError,
+    DeviceExistsError,
     DeviceNotFoundError,
     EmailOrPasswordIncorrectError,
     InvalidSerialNumberError,
@@ -36,6 +37,7 @@ def exception_handlers_factory() -> list[tuple[type[Exception], ExceptionHandler
     return [
         (PulseNotFoundError, exc_handler(status.HTTP_404_NOT_FOUND)),
         (DeviceNotFoundError, exc_handler(status.HTTP_404_NOT_FOUND)),
+        (DeviceExistsError, exc_handler(status.HTTP_409_CONFLICT)),
         (InvalidSerialNumberError, exc_handler(status.HTTP_422_UNPROCESSABLE_ENTITY)),
         (AttrDataTypeExistsError, exc_handler(status.HTTP_400_BAD_REQUEST)),
         (AttrKeyDoesNotExistError, exc_handler(status.HTTP_404_NOT_FOUND)),

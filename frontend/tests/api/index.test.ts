@@ -1,6 +1,5 @@
 import { loginAsAdmin, readTestingAsset } from "@tests/testing-utils";
-import { getFilteredPulses, getPulseKeys, getPulses } from "api";
-import { uploadPulses } from "api";
+import { getFilteredPulses, getPulseKeys, getPulses, uploadPulses } from "api";
 import {
 	AnnotatedPulse,
 	DateAttrKey,
@@ -10,8 +9,7 @@ import {
 	PulseStringFilter,
 } from "classes";
 import { extractPulses } from "helpers/data-io";
-import { KVType, PulseFilter } from "interfaces";
-import { BackendTHzDevice } from "interfaces";
+import { BackendTHzDevice, KVType, PulseFilter } from "interfaces";
 import { describe, expect, test } from "vitest";
 
 describe("getFilteredPulses", async () => {
@@ -66,7 +64,7 @@ describe("getFilteredPulses", async () => {
 describe("uploadPulses", () => {
 	const devices: BackendTHzDevice[] = [
 		{
-			friendly_name: "My friendly device",
+			serial_number: "My friendly device",
 			device_id: "5042dbda-e9bc-4216-a614-ac56d0a32023",
 		},
 	];
@@ -110,7 +108,7 @@ describe("getPulses", () => {
 			expect(pulse.pulse.signal).toBeDefined();
 			expect(pulse.pulse.signal_err).toBeDefined();
 			expect(pulse.pulse_attributes).toBeDefined();
-			expect(pulse.device_id).toBeDefined();
+			expect(pulse.device_serial_number).toBeDefined();
 			expect(pulse.integration_time_ms).toBeDefined();
 			expect(pulse.pulse).toBeDefined();
 			expect(pulse.pulse_id).toBeDefined();

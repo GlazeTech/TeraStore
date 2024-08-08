@@ -18,6 +18,26 @@ def test_create_device(client: TestClient) -> None:
     assert data[SERIAL_NUMBER_KEY] == G1_SERIAL_NUMBER
 
 
+def test_create_device_w_attrs(client: TestClient) -> None:
+    device_payload = {
+        SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
+        "device_attrs": [
+            {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "string", "value": "kek"},
+            {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "float", "value": 1.0},
+            {
+                SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
+                "key": "floatarray",
+                "value": [1.0, 2.0],
+            },
+        ],
+    }
+    response = client.post("/devices/", json=device_payload)
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data[SERIAL_NUMBER_KEY] == G1_SERIAL_NUMBER
+
+
 def test_create_device_with_nonstring_serial_no(client: TestClient) -> None:
     device_payload = {SERIAL_NUMBER_KEY: 1}
     response = client.post(
@@ -83,6 +103,23 @@ def test_create_device_with_invalid_device_id(client: TestClient) -> None:
     assert response.status_code == 422
     assert data["detail"][0]["msg"] == "Extra inputs are not permitted"
     assert data["detail"][0]["type"] == "extra_forbidden"
+
+
+def test_create_existing_device(client: TestClient) -> None:
+    device_payload = {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER}
+    response = client.post("/devices/", json=device_payload)
+    data = response.json()
+
+    assert response.status_code == 200
+    assert data[SERIAL_NUMBER_KEY] == G1_SERIAL_NUMBER
+
+    response_2 = client.post("/devices/", json=device_payload)
+    data_2 = response_2.json()
+    assert response_2.status_code == 409
+    assert (
+        data_2["detail"]
+        == f"A device with serial number {G1_SERIAL_NUMBER} already exists"
+    )
 
 
 def test_get_device(client: TestClient) -> None:

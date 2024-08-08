@@ -98,3 +98,7 @@ export async function uploadPulses(pulses: AnnotatedPulse[]) {
 export async function getDevices() {
 	return api.get<BackendTHzDevice[]>("/devices").then((resp) => resp.data);
 }
+
+export async function addDevice(serialNumber: string) {
+	return api.post("/devices", { serial_number: serialNumber });
+}

@@ -1,9 +1,11 @@
 from fastapi import Depends
+from psycopg2.errors import UniqueViolation
+from sqlalchemy.exc import IntegrityError
 from sqlmodel import Session, select
 
 from api.database import get_session
 from api.public.device.models import Device, DeviceCreate, DeviceRead
-from api.utils.exceptions import DeviceNotFoundError
+from api.utils.exceptions import DeviceExistsError, DeviceNotFoundError
 
 
 def create_device(
@@ -12,8 +14,14 @@ def create_device(
 ) -> DeviceRead:
     device_to_db = Device.model_validate(device)
     db.add(device_to_db)
-    db.commit()
+    try:
+        db.commit()
+    except IntegrityError as e:
+        if isinstance(e.orig, UniqueViolation):
+            raise DeviceExistsError(device.serial_number) from e
+
     db.refresh(device_to_db)
+
     return DeviceRead.model_validate(device_to_db)
 
 

@@ -36,7 +36,7 @@ describe("AnnotatedPulse", () => {
 		],
 	};
 	const devices = [
-		{ device_id: "someID", friendly_name: "someName" } as BackendTHzDevice,
+		{ device_id: "someID", serial_number: "someName" } as BackendTHzDevice,
 	];
 
 	test("should create an instance of AnnotatedPulse", () => {
@@ -56,7 +56,9 @@ describe("AnnotatedPulse", () => {
 		expect(annotatedPulse.creation_time.toISOString()).toEqual(
 			validAnnotatedPulse.creation_time,
 		);
-		expect(annotatedPulse.device_id).toEqual(validAnnotatedPulse.device_id);
+		expect(annotatedPulse.device_serial_number).toEqual(
+			validAnnotatedPulse.device_id,
+		);
 		expect(annotatedPulse.pulse_attributes).toEqual(
 			validAnnotatedPulse.pulse_attributes,
 		);
@@ -82,7 +84,7 @@ describe("AnnotatedPulse", () => {
 				[
 					{
 						device_id: "nonexistent device",
-						friendly_name: "someName",
+						serial_number: "someName",
 					} as BackendTHzDevice,
 				],
 			);
@@ -97,7 +99,7 @@ describe("AnnotatedPulse", () => {
 			},
 			integration_time_ms: 100,
 			creation_time: "wrong datetime", // Invalid creation_time
-			device_id: devices[0].device_id,
+			device_serial_number: devices[0].serial_number,
 			pulse_attributes: [
 				{ key: "key1", value: "value1" },
 				{ key: "key2", value: 2 },
@@ -115,7 +117,7 @@ describe("AnnotatedPulse", () => {
 			},
 			integration_time_ms: 100,
 			creation_time: "2023-11-19T01:30:10.175Z",
-			device_id: devices[0].device_id,
+			device_id: devices[0].serial_number,
 			pulse_attributes: [
 				{ key: "key1", value: "value1" },
 				{ key: "key2", value: 2 },

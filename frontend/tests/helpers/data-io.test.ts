@@ -13,11 +13,11 @@ describe("extractPulses", () => {
 	const devices: BackendTHzDevice[] = [
 		{
 			device_id: "5042dbda-e9bc-4216-a614-ac56d0a32023",
-			friendly_name: "Device 1",
+			serial_number: "Device 1",
 		},
 		{
 			device_id: "5042dbda-e9bc-4216-a614-ac56d0a32023",
-			friendly_name: "Device 2",
+			serial_number: "Device 2",
 		},
 	];
 

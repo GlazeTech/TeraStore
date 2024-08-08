@@ -21,6 +21,5 @@ export interface BackendAttrKey {
 }
 
 export interface BackendTHzDevice {
-	friendly_name: string;
-	device_id: string;
+	serial_number: string;
 }

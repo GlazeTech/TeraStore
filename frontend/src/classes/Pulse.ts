@@ -10,7 +10,7 @@ export class AnnotatedPulse {
 		},
 		public integration_time_ms: number,
 		public creation_time: Date,
-		public device_id: string,
+		public device_serial_number: string,
 		public pulse_attributes: { key: string; value: string | number }[],
 		public pulse_id?: string,
 	) {}
@@ -49,11 +49,11 @@ export class AnnotatedPulse {
 		}
 
 		const deviceIdIsValid = devices.some(
-			(device) => device.device_id === parsed.device_id,
+			(device) => device.serial_number === parsed.device_serial_number,
 		);
 		if (!deviceIdIsValid) {
 			throw new InvalidDeviceIDError(
-				`Device ID ${parsed.device_id} does not exist.`,
+				`Device serial number ${parsed.device_serial_number} does not exist.`,
 			);
 		}
 
@@ -65,7 +65,7 @@ export class AnnotatedPulse {
 			},
 			parsed.integration_time_ms,
 			creationTime,
-			parsed.device_id,
+			parsed.device_serial_number,
 			parsed.pulse_attributes,
 		);
 	}
@@ -85,7 +85,7 @@ export class AnnotatedPulse {
 			signal: this.pulse.signal,
 			integration_time_ms: this.integration_time_ms,
 			creation_time: this.creation_time.toISOString(),
-			device_id: this.device_id,
+			device_serial_number: this.device_serial_number,
 			pulse_attributes: this.pulse_attributes.map((attr) =>
 				AnnotatedPulse.pulseAttrAsBackendCompatible(attr.key, attr.value),
 			),
@@ -101,7 +101,7 @@ const annotatedPulseSchema = z.object({
 	}),
 	integration_time_ms: z.number(),
 	creation_time: z.string(),
-	device_id: z.string(),
+	device_serial_number: z.string(),
 	pulse_attributes: z.array(
 		z.object({
 			key: z.string(),

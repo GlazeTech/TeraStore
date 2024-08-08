@@ -33,6 +33,15 @@ class DeviceNotFoundError(Exception):
         super().__init__(f"Device not found with serial number: {device_serial_number}")
 
 
+class DeviceExistsError(Exception):
+    """Exception raised when attempting to create an already existing device."""
+
+    def __init__(self: Self, device_serial_number: str) -> None:
+        super().__init__(
+            f"A device with serial number {device_serial_number} already exists"
+        )
+
+
 class InvalidSerialNumberError(Exception):
     """Exception raised when the data type of an attribute is not supported."""
 

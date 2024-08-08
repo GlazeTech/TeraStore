@@ -13,6 +13,7 @@ def create_a_device(
     device: DeviceCreate,
     db: Session = Depends(get_session),
 ) -> DeviceRead:
+    print(device)
     return create_device(device=device, db=db)
 
 
