@@ -52,8 +52,14 @@ class DeviceCreate(DeviceBase):
     attrs: list[TDeviceAttr] | None = Field(default=None)
 
     @classmethod
-    def create_mock(cls: type[DeviceCreate], serial_number: str) -> DeviceCreate:
-        return cls(serial_number=serial_number)
+    def create_mock(
+        cls: type[DeviceCreate],
+        serial_number: str,
+        attrs: list[TDeviceAttr] | None = None,
+    ) -> DeviceCreate:
+        if attrs is None:
+            attrs = []
+        return cls.model_validate({"serial_number": serial_number, "attrs": attrs})
 
     def as_dict(self: Self) -> dict[str, str]:
         return self.model_dump()

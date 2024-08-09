@@ -18,7 +18,12 @@ import {
 	updateUser as updateUserOnBackend,
 } from "auth";
 import { getEnumKeys } from "helpers";
-import { BackendAuthLevel, BackendTHzDevice, BackendUser } from "interfaces";
+import {
+	BackendAuthLevel,
+	BackendDeviceAttr,
+	BackendTHzDevice,
+	BackendUser,
+} from "interfaces";
 import { useEffect, useState } from "react";
 import Header from "./Header";
 
@@ -187,6 +192,7 @@ function DevicesCard() {
 
 	useEffect(() => {
 		getDevices().then((res) => {
+			console.log(res);
 			devicesHandler.setState(res);
 		});
 	}, []);
@@ -200,7 +206,10 @@ function DevicesCard() {
 					autoClose: 2000,
 				});
 				modalHandler.toggle();
-				devicesHandler.append({ serial_number: deviceSerialNumber });
+				devicesHandler.append({
+					serial_number: deviceSerialNumber,
+					attributes: [],
+				});
 			})
 			.catch((err) => {
 				notifications.show({
@@ -260,21 +269,81 @@ function DeviceTable({
 			</Table.Thead>
 			<Table.Tbody>
 				{devices.map((device) => (
-					<Table.Tr key={device.serial_number}>
-						<Table.Td>{device.serial_number}</Table.Td>
-						<Table.Td>
-							<Button size="xs" color="blue">
-								Attributes
-							</Button>
-						</Table.Td>
-						<Table.Td>
-							<Button size="xs" color="blue">
-								Update
-							</Button>
-						</Table.Td>
-					</Table.Tr>
+					<DeviceRow device={device} key={device.serial_number} />
 				))}
 			</Table.Tbody>
 		</Table>
 	);
+}
+
+function DeviceRow({
+	device,
+}: {
+	device: BackendTHzDevice;
+}) {
+	const [modalIsOpen, modalHandler] = useDisclosure(false);
+
+	return (
+		<Table.Tr>
+			<Modal
+				opened={modalIsOpen}
+				onClose={modalHandler.close}
+				title={device.serial_number}
+			>
+				{device.attributes.map((v) => (
+					<DeviceRowContent device={v} key={v.serial_number + v.key} />
+				))}
+			</Modal>
+			<Table.Td>{device.serial_number}</Table.Td>
+			<Table.Td>
+				<Button size="xs" color="blue" onClick={modalHandler.toggle}>
+					Attributes
+				</Button>
+			</Table.Td>
+			<Table.Td>
+				<Button size="xs" color="blue">
+					Update
+				</Button>
+			</Table.Td>
+		</Table.Tr>
+	);
+}
+
+function DeviceRowContent({ device }: { device: BackendDeviceAttr }) {
+	const displayValue = (attr: BackendDeviceAttr) => {
+		if (attr.value instanceof Array) {
+			if (attr.value.length > 2) {
+				return `[${formatArrayToString(attr.value.slice(0, 1))},..., ${
+					attr.value[attr.value.length - 1]
+				}]`;
+			} else {
+				return `[${formatArrayToString(attr.value)}]`;
+			}
+		}
+		return attr.value;
+	};
+
+	return (
+		<Group justify="space-between">
+			<Text>{device.key}</Text>
+			<Text>{displayValue(device)}</Text>
+		</Group>
+	);
+}
+
+function formatArrayToString(arr: number[]): string {
+	return arr
+		.map((num) => {
+			if (Number.isInteger(num)) {
+				return num.toString();
+			} else {
+				const formattedNum = num.toFixed(2);
+				if (formattedNum.endsWith("00")) {
+					return num.toExponential(2);
+				} else {
+					return formattedNum;
+				}
+			}
+		})
+		.join(", ");
 }

@@ -24,6 +24,10 @@ from api.utils.types import Lifespan
 
 @asynccontextmanager
 async def lifespan_dev(app: FastAPI) -> AsyncGenerator[None, None]:
+
+    # In case of a dirty DB, drop all tables and recreate them for consistent testing
+    drop_tables()
+
     create_db_and_tables()
     create_devices_and_pulses()
     create_frontend_dev_data()
