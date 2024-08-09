@@ -18,24 +18,27 @@ def test_create_device(client: TestClient) -> None:
     assert data[SERIAL_NUMBER_KEY] == G1_SERIAL_NUMBER
 
 
-def test_create_device_w_attrs(client: TestClient) -> None:
+def test_create_read_device_w_attrs(client: TestClient) -> None:
+    attrs = [
+        {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "string", "value": "kek"},
+        {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "float", "value": 1.0},
+        {
+            SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
+            "key": "floatarray",
+            "value": [1.0, 2.0],
+        },
+    ]
+
     device_payload = {
         SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
-        "device_attrs": [
-            {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "string", "value": "kek"},
-            {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "float", "value": 1.0},
-            {
-                SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
-                "key": "floatarray",
-                "value": [1.0, 2.0],
-            },
-        ],
+        "attrs": attrs,
     }
     response = client.post("/devices/", json=device_payload)
-    data = response.json()
-
     assert response.status_code == 200
-    assert data[SERIAL_NUMBER_KEY] == G1_SERIAL_NUMBER
+    response2 = client.get(f"/devices/{G1_SERIAL_NUMBER}")
+    data = response2.json()
+    for attr in attrs:
+        assert attr in data["attributes"]
 
 
 def test_create_device_with_nonstring_serial_no(client: TestClient) -> None:
@@ -63,19 +66,6 @@ def test_create_device_with_wrong_format_serial_no(client: TestClient) -> None:
     assert data["detail"] == "Ill-formatted serial number: wrong-serial"
 
 
-def test_create_device_with_extra_params(client: TestClient) -> None:
-    device_payload = {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "device_id": "abc"}
-    response = client.post(
-        "/devices/",
-        json=device_payload,
-    )
-    data = response.json()
-
-    assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "Extra inputs are not permitted"
-    assert data["detail"][0]["type"] == "extra_forbidden"
-
-
 def test_create_device_with_empty_body(client: TestClient) -> None:
     device_payload: dict[None, None] = {}
     response = client.post(
@@ -91,8 +81,7 @@ def test_create_device_with_empty_body(client: TestClient) -> None:
 
 def test_create_device_with_invalid_device_id(client: TestClient) -> None:
     device_payload = {
-        SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
-        "device_id": "00000000-0000-0000-0000-000000000000",
+        SERIAL_NUMBER_KEY: "00000000-0000-0000-0000-000000000000",
     }
     response = client.post(
         "/devices/",
@@ -101,8 +90,10 @@ def test_create_device_with_invalid_device_id(client: TestClient) -> None:
     data = response.json()
 
     assert response.status_code == 422
-    assert data["detail"][0]["msg"] == "Extra inputs are not permitted"
-    assert data["detail"][0]["type"] == "extra_forbidden"
+    assert (
+        data["detail"]
+        == "Ill-formatted serial number: 00000000-0000-0000-0000-000000000000"
+    )
 
 
 def test_create_existing_device(client: TestClient) -> None:

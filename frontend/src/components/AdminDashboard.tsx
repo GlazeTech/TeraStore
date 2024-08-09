@@ -263,7 +263,14 @@ function DeviceTable({
 					<Table.Tr key={device.serial_number}>
 						<Table.Td>{device.serial_number}</Table.Td>
 						<Table.Td>
-							<Button color="blue">Update</Button>
+							<Button size="xs" color="blue">
+								Attributes
+							</Button>
+						</Table.Td>
+						<Table.Td>
+							<Button size="xs" color="blue">
+								Update
+							</Button>
 						</Table.Td>
 					</Table.Tr>
 				))}

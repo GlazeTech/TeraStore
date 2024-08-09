@@ -49,9 +49,7 @@ class DeviceCreate(DeviceBase):
     it is only here for FastAPI documentation purposes.
     """
 
-    device_attrs: list[TDeviceAttrCreate] | None = Field(default=None)
-
-    model_config = ConfigDict(extra="forbid")  # type: ignore[assignment]
+    attrs: list[TDeviceAttr] | None = Field(default=None)
 
     @classmethod
     def create_mock(cls: type[DeviceCreate], serial_number: str) -> DeviceCreate:
@@ -68,6 +66,18 @@ class DeviceRead(DeviceBase):
     from the db, as this requires the device_id.
     """
 
+    attributes: list[TDeviceAttr]
+
+    @classmethod
+    def new(
+        cls: type[DeviceRead],
+        device: Device,
+        attributes: list[TDeviceAttr] | None = None,
+    ) -> DeviceRead:
+        if attributes is None:
+            attributes = []
+        return cls.model_validate({**device.model_dump(), "attributes": attributes})
+
 
 class DeviceAttrBase(SQLModel):
     """Model for device attributes."""
@@ -76,39 +86,50 @@ class DeviceAttrBase(SQLModel):
     key: str
 
 
-class DeviceAttrStrCreate(DeviceAttrBase):
+class DeviceAttrStr(DeviceAttrBase):
     value: StrictStr
 
+    @property
+    def table(self) -> type[SQLModel]:
+        return _DeviceAttrStr
 
-class DeviceAttrFloatCreate(DeviceAttrBase):
+
+class DeviceAttrFloat(DeviceAttrBase):
     value: StrictFloat
 
+    @property
+    def table(self) -> type[SQLModel]:
+        return _DeviceAttrFloat
 
-class DeviceAttrFloatArrayCreate(DeviceAttrBase):
+
+class DeviceAttrFloatArray(DeviceAttrBase):
     value: list[float]
 
+    @property
+    def table(self) -> type[SQLModel]:
+        return _DeviceAttrFloatArray
 
-class DeviceAttrStr(DeviceAttrStrCreate, table=True):
+
+class _DeviceAttrStr(DeviceAttrStr, table=True):
     __tablename__ = "device_str_attrs"
     index: int | None = Field(default=None, primary_key=True)
 
 
-class DeviceAttrFloat(DeviceAttrFloatCreate, table=True):
+class _DeviceAttrFloat(DeviceAttrFloat, table=True):
     __tablename__ = "device_float_attrs"
     index: int | None = Field(default=None, primary_key=True)
 
 
-class DeviceAttrFloatArray(DeviceAttrFloatArrayCreate, table=True):
+class _DeviceAttrFloatArray(DeviceAttrFloatArray, table=True):
     __tablename__ = "device_floatarray_attrs"
     value: list[float] = Field(sa_column=Column(postgresql.ARRAY(Float)))
     index: int | None = Field(default=None, primary_key=True)
 
 
-TDeviceAttrCreate: TypeAlias = (
-    DeviceAttrFloatArrayCreate | DeviceAttrFloatCreate | DeviceAttrStrCreate
-)
+TDeviceAttr: TypeAlias = DeviceAttrFloatArray | DeviceAttrFloat | DeviceAttrStr
 
-# class AnnotatedDeviceRead(DeviceBase):
-#     """Model for reading a device with all annotations."""
+TDeviceAttrTable: TypeAlias = _DeviceAttrFloatArray | _DeviceAttrFloat | _DeviceAttrStr
 
-#     device_attributes: list[TDeviceAttrReadType]
+
+def device_attrs_tables() -> list[type[TDeviceAttrTable]]:
+    return [_DeviceAttrFloatArray, _DeviceAttrFloat, _DeviceAttrStr]

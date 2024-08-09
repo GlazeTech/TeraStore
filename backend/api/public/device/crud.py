@@ -1,15 +1,22 @@
+from typing import cast
 from fastapi import Depends
 from psycopg2.errors import UniqueViolation
 from sqlalchemy.exc import IntegrityError
-from sqlmodel import Session, select
+from sqlmodel import Session, col, select
 
 from api.database import get_session
-from api.public.device.models import Device, DeviceCreate, DeviceRead
+from api.public.device.models import (
+    Device,
+    DeviceCreate,
+    DeviceRead,
+    TDeviceAttr,
+    device_attrs_tables,
+)
 from api.utils.exceptions import DeviceExistsError, DeviceNotFoundError
 
 
 def create_device(
-    device: DeviceCreate | Device,
+    device: DeviceCreate,
     db: Session = Depends(get_session),
 ) -> DeviceRead:
     device_to_db = Device.model_validate(device)
@@ -20,9 +27,17 @@ def create_device(
         if isinstance(e.orig, UniqueViolation):
             raise DeviceExistsError(device.serial_number) from e
 
-    db.refresh(device_to_db)
+    if device.attrs is None:
+        db.refresh(device_to_db)
+        return DeviceRead.new(device_to_db)
 
-    return DeviceRead.model_validate(device_to_db)
+    for table in device_attrs_tables():
+        attrs = [attr for attr in device.attrs if attr.table is table]
+        db.add_all([table.model_validate(attr) for attr in attrs])
+
+    db.commit()
+    db.refresh(device_to_db)
+    return DeviceRead.new(device_to_db)
 
 
 def read_devices(
@@ -31,7 +46,17 @@ def read_devices(
     db: Session = Depends(get_session),
 ) -> list[DeviceRead]:
     devices = db.exec(select(Device).offset(offset).limit(limit)).all()
-    return [DeviceRead.model_validate(device) for device in devices]
+    device_attrs = _read_device_attrs([device.serial_number for device in devices], db)
+
+    return [
+        DeviceRead.new(
+            device=device,
+            attributes=[
+                a for a in device_attrs if a.serial_number == device.serial_number
+            ],
+        )
+        for device in devices
+    ]
 
 
 def read_device(
@@ -42,4 +67,18 @@ def read_device(
     ).first()
     if not device:
         raise DeviceNotFoundError(device_serial_number=device_serial_number)
-    return DeviceRead.model_validate(device)
+
+    device_attrs = _read_device_attrs([device_serial_number], db)
+    return DeviceRead.new(device, device_attrs)
+
+
+def _read_device_attrs(
+    device_serial_numbers: list[str], db: Session
+) -> list[TDeviceAttr]:
+    all_attrs: list[TDeviceAttr] = []
+    for table in device_attrs_tables():
+        attrs = db.exec(
+            select(table).where(col(table.serial_number).in_(device_serial_numbers))
+        ).all()
+        all_attrs.extend(cast(list[TDeviceAttr], attrs))
+    return all_attrs
