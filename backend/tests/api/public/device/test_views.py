@@ -7,6 +7,15 @@ from api.public.device.models import DeviceCreate
 G1_SERIAL_NUMBER = "G-0001"
 G2_SERIAL_NUMBER = "G-0002"
 SERIAL_NUMBER_KEY = "serial_number"
+DEVICE_ATTRS = [
+    {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "string", "value": "kek"},
+    {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "float", "value": 1.0},
+    {
+        SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
+        "key": "floatarray",
+        "value": [1.0, 2.0],
+    },
+]
 
 
 def test_create_device(client: TestClient) -> None:
@@ -19,25 +28,15 @@ def test_create_device(client: TestClient) -> None:
 
 
 def test_create_read_device_w_attrs(client: TestClient) -> None:
-    attrs = [
-        {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "string", "value": "kek"},
-        {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "float", "value": 1.0},
-        {
-            SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
-            "key": "floatarray",
-            "value": [1.0, 2.0],
-        },
-    ]
-
     device_payload = {
         SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
-        "attrs": attrs,
+        "attrs": DEVICE_ATTRS,
     }
     response = client.post("/devices/", json=device_payload)
     assert response.status_code == 200
     response2 = client.get(f"/devices/{G1_SERIAL_NUMBER}")
     data = response2.json()
-    for attr in attrs:
+    for attr in DEVICE_ATTRS:
         assert attr in data["attributes"]
 
 
@@ -303,3 +302,70 @@ def test_get_all_devices_with_invalid_limit_and_offset(client: TestClient) -> No
         == "Input should be a valid integer, unable to parse string as an integer"
     )
     assert data["detail"][1]["type"] == "int_parsing"
+
+
+def test_add_device_attr(client: TestClient) -> None:
+    # Create a device
+    device_payload = {
+        SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
+    }
+    response = client.post("/devices/", json=device_payload)
+    assert response.status_code == 200
+
+    # Add attributes to the device
+    for attr in DEVICE_ATTRS:
+        assert (
+            client.post(f"/devices/{G1_SERIAL_NUMBER}/attrs", json=attr).status_code
+            == 200
+        )
+
+    # Read device again, and ensure attributes match
+    response = client.get(f"/devices/{G1_SERIAL_NUMBER}")
+    data = response.json()
+    for attr in DEVICE_ATTRS:
+        assert attr in data["attributes"]
+
+
+def test_reject_too_long_attr(client: TestClient) -> None:
+    device_payload = {
+        SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
+    }
+    response = client.post("/devices/", json=device_payload)
+    assert response.status_code == 200
+
+    value = "a" * 201
+    attr = {SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER, "key": "somestring", "value": value}
+    response = client.post(f"/devices/{G1_SERIAL_NUMBER}/attrs", json=attr)
+    data = response.json()
+    assert response.status_code == 422
+    assert data["detail"] == f"String attribute too long: {value}"
+
+
+def test_delete_attr(client: TestClient) -> None:
+    # Create a device
+    device_payload = {
+        SERIAL_NUMBER_KEY: G1_SERIAL_NUMBER,
+    }
+    response = client.post("/devices/", json=device_payload)
+    assert response.status_code == 200
+
+    # Add attributes to the device
+    for attr in DEVICE_ATTRS:
+        assert (
+            client.post(f"/devices/{G1_SERIAL_NUMBER}/attrs", json=attr).status_code
+            == 200
+        )
+
+    # Delete the attributes
+    for attr in DEVICE_ATTRS:
+        assert (
+            client.delete(
+                f"/devices/{G1_SERIAL_NUMBER}/attrs/{attr['key']}"  # type: ignore[index]
+            ).status_code
+            == 200
+        )
+
+    # Read device again, and ensure attributes are deleted
+    response = client.get(f"/devices/{G1_SERIAL_NUMBER}")
+    data = response.json()
+    assert data["attributes"] == []

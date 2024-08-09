@@ -6,7 +6,12 @@ from api.public.attrs.models import PulseAttrsFloatCreate, PulseAttrsStrCreate
 from api.public.auth.crud import create_user
 from api.public.auth.models import AuthLevel, UserCreate
 from api.public.device.crud import create_device
-from api.public.device.models import Device, DeviceAttrFloat, DeviceAttrFloatArray, DeviceAttrStr, DeviceCreate
+from api.public.device.models import (
+    DeviceAttrFloat,
+    DeviceAttrFloatArray,
+    DeviceAttrStr,
+    DeviceCreate,
+)
 from api.public.pulse.crud import create_pulses
 from api.public.pulse.models import PulseCreate
 
@@ -21,9 +26,15 @@ def create_devices_and_pulses() -> None:
             DeviceCreate.create_mock(
                 carmen_serial,
                 attrs=[
-                    DeviceAttrFloat(serial_number=carmen_serial, key="floaty", value=1.0),
-                    DeviceAttrStr(serial_number=carmen_serial, key="stringy", value="stringattr"),
-                    DeviceAttrFloatArray(serial_number=carmen_serial, key="floatylisty", value=[1.0, 2.0]),
+                    DeviceAttrFloat(
+                        serial_number=carmen_serial, key="floaty", value=1.0
+                    ),
+                    DeviceAttrStr(
+                        serial_number=carmen_serial, key="stringy", value="stringattr"
+                    ),
+                    DeviceAttrFloatArray(
+                        serial_number=carmen_serial, key="floatylisty", value=[1.0, 2.0]
+                    ),
                 ],
             ),
             sess,
@@ -86,11 +97,25 @@ def create_frontend_dev_data() -> None:
             DeviceCreate.create_mock(
                 serial_number=dev_g1_serial,
                 attrs=[
-                    DeviceAttrFloat(serial_number=dev_g1_serial, key="floaty", value=1.0),
-                    DeviceAttrStr(serial_number=dev_g1_serial, key="stringy", value="stringattr"),
-                    DeviceAttrFloatArray(serial_number=dev_g1_serial, key="small-array", value=[1, 2]),
-                    DeviceAttrFloatArray(serial_number=dev_g1_serial, key="large-array", value=[e*1e-2 for e in range(100)]),
-                    DeviceAttrFloatArray(serial_number=dev_g1_serial, key="array-with-ps", value=[e*1e-12 for e in range(100)]),
+                    DeviceAttrFloat(
+                        serial_number=dev_g1_serial, key="floaty", value=1.0
+                    ),
+                    DeviceAttrStr(
+                        serial_number=dev_g1_serial, key="stringy", value="stringattr"
+                    ),
+                    DeviceAttrFloatArray(
+                        serial_number=dev_g1_serial, key="small-array", value=[1, 2]
+                    ),
+                    DeviceAttrFloatArray(
+                        serial_number=dev_g1_serial,
+                        key="large-array",
+                        value=[e * 1e-2 for e in range(100)],
+                    ),
+                    DeviceAttrFloatArray(
+                        serial_number=dev_g1_serial,
+                        key="array-with-ps",
+                        value=[e * 1e-12 for e in range(100)],
+                    ),
                 ],
             ),
             sess,

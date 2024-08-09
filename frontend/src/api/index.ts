@@ -13,7 +13,7 @@ import {
 	PulseFilter,
 	PulseID,
 } from "interfaces";
-import { BackendTHzDevice } from "interfaces/backend";
+import { BackendDeviceAttr, BackendTHzDevice } from "interfaces/backend";
 import { apiFactory } from "./factory";
 
 const api = apiFactory();
@@ -101,4 +101,14 @@ export async function getDevices() {
 
 export async function addDevice(serialNumber: string) {
 	return api.post("/devices", { serial_number: serialNumber });
+}
+
+export async function addDeviceAttribute(deviceAttr: BackendDeviceAttr) {
+	return api.post(`/devices/${deviceAttr.serial_number}/attrs`, deviceAttr);
+}
+
+export async function deleteDeviceAttribute(deviceAttr: BackendDeviceAttr) {
+	return api.delete(
+		`/devices/${deviceAttr.serial_number}/attrs/${deviceAttr.key}`,
+	);
 }

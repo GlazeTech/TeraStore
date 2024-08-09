@@ -10,8 +10,13 @@ import {
 	TextInput,
 } from "@mantine/core";
 import { useDisclosure, useListState } from "@mantine/hooks";
-import { notifications } from "@mantine/notifications";
-import { addDevice, getDevices } from "api";
+import { notifications, showNotification } from "@mantine/notifications";
+import {
+	addDevice,
+	addDeviceAttribute,
+	deleteDeviceAttribute,
+	getDevices,
+} from "api";
 import {
 	deleteUser as deleteUserOnBackend,
 	getUsers,
@@ -192,7 +197,6 @@ function DevicesCard() {
 
 	useEffect(() => {
 		getDevices().then((res) => {
-			console.log(res);
 			devicesHandler.setState(res);
 		});
 	}, []);
@@ -282,7 +286,38 @@ function DeviceRow({
 	device: BackendTHzDevice;
 }) {
 	const [modalIsOpen, modalHandler] = useDisclosure(false);
+	const [addAttrModalIsOpen, addAttrModalHandler] = useDisclosure(false);
+	const [newAttrKey, setNewAttrKey] = useState("");
+	const [newAttrValue, setNewAttrValue] = useState("");
 
+	const addDeviceAttrOnBackend = () => {
+		const newDeviceAttr: BackendDeviceAttr = {
+			key: newAttrKey,
+			value: parseAttrInput(newAttrValue),
+			serial_number: device.serial_number,
+		};
+		addDeviceAttribute(newDeviceAttr)
+			.then(() => {
+				const refreshDuration = 2000;
+				showNotification({
+					title: "Success",
+					message: "Attribute added.",
+					autoClose: refreshDuration,
+				});
+
+				setTimeout(() => {
+					window.location.reload();
+				}, refreshDuration - 500);
+			})
+			.catch((err) => {
+				showNotification({
+					title: "Error",
+					message: err.response.data.detail,
+					autoClose: 2000,
+					color: "red",
+				});
+			});
+	};
 	return (
 		<Table.Tr>
 			<Modal
@@ -290,60 +325,152 @@ function DeviceRow({
 				onClose={modalHandler.close}
 				title={device.serial_number}
 			>
+				<Modal
+					opened={addAttrModalIsOpen}
+					onClose={addAttrModalHandler.close}
+					title={"Add attribute"}
+				>
+					<TextInput
+						label="Key"
+						placeholder="Key"
+						onChange={(event) => setNewAttrKey(event.currentTarget.value)}
+					/>
+					<TextInput
+						label="Value"
+						placeholder="Value"
+						onChange={(event) => setNewAttrValue(event.currentTarget.value)}
+					/>
+					<Group>
+						<Button color="blue" size="xs" onClick={addDeviceAttrOnBackend}>
+							Add
+						</Button>
+					</Group>
+				</Modal>
+				<Button size="xs" onClick={addAttrModalHandler.toggle}>
+					Add attribute
+				</Button>
 				{device.attributes.map((v) => (
-					<DeviceRowContent device={v} key={v.serial_number + v.key} />
+					<DeviceRowContent
+						device={v}
+						key={v.serial_number + v.key}
+						modalToggler={modalHandler}
+					/>
 				))}
 			</Modal>
 			<Table.Td>{device.serial_number}</Table.Td>
 			<Table.Td>
-				<Button size="xs" color="blue" onClick={modalHandler.toggle}>
+				<Button size="xs" m={5} color="blue" onClick={modalHandler.toggle}>
 					Attributes
-				</Button>
-			</Table.Td>
-			<Table.Td>
-				<Button size="xs" color="blue">
-					Update
 				</Button>
 			</Table.Td>
 		</Table.Tr>
 	);
 }
 
-function DeviceRowContent({ device }: { device: BackendDeviceAttr }) {
+function DeviceRowContent({
+	device,
+	modalToggler,
+}: {
+	device: BackendDeviceAttr;
+	modalToggler: {
+		readonly open: () => void;
+		readonly close: () => void;
+		readonly toggle: () => void;
+	};
+}) {
 	const displayValue = (attr: BackendDeviceAttr) => {
 		if (attr.value instanceof Array) {
-			if (attr.value.length > 2) {
-				return `[${formatArrayToString(attr.value.slice(0, 1))},..., ${
-					attr.value[attr.value.length - 1]
-				}]`;
-			} else {
-				return `[${formatArrayToString(attr.value)}]`;
-			}
+			return formatArrayToString(attr.value);
 		}
 		return attr.value;
 	};
 
+	const deleteAttribute = (deviceAttr: BackendDeviceAttr) => {
+		const isConfirmed = window.confirm(
+			"Are you sure you want to delete this attribute?",
+		);
+		if (!isConfirmed) {
+			return;
+		}
+		deleteDeviceAttribute(deviceAttr).then((res) => {
+			if (res.status === 200) {
+				const refreshDuration = 1500;
+				modalToggler.close();
+				notifications.show({
+					title: "Success",
+					message: "Attribute deleted.",
+					autoClose: refreshDuration,
+				});
+				setTimeout(() => {
+					window.location.reload();
+				}, refreshDuration - 500);
+			}
+		});
+	};
 	return (
 		<Group justify="space-between">
 			<Text>{device.key}</Text>
-			<Text>{displayValue(device)}</Text>
+			<Group>
+				<Text>{displayValue(device)}</Text>
+				<Button
+					size="xs"
+					m={5}
+					color="red"
+					onClick={() => deleteAttribute(device)}
+				>
+					Delete
+				</Button>
+			</Group>
 		</Group>
 	);
 }
 
 function formatArrayToString(arr: number[]): string {
-	return arr
-		.map((num) => {
-			if (Number.isInteger(num)) {
-				return num.toString();
-			} else {
-				const formattedNum = num.toFixed(2);
-				if (formattedNum.endsWith("00")) {
-					return num.toExponential(2);
+	const formatter = (arr: number[]) => {
+		return arr
+			.map((num) => {
+				if (Number.isInteger(num)) {
+					return num.toString();
 				} else {
-					return formattedNum;
+					const formattedNum = num.toFixed(2);
+					if (formattedNum.endsWith("00")) {
+						return num.toExponential(2);
+					} else {
+						return formattedNum;
+					}
 				}
-			}
-		})
-		.join(", ");
+			})
+			.join(", ");
+	};
+
+	if (arr.length > 2) {
+		return `[${formatter(arr.slice(0, 1))},..., ${arr[arr.length - 1]}]`;
+	} else {
+		return `[${formatter(arr)}]`;
+	}
 }
+
+const parseAttrInput = (input: string): string | number | number[] => {
+	const trimmedInput = input.trim();
+
+	// Check if the input is a number
+	if (!isNaN(Number(trimmedInput))) {
+		return Number(trimmedInput);
+	}
+
+	// Check if the input is an array of numbers
+	if (trimmedInput.startsWith("[") && trimmedInput.endsWith("]")) {
+		const numbers = trimmedInput
+			.slice(1, -1)
+			.split(",")
+			.map((item) => Number(item.trim()));
+
+		// Check if all items in the array are valid numbers
+		if (numbers.every((item) => !isNaN(item))) {
+			return numbers;
+		}
+	}
+
+	// If the input is not a number or an array of numbers, return it as a string
+	return trimmedInput;
+};

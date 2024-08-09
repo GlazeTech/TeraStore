@@ -1,7 +1,8 @@
 from typing import cast
+
 from fastapi import Depends
 from psycopg2.errors import UniqueViolation
-from sqlalchemy.exc import IntegrityError
+from sqlalchemy.exc import IntegrityError, NoResultFound
 from sqlmodel import Session, col, select
 
 from api.database import get_session
@@ -70,6 +71,35 @@ def read_device(
 
     device_attrs = _read_device_attrs([device_serial_number], db)
     return DeviceRead.new(device, device_attrs)
+
+
+def create_device_attr(
+    device_attr: TDeviceAttr,
+    db: Session = Depends(get_session),
+) -> None:
+    db.add(device_attr.table.model_validate(device_attr))
+    db.commit()
+
+
+def delete_device_attr(
+    device_serial_number: str, attr_key: str, db: Session = Depends(get_session)
+) -> None:
+    for table in device_attrs_tables():
+        try:
+            instance = db.exec(
+                select(table)
+                .where(col(table.serial_number) == device_serial_number)
+                .where(col(table.key) == attr_key)
+            ).one()
+            db.delete(instance)
+            db.commit()
+        except NoResultFound:
+            continue
+        else:
+            return
+
+    msg = f"Attribute {attr_key} on device {device_serial_number} not found"
+    raise NoResultFound(msg)
 
 
 def _read_device_attrs(

@@ -42,6 +42,22 @@ class DeviceExistsError(Exception):
         )
 
 
+class DeviceStrAttrTooLongError(Exception):
+    """Exception raised when a string attribute is too long."""
+
+    def __init__(self: Self, value: str) -> None:
+        self.value = value
+        super().__init__(f"String attribute too long: {value}")
+
+
+class InvalidDeviceAttrKeyError(Exception):
+    """Exception raised when special characters are used in attr key."""
+
+    def __init__(self: Self, key: str) -> None:
+        self.key = key
+        super().__init__(f"Ill-formatted key: {key}")
+
+
 class InvalidSerialNumberError(Exception):
     """Exception raised when the data type of an attribute is not supported."""
 

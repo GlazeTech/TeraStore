@@ -3,11 +3,15 @@ from __future__ import annotations
 import re
 from typing import Self, TypeAlias
 
-from pydantic import ConfigDict, StrictFloat, StrictStr, field_validator
+from pydantic import StrictFloat, StrictStr, field_validator
 from sqlalchemy.dialects import postgresql
 from sqlmodel import Column, Field, Float, SQLModel
 
-from api.utils.exceptions import InvalidSerialNumberError
+from api.utils.exceptions import (
+    DeviceStrAttrTooLongError,
+    InvalidDeviceAttrKeyError,
+    InvalidSerialNumberError,
+)
 
 
 class DeviceBase(SQLModel):
@@ -91,9 +95,30 @@ class DeviceAttrBase(SQLModel):
     serial_number: str = Field(foreign_key="devices.serial_number", index=True)
     key: str
 
+    @field_validator("key")
+    def validate_key(cls, key: str) -> str:  # noqa: N805
+        """Validate a device attribute key.
+
+        Do not accept keys with special characters.
+        """
+        if not bool(re.match(r"^[a-zA-Z0-9_-]+$", key)):
+            raise InvalidDeviceAttrKeyError(key)
+        return key
+
 
 class DeviceAttrStr(DeviceAttrBase):
     value: StrictStr
+
+    @field_validator("value")
+    def validate_value(cls, value: str) -> str:  # noqa: N805
+        """Validate a string attribute.
+
+        Do not accept strings larger than 200 characters.
+        """
+        max_length = 200
+        if len(value) > max_length:
+            raise DeviceStrAttrTooLongError(value)
+        return value
 
     @property
     def table(self) -> type[SQLModel]:

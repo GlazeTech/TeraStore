@@ -2,6 +2,7 @@ from collections.abc import Mapping
 
 from fastapi import Request, Response
 from fastapi.responses import JSONResponse
+from sqlalchemy.exc import NoResultFound
 from starlette import status
 from starlette.types import ExceptionHandler
 
@@ -12,7 +13,9 @@ from api.utils.exceptions import (
     CredentialsIncorrectError,
     DeviceExistsError,
     DeviceNotFoundError,
+    DeviceStrAttrTooLongError,
     EmailOrPasswordIncorrectError,
+    InvalidDeviceAttrKeyError,
     InvalidSerialNumberError,
     PulseColumnNonexistentError,
     PulseNotFoundError,
@@ -51,4 +54,7 @@ def exception_handlers_factory() -> list[tuple[type[Exception], ExceptionHandler
                 status.HTTP_401_UNAUTHORIZED, headers={"WWW-Authenticate": "Bearer"}
             ),
         ),
+        (DeviceStrAttrTooLongError, exc_handler(status.HTTP_422_UNPROCESSABLE_ENTITY)),
+        (InvalidDeviceAttrKeyError, exc_handler(status.HTTP_422_UNPROCESSABLE_ENTITY)),
+        (NoResultFound, exc_handler(status.HTTP_404_NOT_FOUND)),
     ]
